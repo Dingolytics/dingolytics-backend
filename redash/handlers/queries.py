@@ -129,7 +129,9 @@ class BaseQueryListResource(BaseResource):
             )
         else:
             results = models.Query.all_queries(
-                self.current_user.group_ids, self.current_user.id, include_drafts=True
+                self.current_user.group_ids,
+                self.current_user.id,
+                include_drafts=True
             )
         return filter_by_tags(results, models.Query.tags)
 
@@ -255,14 +257,13 @@ class QueryListResource(BaseQueryListResource):
         query_def["data_source"] = data_source
         query_def["org"] = self.current_org
         query_def["is_draft"] = True
+        query_def["schedule"] = {}
         query = models.Query.create(**query_def)
         models.db.session.add(query)
         models.db.session.commit()
-
         self.record_event(
             {"action": "create", "object_id": query.id, "object_type": "query"}
         )
-
         return QuerySerializer(query, with_visualizations=True).serialize()
 
 

@@ -2,9 +2,8 @@ import logging
 import requests
 from string import Template
 
-from redash.destinations import *
+from redash.destinations import BaseDestination, register
 from redash.utils import json_dumps
-from redash.serializers import serialize_alert
 
 
 def json_string_substitute(j, substitutions):

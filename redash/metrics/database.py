@@ -7,20 +7,26 @@ from redash import statsd_client
 from sqlalchemy.engine import Engine
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm.util import _ORMJoin
-from sqlalchemy.sql.selectable import Alias
+from sqlalchemy.sql.selectable import Alias, Select
 
 metrics_logger = logging.getLogger("metrics")
 
 
-def _table_name_from_select_element(elt):
-    t = elt.froms[0]
-
+def _table_name_from_select_element(elt: Select) -> str:
+    """Extract the table name from a Select element."""
+    # Get the list of tables being selected from
+    from_list = elt.get_final_froms()
+    # Get the first table in the list
+    t = from_list[0]
+    # If the table is an Alias, get the underlying table
     if isinstance(t, Alias):
-        t = t.original.froms[0]
-
+        t = t.element
+    # Iterate through join clauses until we find the actual table
     while isinstance(t, _ORMJoin):
-        t = t.left
-
+        t = t.right
+        if isinstance(t, Alias):
+            t = t.element
+    # Return the name of the table
     return t.name
 
 

@@ -1,20 +1,20 @@
-from flask import render_template, safe_join, send_file
-
+from flask import render_template, send_file
 from flask_login import login_required
 from redash import settings
 from redash.handlers import routes
 from redash.handlers.authentication import base_href
 from redash.handlers.base import org_scoped_rule
 from redash.security import csp_allows_embeding
+from werkzeug.utils import safe_join
 
 
 def render_index():
+    return {"message": "Open index page via frontend app."}, 200
     if settings.MULTI_ORG:
         response = render_template("multi_org.html", base_href=base_href())
     else:
         full_path = safe_join(settings.STATIC_ASSETS_PATH, "index.html")
         response = send_file(full_path, **dict(cache_timeout=0, conditional=True))
-
     return response
 
 

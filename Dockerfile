@@ -33,23 +33,6 @@ RUN apt-get update && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-# ARG TARGETPLATFORM
-# ARG databricks_odbc_driver_url=https://databricks.com/wp-content/uploads/2.6.10.1010-2/SimbaSparkODBC-2.6.10.1010-2-Debian-64bit.zip
-# RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-#   curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-#   && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
-#   && apt-get update \
-#   && ACCEPT_EULA=Y apt-get install  -y --no-install-recommends msodbcsql17 \
-#   && apt-get clean \
-#   && rm -rf /var/lib/apt/lists/* \
-#   && curl "$databricks_odbc_driver_url" --location --output /tmp/simba_odbc.zip \
-#   && chmod 600 /tmp/simba_odbc.zip \
-#   && unzip /tmp/simba_odbc.zip -d /tmp/ \
-#   && dpkg -i /tmp/SimbaSparkODBC-*/*.deb \
-#   && printf "[Simba]\nDriver = /opt/simba/spark/lib/64/libsparkodbc_sb64.so" >> /etc/odbcinst.ini \
-#   && rm /tmp/simba_odbc.zip \
-#   && rm -rf /tmp/SimbaSparkODBC*; fi
-
 # Install Python dependencies
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV PIP_NO_CACHE_DIR=1
@@ -57,14 +40,14 @@ COPY requirements.txt requirements-dev.txt ./
 RUN pip install --upgrade pip~=23.0.1 --timeout 120 \
     && pip install -r requirements-dev.txt -r requirements.txt --timeout 120
 
-# Copy Redash source
-COPY LICENSE.original manage.py  ./
+# Copy source and configurations
+COPY LICENSE LICENSE.redash manage.py  ./
 COPY etc ./etc
 COPY migrations ./migrations
 COPY redash ./redash
 COPY tests ./tests
 
-# Change ownership of the Redash source
+# Change ownership of the source
 RUN chown -R redash ./
 USER redash
 

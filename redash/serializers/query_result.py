@@ -1,11 +1,15 @@
 import io
 import csv
-import xlsxwriter
 from funcy import rpartial, project
 from dateutil.parser import isoparse as parse_date
-from redash.utils import json_loads, UnicodeWriter
+# from redash.utils import json_loads, UnicodeWriter
 from redash.query_runner import TYPE_BOOLEAN, TYPE_DATE, TYPE_DATETIME
 from redash.authentication.org_resolving import current_org
+
+try:
+    import xlsxwriter
+except ImportError:
+    xlsxwriter = None
 
 
 def _convert_format(fmt):
@@ -100,6 +104,9 @@ def serialize_query_result_to_dsv(query_result, delimiter):
 
 
 def serialize_query_result_to_xlsx(query_result):
+    if not xlsxwriter:
+        raise RuntimeError("XLSX export requires the xlsxwriter library.")
+
     output = io.BytesIO()
 
     query_data = query_result.data

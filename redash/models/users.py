@@ -8,7 +8,7 @@ from operator import or_
 from flask import current_app as app, url_for, request_started
 from flask_login import current_user, AnonymousUserMixin, UserMixin
 from passlib.apps import custom_app_context as pwd_context
-from sqlalchemy.exc import DBAPIError
+# from sqlalchemy.exc import DBAPIError
 from sqlalchemy.dialects import postgresql
 
 from sqlalchemy_utils import EmailType
@@ -94,9 +94,7 @@ class User(
     disabled_at = Column(db.DateTime(True), default=None, nullable=True)
     details = Column(
         MutableDict.as_mutable(postgresql.JSONB),
-        nullable=True,
-        server_default="{}",
-        default={},
+        server_default="{}", default={},
     )
     active_at = json_cast_property(
         db.DateTime(True), "details", "active_at", default=None

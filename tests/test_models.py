@@ -358,14 +358,12 @@ class QueryArchiveTest(BaseTestCase):
             123,
             yesterday,
         )
-
         query.latest_query_data = query_result
         groups = list(models.Group.query.filter(models.Group.id.in_(query.groups)))
         self.assertIn(query, list(models.Query.all_queries([g.id for g in groups])))
         self.assertIn(query, models.Query.outdated_queries())
         db.session.flush()
         query.archive()
-
         self.assertNotIn(query, list(models.Query.all_queries([g.id for g in groups])))
         self.assertNotIn(query, models.Query.outdated_queries())
 

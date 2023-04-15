@@ -5,11 +5,11 @@ import time
 import numbers
 import pytz
 
-from sqlalchemy import distinct, or_, and_, UniqueConstraint, cast
+from sqlalchemy import distinct, or_, and_, UniqueConstraint
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import backref, contains_eager, joinedload, subqueryload, load_only
+from sqlalchemy.orm import backref, contains_eager, joinedload, load_only
 from sqlalchemy.orm.exc import NoResultFound  # noqa: F401
 from sqlalchemy import func
 from sqlalchemy_utils import generic_relationship
@@ -27,10 +27,8 @@ from redash.query_runner import (
     with_ssh_tunnel,
     get_configuration_schema_for_query_runner_type,
     get_query_runner,
-    TYPE_BOOLEAN,
-    TYPE_DATE,
-    TYPE_DATETIME,
-    BaseQueryRunner)
+    BaseQueryRunner
+)
 from redash.utils import (
     generate_token,
     json_dumps,
@@ -38,21 +36,19 @@ from redash.utils import (
     mustache_render,
     base_url,
     sentry,
-    gen_query_hash)
+    gen_query_hash
+)
 from redash.utils.configuration import ConfigurationContainer
 from redash.models.parameterized_query import ParameterizedQuery
 
 from .base import db, gfk_type, Column, GFKBase, SearchBaseQuery, key_type, primary_key
-from .changes import ChangeTrackingMixin, Change  # noqa
 from .mixins import BelongsToOrgMixin, TimestampMixin
 from .organizations import Organization
 from .types import (
     EncryptedConfiguration,
-    Configuration,
     MutableDict,
     MutableList,
-    PseudoJSON,
-    pseudo_json_cast_property
+    json_cast_property
 )
 from .users import AccessPermission, AnonymousUser, ApiUser, Group, User  # noqa
 
@@ -465,7 +461,7 @@ def should_schedule_next(
     "schedule",
     "schedule_failures",
 )
-class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
+class Query(TimestampMixin, BelongsToOrgMixin, db.Model):
     id = primary_key("Query")
     version = Column(db.Integer, default=1)
     org_id = Column(key_type("Organization"), db.ForeignKey("organizations.id"))
@@ -489,11 +485,17 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     )
     is_archived = Column(db.Boolean, default=False, index=True)
     is_draft = Column(db.Boolean, default=True, index=True)
-    schedule = Column(MutableDict.as_mutable(PseudoJSON), nullable=True)
-    interval = pseudo_json_cast_property(db.Integer, "schedule", "interval", default=0)
+    schedule = Column(
+        MutableDict.as_mutable(postgresql.JSONB),
+        server_default="{}", default={}
+    )
+    interval = json_cast_property(db.Integer, "schedule", "interval", default=0)
     schedule_failures = Column(db.Integer, default=0)
     visualizations = db.relationship("Visualization", cascade="all, delete-orphan")
-    options = Column(MutableDict.as_mutable(PseudoJSON), default={})
+    options = Column(
+        MutableDict.as_mutable(postgresql.JSONB),
+        server_default="{}", default={}
+    )
     search_vector = Column(
         TSVectorType(
             "id",
@@ -554,11 +556,13 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
         query_ids = (
             db.session.query(distinct(cls.id))
             .join(
-                DataSourceGroup, Query.data_source_id == DataSourceGroup.data_source_id
+                DataSourceGroup,
+                Query.data_source_id == DataSourceGroup.data_source_id
             )
             .filter(Query.is_archived.is_(include_archived))
             .filter(DataSourceGroup.group_id.in_(group_ids))
         )
+        # print('query_ids:', [x for x in query_ids], flush=True)
         queries = (
             cls.query.options(
                 joinedload(Query.user),
@@ -574,7 +578,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
                 contains_eager(Query.user), contains_eager(Query.latest_query_data)
             )
         )
-
+        # print('queries:', [x for x in queries], flush=True)
         if not include_drafts:
             queries = queries.filter(
                 or_(Query.is_draft.is_(False), Query.user_id == user_id)
@@ -595,19 +599,23 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
     @classmethod
     def all_tags(cls, user, include_drafts=False):
         queries = cls.all_queries(
-            group_ids=user.group_ids, user_id=user.id, include_drafts=include_drafts
+            group_ids=user.group_ids,
+            user_id=user.id,
+            include_drafts=include_drafts
         )
-
+        # print('queries:', [x for x in queries], flush=True)
         tag_column = func.unnest(cls.tags).label("tag")
         usage_count = func.count(1).label("usage_count")
-
-        query = (
+        # queries_ids = [x.id for x in queries.options(load_only("id"))]
+        queries_ids = queries.with_entities(Query.id).subquery()
+        tags = (
             db.session.query(tag_column, usage_count)
             .group_by(tag_column)
-            .filter(Query.id.in_(queries.options(load_only("id"))))
+            .filter(Query.id.in_(queries_ids))
             .order_by(usage_count.desc())
         )
-        return query
+        # print('tags:', [x for x in tags], flush=True)
+        return tags
 
     @classmethod
     def by_user(cls, user):
@@ -624,7 +632,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
         return [
             query
             for query in queries
-            if query.schedule["until"] is not None
+            if query.schedule.get("until") is not None
             and pytz.utc.localize(
                 datetime.datetime.strptime(query.schedule["until"], "%Y-%m-%d")
             )
@@ -977,7 +985,10 @@ class Alert(TimestampMixin, BelongsToOrgMixin, db.Model):
     query_rel = db.relationship(Query, backref=backref("alerts", cascade="all"))
     user_id = Column(key_type("User"), db.ForeignKey("users.id"))
     user = db.relationship(User, backref="alerts")
-    options = Column(MutableDict.as_mutable(PseudoJSON))
+    options = Column(
+        MutableDict.as_mutable(postgresql.JSONB),
+        server_default="{}", default={}
+    )
     state = Column(db.String(255), default=UNKNOWN_STATE)
     subscriptions = db.relationship("AlertSubscription", cascade="all, delete-orphan")
     last_triggered_at = Column(db.DateTime(True), nullable=True)
@@ -1081,7 +1092,7 @@ def generate_slug(ctx):
 @generic_repr(
     "id", "name", "slug", "user_id", "org_id", "version", "is_archived", "is_draft"
 )
-class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
+class Dashboard(TimestampMixin, BelongsToOrgMixin, db.Model):
     id = primary_key("Dashboard")
     version = Column(db.Integer)
     org_id = Column(key_type("Organization"), db.ForeignKey("organizations.id"))
@@ -1157,14 +1168,14 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
     @classmethod
     def all_tags(cls, org, user):
         dashboards = cls.all(org, user.group_ids, user.id)
-
         tag_column = func.unnest(cls.tags).label("tag")
         usage_count = func.count(1).label("usage_count")
-
+        # dashboards_ids = [x.id for x in dashboards.options(load_only("id"))]
+        dashboards_ids = dashboards.with_entities(Dashboard.id).subquery()
         query = (
             db.session.query(tag_column, usage_count)
             .group_by(tag_column)
-            .filter(Dashboard.id.in_(dashboards.options(load_only("id"))))
+            .filter(Dashboard.id.in_(dashboards_ids))
             .order_by(usage_count.desc())
         )
         return query
@@ -1268,7 +1279,8 @@ class Event(db.Model):
     object_type = Column(db.String(255))
     object_id = Column(db.String(255), nullable=True)
     additional_properties = Column(
-        MutableDict.as_mutable(PseudoJSON), nullable=True, default={}
+        MutableDict.as_mutable(postgresql.JSONB),
+        server_default="{}", default={}
     )
     created_at = Column(db.DateTime(True), default=db.func.now())
 

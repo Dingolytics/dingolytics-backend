@@ -3,7 +3,6 @@ from base64 import b64decode
 
 from dateutil import parser
 from requests import Session
-from xlsxwriter.utility import xl_col_to_name
 
 from redash.query_runner import *
 from redash.utils import json_dumps, json_loads
@@ -12,9 +11,9 @@ logger = logging.getLogger(__name__)
 
 try:
     import gspread
+    from xlsxwriter.utility import xl_col_to_name
     from gspread.exceptions import APIError
     from oauth2client.service_account import ServiceAccountCredentials
-
     enabled = True
 except ImportError:
     enabled = False

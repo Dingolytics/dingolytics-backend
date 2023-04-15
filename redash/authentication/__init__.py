@@ -210,21 +210,22 @@ def log_user_logged_in(app, user):
         "user_agent": request.user_agent.string,
         "ip": request.remote_addr,
     }
-
     record_event.delay(event)
+
+
+def is_ajax_request() -> bool:
+    return request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
 
 @login_manager.unauthorized_handler
 def redirect_to_login():
-    if request.is_xhr or "/api/" in request.path:
+    if is_ajax_request() or ("/api/" in request.path):
         response = jsonify(
             {"message": "Couldn't find resource. Please login and try again."}
         )
         response.status_code = 404
         return response
-
     login_url = get_login_url(next=request.url, external=False)
-
     return redirect(login_url)
 
 

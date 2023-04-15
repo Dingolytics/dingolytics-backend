@@ -9,9 +9,10 @@ from redash.cli import data_sources, database, groups, organization, queries, us
 from redash.monitor import get_status
 
 
-def create(group):
+# def create(group):
+def create():
     app = current_app or create_app()
-    group.app = app
+    # group.app = app
 
     @app.shell_context_processor
     def shell_context():
