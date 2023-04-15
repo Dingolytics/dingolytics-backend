@@ -41,3 +41,7 @@ which is licensed under the BSD-2-Clause license.
 This forked repository includes modifications made by Dingolytics team,
 which are also licensed under the BSD-2-Clause license.
 
+Dingolytics team:
+
+- Alexey Kinev <https://github.com/rudyryk>
+- Ekaterina Ponomarenko <https://github.com/alesten-code>
