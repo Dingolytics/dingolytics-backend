@@ -1,36 +1,85 @@
-Redash (Wild edition) Server
+Redash (wild edition) server
 ============================
 
-This is a "wild" fork of Redash project:  
+![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/dingolytics/redash-wild-server?sort=date)
+
+This is a "wild" fork of [Redash](https://redash.io) project:  
 
 - Extracted back-end part to build and deploy separately
-- HTTP API-level compatibility is a goal
+- HTTP API level compatibility is a goal
 - Codebase backwards compatibility is not a goal
+
+
+Changes overview
+----------------
+
 - Dependencies are updated to the latest versions
 - PostgreSQL of version 15.x is used
 - Database migrations history is cleaned up to start from scratch
+- `PseudoJSON` field removed in favor of `JSONB`
+- SQLAlchemy is updated to the latest version, queries updated
+- Disabled changes tracking via `ChangeTrackingMixin`
+- Release management scripts are removed, to reconsider later
 
 
-Overview
---------
+Development
+-----------
 
-- Back-end part is extracted to the separate repo (this one)
-- Backwards compatibility is not a goal, it's a spin-off
-- Existing features will be revised, some new features will be added
+The easiest way to start development is to use Docker Compose. Before
+starting, you need to create a `.env` file with the following contents:
+
+```bash
+# Generate secrets with `openssl rand -hex 32` or use random strings
+REDASH_COOKIE_SECRET=...
+REDASH_SECRET_KEY=...
+```
+
+Then creare a database tables with:
+
+```bash
+docker-compose run --rm server create_db
+```
+
+Finally, start the server with:
+
+```bash
+docker-compose up --build
+```
+
+
+TODO
+----
+
+Short-term tasks:
+
+- [ ] Restore tests and CI
+- [ ] Use modern password hashing algorithms
+- [ ] Re-implement versioning for `Query` model
+- [ ] Model to connect [Vector](https://vector.dev) with data sources
+- [ ] Re-implement saving results logic, `QueryResult` model
+- [ ] Try reducing Docker image size for release builds
 
 
 Credits
 -------
 
-Redash project: https://redash.io
+In summary, our project involves forking Redash with the intention of
+improving it and creating a new product. We value the original work and
+aim to appreciate and contribute to it while also developing our own
+unique vision.
 
-In summary, our project involves forking Redash with the intention of improving it and creating a new product. We value the original work and aim to appreciate and contribute to it while also developing our own unique vision.
+When forking an original work, it is important to appreciate the effort and
+value of the original creators while also acknowledging the need for changes
+and improvements. We believe that the best way to do this is to be transparent
+about our intentions and to give credit to the original creators
+and contributors.
 
-When forking an original work, it is important to appreciate the effort and value of the original creators while also acknowledging the need for changes and improvements. We believe that the best way to do this is to be transparent about our intentions and to give credit to the original creators and contributors.
-
-Our approach involves collaborating with the Redash community to contribute back to the original project if possible while also maintaining a separate codebase for our own project. 
+Our approach involves collaborating with the Redash community to contribute
+back to the original project if possible while also maintaining a separate
+codebase for our own project. 
 
 Check the **LICENSE.redash** file for the original license.
+
 
 License
 -------
