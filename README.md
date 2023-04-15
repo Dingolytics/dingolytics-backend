@@ -35,4 +35,9 @@ Check the **LICENSE.redash** file for the original license.
 License
 -------
 
-BSD-2-Clause.
+This repository contains a forked version of Redash <https://redash.io>,
+which is licensed under the BSD-2-Clause license.
+
+This forked repository includes modifications made by Dingolytics team,
+which are also licensed under the BSD-2-Clause license.
+
