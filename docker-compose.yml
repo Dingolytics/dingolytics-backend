@@ -52,6 +52,7 @@ services:
       <<: *redash-environment
       PYTHONUNBUFFERED: 0
     command: dev_worker
+    # command: worker
 
   redis:
     image: redis:6.2.11-alpine
