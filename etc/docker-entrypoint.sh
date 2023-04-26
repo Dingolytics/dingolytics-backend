@@ -1,16 +1,23 @@
 #!/bin/bash
 set -e
 
+create_db() {
+  exec ./manage.py database create-tables
+}
+
 scheduler() {
   echo "Starting RQ scheduler..."
-
-  exec /app/manage.py rq scheduler
+  exec ./manage.py rq scheduler
 }
 
 dev_scheduler() {
   echo "Starting dev RQ scheduler..."
 
-  exec watchmedo auto-restart --directory=./redash/ --pattern=*.py --recursive -- ./manage.py rq scheduler
+  pip install --user watchdog
+  exec watchmedo auto-restart \
+    --directory=./redash/ \
+    --pattern=*.py --recursive -- \
+    ./manage.py rq scheduler
 }
 
 worker() {
@@ -38,7 +45,10 @@ workers_healthcheck() {
 dev_worker() {
   echo "Starting dev RQ worker..."
 
-  exec watchmedo auto-restart --directory=./redash/ --pattern=*.py --recursive -- ./manage.py rq worker $QUEUES
+  pip install --user watchdog
+  exec watchmedo auto-restart --directory=./redash/ \
+    --pattern=*.py --recursive -- \
+    ./manage.py rq worker $QUEUES
 }
 
 server() {
@@ -47,10 +57,6 @@ server() {
   MAX_REQUESTS_JITTER=${MAX_REQUESTS_JITTER:-100}
   TIMEOUT=${REDASH_GUNICORN_TIMEOUT:-60}
   exec /usr/local/bin/gunicorn -b 0.0.0.0:5000 --name redash -w${REDASH_WEB_WORKERS:-4} redash.wsgi:app --max-requests $MAX_REQUESTS --max-requests-jitter $MAX_REQUESTS_JITTER --timeout $TIMEOUT
-}
-
-create_db() {
-  exec /app/manage.py database create-tables
 }
 
 help() {
@@ -109,28 +115,24 @@ case "$1" in
     shift
     dev_worker
     ;;
-  celery_healthcheck)
-    shift
-    echo "DEPRECATED: Celery has been replaced with RQ and now performs healthchecks autonomously as part of the 'worker' entrypoint."
-    ;;
   dev_server)
     export FLASK_DEBUG=1
-    exec /app/manage.py runserver --debugger --reload -h 0.0.0.0
+    exec ./manage.py runserver --debugger --reload -h 0.0.0.0
     ;;
   debug)
     export FLASK_DEBUG=1
     export REMOTE_DEBUG=1
-    exec /app/manage.py runserver --debugger --no-reload -h 0.0.0.0
+    exec ./manage.py runserver --debugger --no-reload -h 0.0.0.0
     ;;
   shell)
-    exec /app/manage.py shell
+    exec ./manage.py shell
     ;;
   create_db)
     create_db
     ;;
   manage)
     shift
-    exec /app/manage.py $*
+    exec ./manage.py $*
     ;;
   tests)
     shift

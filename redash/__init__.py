@@ -15,12 +15,16 @@ from .app import create_app  # noqa
 from .query_runner import import_query_runners
 from .destinations import import_destinations
 
-__version__ = "11.0.0-dev"
+__version__ = "11.0.1-dev"
 
 
 if os.environ.get("REMOTE_DEBUG"):
-    import ptvsd
-    ptvsd.enable_attach(address=("0.0.0.0", 5678))
+    try:
+        import ptvsd
+        ptvsd.enable_attach(address=("0.0.0.0", 5678))
+    except ImportError:
+        print("Error enabling remote debugging. Make sure ptvsd is installed.")
+        sys.exit(1)
 
 
 def setup_logging():
