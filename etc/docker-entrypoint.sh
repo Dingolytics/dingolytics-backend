@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-create_db() {
+create_tables() {
   exec ./manage.py database create-tables
 }
 
@@ -52,11 +52,15 @@ dev_worker() {
 }
 
 server() {
-  # Recycle gunicorn workers every n-th request. See http://docs.gunicorn.org/en/stable/settings.html#max-requests for more details.
+  # Recycle gunicorn workers every n-th request.
+  # See http://docs.gunicorn.org/en/stable/settings.html#max-requests
   MAX_REQUESTS=${MAX_REQUESTS:-1000}
   MAX_REQUESTS_JITTER=${MAX_REQUESTS_JITTER:-100}
   TIMEOUT=${REDASH_GUNICORN_TIMEOUT:-60}
-  exec /usr/local/bin/gunicorn -b 0.0.0.0:5000 --name redash -w${REDASH_WEB_WORKERS:-4} redash.wsgi:app --max-requests $MAX_REQUESTS --max-requests-jitter $MAX_REQUESTS_JITTER --timeout $TIMEOUT
+  exec gunicorn -b 0.0.0.0:5000 --name redash \
+    -w${REDASH_WEB_WORKERS:-4} redash.wsgi:app \
+    --max-requests $MAX_REQUESTS --max-requests-jitter \
+    $MAX_REQUESTS_JITTER --timeout $TIMEOUT
 }
 
 help() {
@@ -64,8 +68,8 @@ help() {
   echo ""
   echo "Usage:"
   echo ""
-  echo "manage -- CLI to manage redash"
-  echo "create_db -- create database tables"
+  echo "manage -- CLI to manage Redash"
+  echo "create_tables -- create database tables"
   echo "server -- start Redash server (with gunicorn)"
   echo "worker -- start a single RQ worker"
   echo "scheduler -- start an rq-scheduler instance"
@@ -91,6 +95,14 @@ tests() {
 }
 
 case "$1" in
+  create_db)
+    shift
+    create_tables
+    ;;
+  create_tables)
+    shift
+    create_tables
+    ;;
   worker)
     shift
     worker
@@ -126,9 +138,6 @@ case "$1" in
     ;;
   shell)
     exec ./manage.py shell
-    ;;
-  create_db)
-    create_db
     ;;
   manage)
     shift

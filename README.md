@@ -37,7 +37,7 @@ REDASH_SECRET_KEY=...
 Then creare a database tables with:
 
 ```bash
-docker-compose run --rm server create_db
+docker-compose run --rm server create_tables
 ```
 
 Finally, start the server with:
