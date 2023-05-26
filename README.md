@@ -65,9 +65,9 @@ TODO
 Short-term tasks:
 
 - [x] Restore tests and CI
-- [ ] Stream model to connect [Vector](https://vector.dev) with data sources
+- [x] Stream model to connect [Vector](https://vector.dev) with data sources
   - [x] Auto-create ClickHouse table after Stream creation
-  - [ ] Auto-create Vector source after Stream creation
+  - [x] Auto-create Vector source after Stream creation
 - [ ] Use modern password hashing algorithms
 - [ ] Re-implement versioning for `Query` model
 - [ ] Re-implement saving results logic, `QueryResult` model
