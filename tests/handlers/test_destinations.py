@@ -1,15 +1,11 @@
 from tests import BaseTestCase
-from mock import patch
-
 from redash.models import NotificationDestination
-from redash.destinations.slack import Slack
 
 
 class TestDestinationListResource(BaseTestCase):
     def test_get_returns_all_destinations(self):
         d1 = self.factory.create_destination()
         d2 = self.factory.create_destination()
-
         rv = self.make_request("get", "/api/destinations", user=self.factory.user)
         self.assertEqual(len(rv.json), 2)
 
@@ -17,7 +13,6 @@ class TestDestinationListResource(BaseTestCase):
         d1 = self.factory.create_destination()
         d2 = self.factory.create_destination()
         d3 = self.factory.create_destination(org=self.factory.create_org())
-
         rv = self.make_request("get", "/api/destinations", user=self.factory.user)
         self.assertEqual(len(rv.json), 2)
 
@@ -31,7 +26,6 @@ class TestDestinationListResource(BaseTestCase):
             "post", "/api/destinations", user=self.factory.create_admin(), data=data
         )
         self.assertEqual(rv.status_code, 200)
-        pass
 
     def test_post_requires_admin(self):
         data = {
@@ -51,7 +45,6 @@ class TestDestinationListResource(BaseTestCase):
             "name": d1.name,
             "type": "email",
         }
-
         rv = self.make_request(
             "post", "/api/destinations", user=self.factory.create_admin(), data=data
         )
@@ -83,15 +76,12 @@ class TestDestinationResource(BaseTestCase):
             "type": d.type,
             "options": {"url": "https://www.slack.com/updated"},
         }
-
-        with self.app.app_context():
-            rv = self.make_request(
-                "post",
-                "/api/destinations/{}".format(d.id),
-                user=self.factory.create_admin(),
-                data=data,
-            )
-
+        rv = self.make_request(
+            "post",
+            "/api/destinations/{}".format(d.id),
+            user=self.factory.create_admin(),
+            data=data,
+        )
         self.assertEqual(rv.status_code, 200)
 
         d = NotificationDestination.query.get(d.id)

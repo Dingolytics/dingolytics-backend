@@ -1,13 +1,10 @@
-from unittest import TestCase
-import uuid
-
 from mock import patch, Mock
 
 from rq import Connection
 from rq.exceptions import NoSuchJobError
 
 from tests import BaseTestCase
-from redash import redis_connection, rq_redis_connection, models
+from redash import rq_redis_connection, models
 from redash.utils import json_dumps
 from redash.query_runner.pg import PostgreSQL
 from redash.tasks.queries.execution import (

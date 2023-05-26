@@ -67,7 +67,7 @@ def record_event(org, user, options):
 def require_fields(req, fields):
     for f in fields:
         if f not in req:
-            abort(400)
+            abort(400, message="Missing parameter: {}".format(f))
 
 
 def get_object_or_404(fn, *args, **kwargs):

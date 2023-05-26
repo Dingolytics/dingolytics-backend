@@ -290,3 +290,5 @@ def execute_query(
     except QueryExecutionError as e:
         models.db.session.rollback()
         return e
+    finally:
+        models.db.session.close()

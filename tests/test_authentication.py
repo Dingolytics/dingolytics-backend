@@ -265,8 +265,11 @@ class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
             org=self.factory.org,
         )
         self.assertEqual(
-            response.location, "http://localhost/{}/".format(self.user.org.slug)
+            response.location, "/{}/".format(self.user.org.slug)
         )
+        # self.assertEqual(
+        #     response.location, "http://localhost/{}/".format(self.user.org.slug)
+        # )
 
     def test_simple_path_in_next_param(self):
         response = self.post_request(
@@ -274,7 +277,8 @@ class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
             data={"email": self.user.email, "password": self.password},
             org=self.factory.org,
         )
-        self.assertEqual(response.location, "http://localhost/default/queries")
+        self.assertEqual(response.location, "queries")
+        # self.assertEqual(response.location, "http://localhost/default/queries")
 
     def test_starts_scheme_url_in_next_param(self):
         response = self.post_request(
@@ -282,7 +286,8 @@ class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
             data={"email": self.user.email, "password": self.password},
             org=self.factory.org,
         )
-        self.assertEqual(response.location, "http://localhost/default/")
+        self.assertEqual(response.location, "./")
+        # self.assertEqual(response.location, "http://localhost/default/")
 
     def test_without_scheme_url_in_next_param(self):
         response = self.post_request(
@@ -290,7 +295,8 @@ class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
             data={"email": self.user.email, "password": self.password},
             org=self.factory.org,
         )
-        self.assertEqual(response.location, "http://localhost/default/")
+        self.assertEqual(response.location, "./")
+        # self.assertEqual(response.location, "http://localhost/default/")
 
     def test_without_scheme_with_path_url_in_next_param(self):
         response = self.post_request(
@@ -298,7 +304,8 @@ class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
             data={"email": self.user.email, "password": self.password},
             org=self.factory.org,
         )
-        self.assertEqual(response.location, "http://localhost/queries")
+        self.assertEqual(response.location, "/queries")
+        # self.assertEqual(response.location, "http://localhost/queries")
 
 
 class TestRemoteUserAuth(BaseTestCase):

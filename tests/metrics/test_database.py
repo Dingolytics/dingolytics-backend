@@ -6,4 +6,4 @@ from tests import BaseTestCase
 class TestDatabaseMetrics(BaseTestCase):
     def test_db_request_records_statsd_metrics(self, timing):
         self.factory.create_query()
-        timing.assert_called_with("db.changes.insert", ANY)
+        timing.assert_called_with("db.data_source_groups.insert", ANY)

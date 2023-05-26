@@ -2,7 +2,7 @@ import pytz
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.indexable import index_property
 from sqlalchemy.ext.mutable import Mutable
-from sqlalchemy_utils import EncryptedType
+from sqlalchemy_utils import EncryptedType, StringEncryptedType
 from sqlalchemy import cast
 from sqlalchemy.dialects.postgresql import JSON
 
@@ -22,7 +22,7 @@ class Configuration(TypeDecorator):
         return ConfigurationContainer.from_json(value)
 
 
-class EncryptedConfiguration(EncryptedType):
+class EncryptedConfiguration(StringEncryptedType):
     def process_bind_param(self, value, dialect):
         return super(EncryptedConfiguration, self).process_bind_param(
             value.to_json(), dialect

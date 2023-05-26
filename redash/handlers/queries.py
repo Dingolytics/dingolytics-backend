@@ -257,7 +257,7 @@ class QueryListResource(BaseQueryListResource):
         query_def["data_source"] = data_source
         query_def["org"] = self.current_org
         query_def["is_draft"] = True
-        query_def["schedule"] = {}
+        # query_def["schedule"] = {}
         query = models.Query.create(**query_def)
         models.db.session.add(query)
         models.db.session.commit()

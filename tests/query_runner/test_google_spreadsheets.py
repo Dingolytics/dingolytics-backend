@@ -1,5 +1,5 @@
 import datetime
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 from mock import MagicMock
 
@@ -127,6 +127,7 @@ class TestGetColumnsAndColumnNames(TestCase):
         columns, column_names = _get_columns_and_column_names(_columns)
 
         self.assertEqual(["foo", "bar", "baz", "foo1", "baz2"], column_names)
+
 
     def test_get_columns_with_blank(self):
         _columns = ["foo", "", "baz", ""]

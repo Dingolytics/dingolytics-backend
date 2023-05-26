@@ -37,8 +37,13 @@ from redash.handlers.destinations import (
     DestinationResource,
     DestinationTypeListResource,
 )
-from redash.handlers.events import EventsResource
-from redash.handlers.favorites import DashboardFavoriteResource, QueryFavoriteResource
+from redash.handlers.events import (
+    EventsResource,
+)
+from redash.handlers.favorites import (
+    DashboardFavoriteResource,
+    QueryFavoriteResource,
+)
 from redash.handlers.groups import (
     GroupDataSourceListResource,
     GroupDataSourceResource,
@@ -75,7 +80,12 @@ from redash.handlers.query_snippets import (
     QuerySnippetListResource,
     QuerySnippetResource,
 )
-from redash.handlers.settings import OrganizationSettings
+from redash.handlers.settings import (
+    OrganizationSettings,
+)
+from redash.handlers.streams import (
+    StreamListResource,
+)
 from redash.handlers.users import (
     UserDisableResource,
     UserInviteResource,
@@ -88,7 +98,10 @@ from redash.handlers.visualizations import (
     VisualizationListResource,
     VisualizationResource,
 )
-from redash.handlers.widgets import WidgetListResource, WidgetResource
+from redash.handlers.widgets import (
+    WidgetListResource,
+    WidgetResource
+)
 from redash.utils import json_dumps
 
 
@@ -111,9 +124,15 @@ def json_representation(data, code, headers=None):
     return resp
 
 
-api.add_org_resource(AlertResource, "/api/alerts/<alert_id>", endpoint="alert")
 api.add_org_resource(
-    AlertMuteResource, "/api/alerts/<alert_id>/mute", endpoint="alert_mute"
+    AlertResource,
+    "/api/alerts/<alert_id>",
+    endpoint="alert",
+)
+api.add_org_resource(
+    AlertMuteResource,
+    "/api/alerts/<alert_id>/mute",
+    endpoint="alert_mute",
 )
 api.add_org_resource(
     AlertSubscriptionListResource,
@@ -125,11 +144,21 @@ api.add_org_resource(
     "/api/alerts/<alert_id>/subscriptions/<subscriber_id>",
     endpoint="alert_subscription",
 )
-api.add_org_resource(AlertListResource, "/api/alerts", endpoint="alerts")
-
-api.add_org_resource(DashboardListResource, "/api/dashboards", endpoint="dashboards")
 api.add_org_resource(
-    DashboardResource, "/api/dashboards/<dashboard_id>", endpoint="dashboard"
+    AlertListResource,
+    "/api/alerts",
+    endpoint="alerts"
+)
+
+api.add_org_resource(
+    DashboardListResource,
+    "/api/dashboards",
+    endpoint="dashboards"
+)
+api.add_org_resource(
+    DashboardResource,
+    "/api/dashboards/<dashboard_id>",
+    endpoint="dashboard"
 )
 api.add_org_resource(
     PublicDashboardResource,
@@ -143,16 +172,22 @@ api.add_org_resource(
 )
 
 api.add_org_resource(
-    DataSourceTypeListResource, "/api/data_sources/types", endpoint="data_source_types"
+    DataSourceTypeListResource,
+    "/api/data_sources/types",
+    endpoint="data_source_types"
 )
 api.add_org_resource(
-    DataSourceListResource, "/api/data_sources", endpoint="data_sources"
+    DataSourceListResource,
+    "/api/data_sources",
+    endpoint="data_sources"
 )
 api.add_org_resource(
-    DataSourceSchemaResource, "/api/data_sources/<data_source_id>/schema"
+    DataSourceSchemaResource,
+    "/api/data_sources/<data_source_id>/schema"
 )
 api.add_org_resource(
-    DatabricksDatabaseListResource, "/api/databricks/databases/<data_source_id>"
+    DatabricksDatabaseListResource,
+    "/api/databricks/databases/<data_source_id>"
 )
 api.add_org_resource(
     DatabricksSchemaResource,
@@ -163,17 +198,38 @@ api.add_org_resource(
     "/api/databricks/databases/<data_source_id>/<database_name>/columns/<table_name>",
 )
 api.add_org_resource(
-    DataSourcePauseResource, "/api/data_sources/<data_source_id>/pause"
+    DataSourcePauseResource,
+    "/api/data_sources/<data_source_id>/pause"
 )
-api.add_org_resource(DataSourceTestResource, "/api/data_sources/<data_source_id>/test")
 api.add_org_resource(
-    DataSourceResource, "/api/data_sources/<data_source_id>", endpoint="data_source"
+    DataSourceTestResource,
+    "/api/data_sources/<data_source_id>/test"
+)
+api.add_org_resource(
+    DataSourceResource,
+    "/api/data_sources/<data_source_id>",
+    endpoint="data_source"
 )
 
-api.add_org_resource(GroupListResource, "/api/groups", endpoint="groups")
-api.add_org_resource(GroupResource, "/api/groups/<group_id>", endpoint="group")
 api.add_org_resource(
-    GroupMemberListResource, "/api/groups/<group_id>/members", endpoint="group_members"
+    StreamListResource,
+    "/api/streams",
+)
+
+api.add_org_resource(
+    GroupListResource,
+    "/api/groups",
+    endpoint="groups"
+)
+api.add_org_resource(
+    GroupResource,
+    "/api/groups/<group_id>",
+    endpoint="group"
+)
+api.add_org_resource(
+    GroupMemberListResource,
+    "/api/groups/<group_id>/members",
+    endpoint="group_members"
 )
 api.add_org_resource(
     GroupMemberResource,
@@ -191,13 +247,21 @@ api.add_org_resource(
     endpoint="group_data_source",
 )
 
-api.add_org_resource(EventsResource, "/api/events", endpoint="events")
+api.add_org_resource(
+    EventsResource,
+    "/api/events",
+    endpoint="events"
+)
 
 api.add_org_resource(
-    QueryFavoriteListResource, "/api/queries/favorites", endpoint="query_favorites"
+    QueryFavoriteListResource,
+    "/api/queries/favorites",
+    endpoint="query_favorites"
 )
 api.add_org_resource(
-    QueryFavoriteResource, "/api/queries/<query_id>/favorite", endpoint="query_favorite"
+    QueryFavoriteResource,
+    "/api/queries/<query_id>/favorite",
+    endpoint="query_favorite"
 )
 api.add_org_resource(
     DashboardFavoriteListResource,

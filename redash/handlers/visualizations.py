@@ -13,7 +13,9 @@ class VisualizationListResource(BaseResource):
         kwargs = request.get_json(force=True)
 
         query = get_object_or_404(
-            models.Query.get_by_id_and_org, kwargs.pop("query_id"), self.current_org
+            models.Query.get_by_id_and_org,
+            kwargs.pop("query_id"),
+            self.current_org
         )
         require_object_modify_permission(query, self.current_user)
 

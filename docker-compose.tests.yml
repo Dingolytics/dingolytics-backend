@@ -1,0 +1,45 @@
+version: "3.9"
+
+x-redash-service: &redash-service
+  build:
+    context: .
+    target: tests
+  volumes:
+    - .:/home/redash/app
+  env_file:
+    - .env
+
+x-redash-environment: &redash-environment
+  REDASH_LOG_LEVEL: "INFO"
+  REDASH_REDIS_URL: "redis://redis-tests:6379/0"
+  REDASH_DATABASE_URL: "postgresql://postgres@postgres-tests/tests"
+  VECTOR_CONFIG_PATH: "/tmp/vector/vector.toml"
+
+services:
+  server-tests:
+    <<: *redash-service
+    depends_on:
+      - postgres-tests
+      - redis-tests
+    environment:
+      <<: *redash-environment
+      SQLALCHEMY_SILENCE_UBER_WARNING: 1
+      PYTHONUNBUFFERED: 0
+    command: tests -x
+
+  redis-tests:
+    image: redis:6.2.11-alpine
+    restart: unless-stopped
+
+  postgres-tests:
+    image: postgres:15.2-alpine
+    restart: unless-stopped
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: tests
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    volumes:
+      - pgdata15-tests:/var/lib/postgresql/data/pgdata
+
+volumes:
+  pgdata15-tests:

@@ -31,30 +31,30 @@ def _table_name_from_select_element(elt: Select) -> str:
 
 
 @listens_for(Engine, "before_execute")
-def before_execute(conn, elt, multiparams, params):
+def before_execute(conn, clauseelement, multiparams, params, execution_options):
     conn.info.setdefault("query_start_time", []).append(time.time())
 
 
 @listens_for(Engine, "after_execute")
-def after_execute(conn, elt, multiparams, params, result):
+def after_execute(conn, clauseelement, multiparams, params,
+                  execution_options, result):
     duration = 1000 * (time.time() - conn.info["query_start_time"].pop(-1))
-    action = elt.__class__.__name__
+    action = clauseelement.__class__.__name__.lower()
 
-    if action == "Select":
+    if action == "select":
         name = "unknown"
         try:
-            name = _table_name_from_select_element(elt)
+            name = _table_name_from_select_element(clauseelement)
         except Exception:
             logging.exception("Failed finding table name.")
-    elif action in ["Update", "Insert", "Delete"]:
-        name = elt.table.name
+    elif action in ["update", "insert", "delete"]:
+        name = clauseelement.table.name
     else:
-        # create/drop tables, sqlalchemy internal schema queries, etc
+        # Create / drop tables, SQLAlchemy internal schema queries, etc
         return
 
-    action = action.lower()
-
     statsd_client.timing("db.{}.{}".format(name, action), duration)
+
     metrics_logger.debug("table=%s query=%s duration=%.2f", name, action, duration)
 
     if has_request_context():

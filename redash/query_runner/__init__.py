@@ -75,11 +75,13 @@ def split_sql_statements(query):
 
     def is_empty_statement(stmt):
         strip_comments = sqlparse.filters.StripCommentsFilter()
-
-        # copy statement object. `copy.deepcopy` fails to do this, so just re-parse it
+        # Copy statement object via `copy.deepcopy` fails to do this,
+        # so just re-parse it:
         st = sqlparse.engine.FilterStack()
-        stmt = next(st.run(str(stmt)))
-
+        try:
+            stmt = next(st.run(str(stmt)))
+        except StopIteration:
+            return True
         sql = str(strip_comments.process(stmt))
         return sql.strip() == ""
 
