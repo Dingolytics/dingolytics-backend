@@ -154,7 +154,7 @@ def new(name=None, type=None, options=None, organization="default"):
 
     if not options.is_valid():
         print("Error: invalid configuration.")
-        exit()
+        exit(1)
 
     print(
         "Creating {} data source ({}) with options:\n{}".format(

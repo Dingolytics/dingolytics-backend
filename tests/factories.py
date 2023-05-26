@@ -44,7 +44,7 @@ user_factory = ModelFactory(
     redash.models.User,
     name="John Doe",
     email=Sequence("test{}@example.com"),
-    password_hash=pwd_context.encrypt("test1234"),
+    password_hash=pwd_context.hash("test1234"),
     group_ids=[2],
     org_id=1,
 )
@@ -56,6 +56,11 @@ org_factory = ModelFactory(
     settings={},
 )
 
+group_factory = ModelFactory(
+    redash.models.Group,
+    name=Sequence("Test {}"),
+)
+
 data_source_factory = ModelFactory(
     redash.models.DataSource,
     name=Sequence("Test {}"),
@@ -63,6 +68,13 @@ data_source_factory = ModelFactory(
     # If we don't use lambda here it will reuse the same options between tests:
     options=lambda: ConfigurationContainer.from_json('{"dbname": "test"}'),
     org_id=1,
+)
+
+stream_factory = ModelFactory(
+    redash.models.Stream,
+    name=Sequence("Test {}"),
+    data_source=data_source_factory.create,
+    db_table='test_stream',    
 )
 
 dashboard_factory = ModelFactory(
@@ -84,7 +96,7 @@ query_factory = ModelFactory(
     user=user_factory.create,
     is_archived=False,
     is_draft=False,
-    schedule=None,
+    schedule={},
     data_source=data_source_factory.create,
     org_id=1,
 )
@@ -195,7 +207,6 @@ class Factory(object):
                     group=self.default_group, data_source=self._data_source
                 )
             )
-
         return self._data_source
 
     def create_org(self, **kwargs):
@@ -238,11 +249,10 @@ class Factory(object):
 
     def create_group(self, **kwargs):
         args = {"name": "Group", "org": self.org}
-
         args.update(kwargs)
-
-        g = redash.models.Group(**args)
-        return g
+        return group_factory.create(**args)
+        # g = redash.models.Group(**args)
+        # return g
 
     def create_alert(self, **kwargs):
         args = {"user": self.user, "query_rel": self.create_query()}
@@ -277,6 +287,9 @@ class Factory(object):
             )
 
         return data_source
+
+    def create_stream(self, **kwargs):
+        return stream_factory.create(**kwargs)
 
     def create_dashboard(self, **kwargs):
         args = {"user": self.user, "org": self.org}

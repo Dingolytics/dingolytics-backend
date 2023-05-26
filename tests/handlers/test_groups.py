@@ -88,19 +88,21 @@ class TestGroupResourcePost(BaseTestCase):
 
 
 class TestGroupResourceDelete(BaseTestCase):
-    def test_allowed_only_to_admin(self):
+    def test_group_delete_allowed_for_admin(self):
         group = self.factory.create_group()
-
-        response = self.make_request("delete", "/api/groups/{}".format(group.id))
-        self.assertEqual(response.status_code, 403)
-
+        group_id = group.id
         response = self.make_request(
             "delete",
-            "/api/groups/{}".format(group.id),
+            "/api/groups/{}".format(group_id),
             user=self.factory.create_admin(),
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(Group.query.get(group.id))
+        self.assertIsNone(Group.query.get(group_id))
+
+    def test_group_delete_not_allowed(self):
+        group = self.factory.create_group()
+        response = self.make_request("delete", "/api/groups/{}".format(group.id))
+        self.assertEqual(response.status_code, 403)
 
     def test_cant_delete_builtin_group(self):
         for group in [self.factory.default_group, self.factory.admin_group]:

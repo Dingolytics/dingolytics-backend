@@ -10,9 +10,11 @@ try:
     from ldap3 import Server, Connection
 except ImportError:
     if settings.LDAP_LOGIN_ENABLED:
-        sys.exit(
-            "The ldap3 library was not found. This is required to use LDAP authentication (see requirements.txt)."
+        print(
+            "The ldap3 library was not found. This is required to use LDAP"
+            "authentication (see requirements.txt)."
         )
+        sys.exit(1)
 
 from redash.authentication import (
     create_and_login_user,
@@ -23,7 +25,6 @@ from redash.authentication.org_resolving import current_org
 from redash.handlers.base import org_scoped_rule
 
 logger = logging.getLogger("ldap_auth")
-
 
 blueprint = Blueprint("ldap_auth", __name__)
 

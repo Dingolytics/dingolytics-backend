@@ -46,18 +46,32 @@ Finally, start the server with:
 docker-compose up --build
 ```
 
+Run tests:
+
+```bash
+make test
+```
+
+or selectiely:
+
+```bash
+docker-compose -f docker-compose.tests.yml run --rm server tests tests/models
+```
+
 
 TODO
 ----
 
 Short-term tasks:
 
-- [ ] Restore tests and CI
+- [x] Restore tests and CI
+- [ ] Stream model to connect [Vector](https://vector.dev) with data sources
+  - [x] Auto-create ClickHouse table after Stream creation
+  - [ ] Auto-create Vector source after Stream creation
 - [ ] Use modern password hashing algorithms
 - [ ] Re-implement versioning for `Query` model
-- [ ] Model to connect [Vector](https://vector.dev) with data sources
 - [ ] Re-implement saving results logic, `QueryResult` model
-- [ ] Try reducing Docker image size for release builds
+- [x] Reduce Docker image size for release builds
 
 
 Credits

@@ -1,12 +1,12 @@
-# This configuration file is for the **development** setup.
-
 version: "3.9"
 
 x-redash-service: &redash-service
   build:
     context: .
+    target: application
   volumes:
-    - .:/src/app
+    # - .:/home/redash/app
+    - vector-etc:/home/redash/etc/vector
   env_file:
     - .env
 
@@ -19,7 +19,7 @@ x-redash-environment: &redash-environment
   REDASH_MAIL_SERVER: "email"
   REDASH_ENFORCE_CSRF: "true"
   REDASH_GUNICORN_TIMEOUT: 60
-  # Set secret keys in the .env file
+  VECTOR_CONFIG_PATH: "/home/redash/etc/vector/vector.toml"
 
 services:
   server:
@@ -42,7 +42,6 @@ services:
     environment:
       <<: *redash-environment
     command: dev_scheduler
-    # command: scheduler
 
   worker:
     <<: *redash-service
@@ -52,7 +51,6 @@ services:
       <<: *redash-environment
       PYTHONUNBUFFERED: 0
     command: dev_worker
-    # command: worker
 
   redis:
     image: redis:6.2.11-alpine
@@ -65,9 +63,10 @@ services:
     restart: unless-stopped
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
       POSTGRES_HOST_AUTH_METHOD: "trust"
     volumes:
-      - pgdata15:/var/lib/postgresql/data/pgdata
+      - ${PGDATA_VOLUME:-pgdata15}:/var/lib/postgresql/data/pgdata
 
   email:
     image: maildev/maildev
@@ -75,5 +74,19 @@ services:
       - "1080:80"
     restart: unless-stopped
 
+  vector:
+    image: timberio/vector:0.30.X-alpine
+    # restart: unless-stopped
+    environment:
+      VECTOR_WATCH_CONFIG: /etc/vector/vector.toml
+    volumes:
+      - vector-data:/var/lib/vector
+      - vector-etc:/etc/vector:ro
+    ports:
+      - "8180:8180"
+    command: --watch-config
+
 volumes:
   pgdata15:
+  vector-data:
+  vector-etc:

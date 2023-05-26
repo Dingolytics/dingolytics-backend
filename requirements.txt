@@ -162,6 +162,8 @@ pyasn1==0.4.8
     #   ndg-httpsclient
 pycparser==2.21
     # via cffi
+pydantic==1.10.8
+    # via -r requirements.in
 pygments==2.15.0
     # via rich
 pyjwt==2.6.0
@@ -254,12 +256,15 @@ supervisor==4.1.0
     # via -r requirements.in
 supervisor-checks==0.8.1
     # via -r requirements.in
+toml==0.10.2
+    # via -r requirements.in
 typing-extensions==4.5.0
     # via
     #   alembic
     #   blinker
     #   flask-limiter
     #   limits
+    #   pydantic
 ua-parser==0.16.1
     # via
     #   -r requirements.in

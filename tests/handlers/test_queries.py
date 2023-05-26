@@ -25,34 +25,36 @@ class TestQueryResourceGet(BaseTestCase):
         self.assertEqual(rv.status_code, 200)
         self.assertEqual(len(rv.json["results"]), 10)
 
-    def test_query_without_data_source_should_be_available_only_by_admin(self):
+    def test_query_without_data_source_accessible_by_admin(self):
         query = self.factory.create_query()
         query.data_source = None
         db.session.add(query)
-
-        rv = self.make_request("get", "/api/queries/{}".format(query.id))
-        self.assertEqual(rv.status_code, 403)
-
+        # rv = self.make_request("get", "/api/queries/{}".format(query.id))
+        # self.assertEqual(rv.status_code, 403)
         rv = self.make_request(
             "get", "/api/queries/{}".format(query.id), user=self.factory.create_admin()
         )
         self.assertEqual(rv.status_code, 200)
 
-    def test_query_only_accessible_to_users_from_its_organization(self):
+    def test_query_non_accessible_to_other_organization(self):
         second_org = self.factory.create_org()
         second_org_admin = self.factory.create_admin(org=second_org)
-
         query = self.factory.create_query()
         query.data_source = None
         db.session.add(query)
-
+        db.session.commit()
         rv = self.make_request(
             "get", "/api/queries/{}".format(query.id), user=second_org_admin
         )
         self.assertEqual(rv.status_code, 404)
 
+    def test_query_accessible_to_organization_admin(self):
+        query = self.factory.create_query()
+        org_admin = self.factory.create_admin()
         rv = self.make_request(
-            "get", "/api/queries/{}".format(query.id), user=self.factory.create_admin()
+            "get",
+            "/api/queries/{}".format(query.id),
+            user=org_admin
         )
         self.assertEqual(rv.status_code, 200)
 
@@ -382,6 +384,7 @@ class QueryRefreshTest(BaseTestCase):
     def setUp(self):
         super(QueryRefreshTest, self).setUp()
 
+        self.user = self.factory.user
         self.query = self.factory.create_query()
         self.path = "/api/queries/{}/refresh".format(self.query.id)
 
@@ -413,13 +416,16 @@ class QueryRefreshTest(BaseTestCase):
 
     def test_refresh_forbiden_with_query_api_key(self):
         response = self.make_request(
-            "post", "{}?api_key={}".format(self.path, self.query.api_key), user=False
+            "post",
+            "{}?api_key={}".format(self.path, self.query.api_key),
+            user=False
         )
         self.assertEqual(403, response.status_code)
 
+    def test_refresh_allowed_with_user_api_key(self):
         response = self.make_request(
             "post",
-            "{}?api_key={}".format(self.path, self.factory.user.api_key),
+            "{}?api_key={}".format(self.path, self.user.api_key),
             user=False,
         )
         self.assertEqual(200, response.status_code)

@@ -172,7 +172,8 @@ class UserListResource(BaseResource):
 
         should_send_invitation = "no_invite" not in request.args
         return invite_user(
-            self.current_org, self.current_user, user, send_email=should_send_invitation
+            self.current_org, self.current_user,
+            user, send_email=should_send_invitation
         )
 
 

@@ -1,14 +1,13 @@
 import functools
 from flask import session, request
 from flask_login import current_user
-from flask_talisman import talisman
+from flask_talisman.talisman import Talisman
 from flask_wtf.csrf import CSRFProtect, generate_csrf
-
 
 from redash import settings
 
+talisman = Talisman()
 
-talisman = talisman.Talisman()
 csrf = CSRFProtect()
 
 
@@ -25,6 +24,7 @@ def csp_allows_embeding(fn):
 
 def init_app(app):
     csrf.init_app(app)
+
     app.config["WTF_CSRF_CHECK_DEFAULT"] = False
     app.config["WTF_CSRF_SSL_STRICT"] = False
     app.config["WTF_CSRF_TIME_LIMIT"] = settings.CSRF_TIME_LIMIT
@@ -48,7 +48,7 @@ def init_app(app):
                 return
             # END workaround
 
-            if not current_user.is_authenticated or "user_id" in session:
+            if not current_user.is_authenticated or ("_user_id" not in session):
                 csrf.protect()
 
     talisman.init_app(

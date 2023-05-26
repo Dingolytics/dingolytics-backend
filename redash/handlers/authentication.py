@@ -198,7 +198,6 @@ def login(org_slug=None):
     if current_user.is_authenticated:
         return redirect(next_path)
 
-
     if request.method == "POST" and current_org.get_setting("auth_password_login_enabled"):
         try:
             org = current_org._get_current_object()

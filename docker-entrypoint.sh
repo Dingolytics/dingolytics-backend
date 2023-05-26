@@ -26,7 +26,7 @@ worker() {
   export WORKERS_COUNT=${WORKERS_COUNT:-2}
   export QUEUES=${QUEUES:-}
 
-  exec supervisord -c etc/worker.conf
+  exec supervisord -c ${HOME}/etc/supervisor/worker.conf
 }
 
 workers_healthcheck() {
@@ -58,7 +58,7 @@ server() {
   MAX_REQUESTS_JITTER=${MAX_REQUESTS_JITTER:-100}
   TIMEOUT=${REDASH_GUNICORN_TIMEOUT:-60}
   exec gunicorn -b 0.0.0.0:5000 --name redash \
-    -w${REDASH_WEB_WORKERS:-4} redash.wsgi:app \
+    -w${REDASH_WEB_WORKERS:-4} redash.main:app \
     --max-requests $MAX_REQUESTS --max-requests-jitter \
     $MAX_REQUESTS_JITTER --timeout $TIMEOUT
 }
@@ -84,13 +84,12 @@ help() {
 }
 
 tests() {
-  export REDASH_DATABASE_URL="postgresql://postgres@postgres/tests"
-
   if [ $# -eq 0 ]; then
     TEST_ARGS=tests/
   else
     TEST_ARGS=$@
   fi
+
   exec pytest $TEST_ARGS
 }
 

@@ -1,53 +1,31 @@
-.PHONY: compose_build up test_db create_database clean down tests lint backend-unit-tests frontend-unit-tests test build watch start redis-cli bash
+.PHONY: build up initdb migrate redis-cli shell test test-clean
 
-compose_build:
-	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build
+COMPOSE_CMD := docker compose
 
-up:
-	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up -d --build
+TEST_COMPOSE_CMD := docker compose -f docker-compose.tests.yml
 
-test_db:
-	@for i in `seq 1 5`; do \
-		if (docker-compose exec postgres sh -c 'psql -U postgres -c "select 1;"' 2>&1 > /dev/null) then break; \
-		else echo "postgres initializing..."; sleep 5; fi \
-	done
-	docker-compose exec postgres sh -c 'psql -U postgres -c "drop database if exists tests;" && psql -U postgres -c "create database tests;"'
+build:
+	$(COMPOSE_CMD) build
 
-create_database:
-	docker-compose run server create_tables
+initdb:
+	$(COMPOSE_CMD) run --rm server manage database create-tables
 
-clean:
-	docker-compose down && docker-compose rm
+up: initdb
+	$(COMPOSE_CMD) up
 
-down:
-	docker-compose down
-
-tests:
-	docker-compose run server tests
-
-lint:
-	./bin/flake8_tests.sh
-
-backend-unit-tests: up test_db
-	docker-compose run --rm --name tests server tests
-
-frontend-unit-tests:
-	CYPRESS_INSTALL_BINARY=0 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 yarn --frozen-lockfile
-	yarn test
-
-test: lint backend-unit-tests frontend-unit-tests
-
-build: 
-	yarn build
-
-watch: 
-	yarn watch
-
-start: 
-	yarn start
+migrate:
+	$(COMPOSE_CMD) run --rm server manage db migrate
 
 redis-cli:
-	docker-compose run --rm redis redis-cli -h redis
+	$(COMPOSE_CMD) run --rm redis redis-cli -h redis
 
-bash:
-	docker-compose run --rm server bash
+shell:
+	$(COMPOSE_CMD) run --rm server bash
+
+test:
+	$(TEST_COMPOSE_CMD) build
+	$(TEST_COMPOSE_CMD) run --rm server-tests
+
+test-clean:
+	$(TEST_COMPOSE_CMD) stop
+	$(TEST_COMPOSE_CMD) down --volumes

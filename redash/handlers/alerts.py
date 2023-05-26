@@ -1,6 +1,5 @@
-import time
-
 from flask import request
+from flask_login import current_user
 from funcy import project
 
 from redash import models
@@ -12,7 +11,6 @@ from redash.permissions import (
     require_permission,
     view_only,
 )
-from redash.utils import json_dumps
 
 
 class AlertResource(BaseResource):
@@ -58,10 +56,8 @@ class AlertMuteResource(BaseResource):
             models.Alert.get_by_id_and_org, alert_id, self.current_org
         )
         require_admin_or_owner(alert.user.id)
-
         alert.options["muted"] = True
         models.db.session.commit()
-
         self.record_event(
             {"action": "mute", "object_id": alert.id, "object_type": "alert"}
         )
@@ -71,10 +67,8 @@ class AlertMuteResource(BaseResource):
             models.Alert.get_by_id_and_org, alert_id, self.current_org
         )
         require_admin_or_owner(alert.user.id)
-
         alert.options["muted"] = False
         models.db.session.commit()
-
         self.record_event(
             {"action": "unmute", "object_id": alert.id, "object_type": "alert"}
         )
@@ -159,7 +153,6 @@ class AlertSubscriptionResource(BaseResource):
         require_admin_or_owner(subscription.user.id)
         models.db.session.delete(subscription)
         models.db.session.commit()
-
         self.record_event(
             {"action": "unsubscribe", "object_id": alert_id, "object_type": "alert"}
         )

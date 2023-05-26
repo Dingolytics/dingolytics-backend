@@ -34,8 +34,8 @@ logging.getLogger("metrics").setLevel(logging.ERROR)
 
 
 def authenticate_request(c, user):
-    with c.session_transaction() as sess:
-        sess["user_id"] = user.get_id()
+    with c.session_transaction() as session:
+        session["_user_id"] = user.get_id()
 
 
 @contextmanager
@@ -44,16 +44,15 @@ def authenticated_user(c, user=None):
         user = user_factory.create()
         db.session.commit()
     authenticate_request(c, user)
-
     yield user
 
 
 class BaseTestCase(TestCase):
     def setUp(self):
+        limiter.enabled = False
         self.app = create_app()
         self.db = db
         self.app.config["TESTING"] = True
-        limiter.enabled = False
         self.app_ctx = self.app.app_context()
         self.app_ctx.push()
         db.session.close()
@@ -64,7 +63,7 @@ class BaseTestCase(TestCase):
 
     def tearDown(self):
         db.session.remove()
-        db.get_engine(self.app).dispose()
+        db.engine.dispose()
         self.app_ctx.pop()
         redis_connection.flushdb()
 

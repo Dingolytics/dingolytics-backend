@@ -4,26 +4,24 @@ from flask import current_app
 from flask.cli import FlaskGroup, run_command, with_appcontext
 from rq import Connection
 
-from redash import __version__, create_app, settings, rq_redis_connection
+from redash import __version__, settings, rq_redis_connection
+from redash.main import initialize_app
 from redash.cli import data_sources, database, groups, organization, queries, users, rq
 from redash.monitor import get_status
 
 
-# def create(group):
-def create():
-    app = current_app or create_app()
-    # group.app = app
+def create_app():
+    app = current_app or initialize_app()
 
     @app.shell_context_processor
     def shell_context():
         from redash import models, settings
-
         return {"models": models, "settings": settings}
 
     return app
 
 
-@click.group(cls=FlaskGroup, create_app=create)
+@click.group(cls=FlaskGroup, create_app=create_app)
 def manager():
     """Management script for Redash"""
 

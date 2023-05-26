@@ -1,6 +1,6 @@
 import datetime
-from unittest import TestCase
-from mock import patch, call
+from unittest import TestCase, skipIf
+from mock import patch
 
 from pytz import utc
 from freezegun import freeze_time
@@ -16,6 +16,7 @@ from redash.utils import json_dumps, parse_human_time
 
 @patch("redash.query_runner.mongodb.pymongo.MongoClient")
 class TestUserPassOverride(TestCase):
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_username_password_present_overrides_username_from_uri(self, mongo_client):
         config = {
             "connectionString": "mongodb://localhost:27017/test",
@@ -29,6 +30,7 @@ class TestUserPassOverride(TestCase):
         self.assertIn("username", mongo_client.call_args.kwargs)
         self.assertIn("password", mongo_client.call_args.kwargs)
 
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_username_password_absent_does_not_pass_args(self, mongo_client):
         config = {
             "connectionString": "mongodb://user:pass@localhost:27017/test",
@@ -42,12 +44,14 @@ class TestUserPassOverride(TestCase):
 
 
 class TestParseQueryJson(TestCase):
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_ignores_non_isodate_fields(self):
         query = {"test": 1, "test_list": ["a", "b", "c"], "test_dict": {"a": 1, "b": 2}}
 
         query_data = parse_query_json(json_dumps(query))
         self.assertDictEqual(query_data, query)
 
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_parses_isodate_fields(self):
         query = {
             "test": 1,
@@ -62,6 +66,7 @@ class TestParseQueryJson(TestCase):
             query_data["testIsoDate"], datetime.datetime(2014, 10, 3, 0, 0)
         )
 
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_parses_isodate_in_nested_fields(self):
         query = {
             "test": 1,
@@ -79,6 +84,7 @@ class TestParseQueryJson(TestCase):
             query_data["test_dict"]["b"]["date"], datetime.datetime(2014, 10, 4, 0, 0)
         )
 
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_handles_nested_fields(self):
         # https://github.com/getredash/redash/issues/597
         query = {
@@ -103,6 +109,7 @@ class TestParseQueryJson(TestCase):
 
         self.assertDictEqual(query, query_data)
 
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_supports_extended_json_types(self):
         query = {
             "test": 1,
@@ -119,6 +126,7 @@ class TestParseQueryJson(TestCase):
             datetime.datetime(2014, 10, 3, 0, 0).replace(tzinfo=utc),
         )
 
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     @freeze_time("2019-01-01 12:00:00")
     def test_supports_relative_timestamps(self):
         query = {"ts": {"$humanTime": "1 hour ago"}}
@@ -129,6 +137,7 @@ class TestParseQueryJson(TestCase):
 
 
 class TestMongoResults(TestCase):
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_parses_regular_results(self):
         raw_results = [
             {"column": 1, "column2": "test"},
@@ -143,6 +152,7 @@ class TestMongoResults(TestCase):
         self.assertIsNotNone(_get_column_by_name(columns, "column2"))
         self.assertIsNotNone(_get_column_by_name(columns, "column3"))
 
+    @skipIf(MongoDB.enabled() is False, "MongoDB is not enabled")
     def test_parses_nested_results(self):
         raw_results = [
             {"column": 1, "column2": "test", "nested": {"a": 1, "b": "str"}},

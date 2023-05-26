@@ -16,6 +16,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
 
 login_manager = LoginManager()
+
 logger = logging.getLogger("authentication")
 
 
@@ -55,7 +56,6 @@ def load_user(user_id_with_identity):
         user = models.User.get_by_id_and_org(user_id, org)
         if user.is_disabled or user.get_id() != user_id_with_identity:
             return None
-
         return user
     except (models.NoResultFound, ValueError, AttributeError):
         return None

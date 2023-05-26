@@ -15,4 +15,4 @@ class TestEmptyScheduleQuery(BaseTestCase):
         oq = staticmethod(lambda: [query])
         with patch.object(Query, "past_scheduled_queries", oq):
             empty_schedules()
-            self.assertEqual(query.schedule, None)
+            self.assertEqual(query.schedule, {})

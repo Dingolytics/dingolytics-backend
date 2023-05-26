@@ -1,0 +1,25 @@
+name: Run tests
+
+on:
+  push:
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Create .env file
+        run: |
+          echo "REDASH_COOKIE_SECRET=test-cookie-secret-1234567890" >> .env
+          echo "REDASH_SECRET_KEY=test-secret-key-1234567890" >> .env
+
+      - name: Build and run tests
+        run: make test
+
+      - name: Clean up test artifacts
+        run: make test-clean
