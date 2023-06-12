@@ -61,7 +61,6 @@ class StreamListResource(BaseResource):
         try:
             stream = models.Stream(
                 data_source=data_source,
-                ingest_key=default_ingest_key(),
                 name=req.get("name", ""),
                 description=req.get("description", ""),
                 db_table=req.get("db_table", ""),
