@@ -23,9 +23,11 @@ shell:
 	$(COMPOSE_CMD) run --rm server bash
 
 test:
-	$(TEST_COMPOSE_CMD) build
+	export COMPOSE_PROJECT_NAME=server-tests && \
+	$(TEST_COMPOSE_CMD) build && \
 	$(TEST_COMPOSE_CMD) run --rm server-tests
 
 test-clean:
-	$(TEST_COMPOSE_CMD) stop
+	export COMPOSE_PROJECT_NAME=server-tests && \
+	$(TEST_COMPOSE_CMD) stop && \
 	$(TEST_COMPOSE_CMD) down --volumes

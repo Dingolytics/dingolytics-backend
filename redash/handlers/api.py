@@ -84,6 +84,7 @@ from redash.handlers.settings import (
     OrganizationSettings,
 )
 from redash.handlers.streams import (
+    StreamResource,
     StreamListResource,
 )
 from redash.handlers.users import (
@@ -214,6 +215,10 @@ api.add_org_resource(
 api.add_org_resource(
     StreamListResource,
     "/api/streams",
+)
+api.add_org_resource(
+    StreamResource,
+    "/api/streams/<stream_id>",
 )
 
 api.add_org_resource(

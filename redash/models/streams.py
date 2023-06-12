@@ -6,7 +6,7 @@ from .datasources import DataSource
 from .mixins import TimestampMixin
 
 
-def default_ingest_key(n: int = 12) -> str:
+def default_ingest_key(n: int = 16) -> str:
     """Generate a random ingest key."""
     return token_urlsafe(n)
 
@@ -44,12 +44,17 @@ class Stream(TimestampMixin, db.Model):
     def __str__(self):
         return "%s | %s" % (self.id, self.db_table)
 
+    @property
+    def ingest_url(self, host: str = "http://localhost:5000") -> str:
+        return "{}/ingest/{}".format(host, self.ingest_key)
+
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "description": self.description,
             "ingest_key": self.ingest_key,
+            "ingest_url": self.ingest_url,
             "data_source_id": self.data_source_id,
             "db_table": self.db_table,
             "db_table_preset": self.db_table_preset,
@@ -57,6 +62,10 @@ class Stream(TimestampMixin, db.Model):
             "is_enabled": self.is_enabled,
             "is_archived": self.is_archived,
         }
+
+    @classmethod
+    def get_by_id(cls, _id):
+        return cls.query.filter(cls.id == _id).one()
 
 
 STREAM_SCHEMAS = {
