@@ -16,15 +16,18 @@ class Stream(TimestampMixin, db.Model):
     id = primary_key("Stream")
     name = Column(db.String(255))
     description = Column(db.Text, nullable=True)
-    ingest_key = Column(db.String(255), unique=True)
 
     data_source_id = Column(
         key_type("DataSource"), db.ForeignKey("data_sources.id")
     )
     data_source = db.relationship(DataSource, backref="streams")
 
+    ingest_key = Column(
+        db.String(255), unique=True, default=default_ingest_key
+    )
+
     db_table = Column(db.String(255), index=True)
-    db_table_preset = Column(db.String(255), index=True)
+    db_table_preset = Column(db.String(255), index=True, default="app_events")
     db_table_query = Column(db.Text, nullable=True)
 
     is_enabled = Column(db.Boolean, default=True, index=True)

@@ -1,9 +1,11 @@
+from mock import patch
 from tests import BaseTestCase
 from redash.ingest import update_vector_config
 
 
 class TestIngestVectorConfig(BaseTestCase):
-    def test_update_vector_config(self):
+    @patch("redash.tasks.queries.enqueue_query")
+    def test_update_vector_config(self, enqueue_query):
         # Before adding streams 1 default sink is created
         vector_config = update_vector_config([], clean=True)
         self.assertEqual(len(vector_config.config["sources"]), 1)
@@ -11,7 +13,7 @@ class TestIngestVectorConfig(BaseTestCase):
 
         # Creating test data source and 2 streams
         data_source = self.factory.create_data_source(
-            type="test", options={
+            type="clickhouse", options={
                 "dbname": "default",
                 "url": "http://localhost:8123",
             }
