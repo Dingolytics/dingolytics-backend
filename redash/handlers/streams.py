@@ -3,6 +3,7 @@ from flask_restful import abort
 from sqlalchemy.exc import IntegrityError
 
 from redash import models
+from redash.models.streams import STREAM_SCHEMAS, default_ingest_key
 from redash.handlers.base import (
     BaseResource,
     get_object_or_404,
@@ -52,16 +53,20 @@ class StreamListResource(BaseResource):
             req.get("data_source_id"), self.current_org
         )
 
-        # TODO: Define `db_create_query` through table schema selection
-        # from pre-defined list of options.
+        # TODO: Cleaner validation code
+        db_type = data_source.type
+        db_table_preset = req.get("db_table_preset", "app_events")
+        db_table_query = STREAM_SCHEMAS[db_type][db_table_preset]
 
         try:
             stream = models.Stream(
                 data_source=data_source,
+                ingest_key=default_ingest_key(),
                 name=req.get("name", ""),
                 description=req.get("description", ""),
                 db_table=req.get("db_table", ""),
-                db_create_query=req.get("db_create_query", ""),
+                db_table_preset=db_table_preset,
+                db_table_query=db_table_query,
             )
             models.db.session.commit()
         except IntegrityError as exc:

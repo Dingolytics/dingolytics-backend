@@ -23,7 +23,7 @@ def get_vector_config() -> "VectorConfig":
 
 
 def update_vector_config(
-    streams: list, clean: bool = False, sink_prefix: str = "ingest-",
+    streams: list, clean: bool = False, sink_prefix: str = "sink-",
     path_key: str = VECTOR_HTTP_PATH_KEY, router_key: str = VECTOR_HTTP_ROUTER
 ) -> "VectorConfig":
     vector_config = get_vector_config()
@@ -31,14 +31,14 @@ def update_vector_config(
         vector_config.load()
     router = VectorRouteTransform(key=router_key)
     for stream in streams:
-        key = stream.db_table.replace("_", "-").replace(".", "-")
-        sink_key = f"{sink_prefix}{key}"
-        path_val = f"/{key}"  # TODO: Use random or salted hash
-        router.add_route(key, f'.{path_key} == "{path_val}"')
+        route_key = stream.db_table.replace("_", "-").replace(".", "-")
+        ingest_key = stream.ingest_key
+        sink_key = f"{sink_prefix}{route_key}"
+        router.add_route(route_key, f'.{path_key} == "/{ingest_key}"')
         options = stream.data_source.options.to_dict()
         sink = VectorClickHouseSink(
             key=sink_key,
-            inputs=[f"{router_key}.{key}"],
+            inputs=[f"{router_key}.{route_key}"],
             table=stream.db_table,
             auth=VectorClickHouseAuth(**options),
             endpoint=options["url"],

@@ -3,7 +3,12 @@ from tests import BaseTestCase
 
 class TestStreamListResource(BaseTestCase):
     def test_create_stream_for_data_source(self):
-        data_source = self.factory.create_data_source()
+        data_source = self.factory.create_data_source(
+            type="clickhouse", options={
+                "dbname": "default",
+                "url": "http://localhost:8123",
+            }
+        )
         admin = self.factory.create_admin()
         data = {
             "data_source_id": data_source.id,
