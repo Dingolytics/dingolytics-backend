@@ -18,3 +18,9 @@ Create a new auto-migration:
 flask --app redash db check
 flask --app redash db migrate
 ```
+
+### Run specific tests
+
+```bash
+docker compose -f docker-compose.tests.yml run --rm server-tests tests tests/handlers/test_streams.py
+```
