@@ -3,16 +3,32 @@ from flask_restful import abort
 from sqlalchemy.exc import IntegrityError
 
 from redash import models
-from redash.models.streams import STREAM_SCHEMAS, default_ingest_key
+from redash.models.streams import STREAM_SCHEMAS
 from redash.handlers.base import (
     BaseResource,
     get_object_or_404,
     require_fields
 )
 from redash.permissions import (
+    require_access,
     require_admin,
     require_permission,
+    view_only,
 )
+
+
+class StreamResource(BaseResource):
+    @require_permission("list_data_sources")
+    def get(self, stream_id):
+        stream = get_object_or_404(models.Stream.get_by_id, stream_id)
+        data_source = stream.data_source
+        require_access(data_source, self.current_user, view_only)
+        self.record_event({
+            "action": "view",
+            "object_id": stream.id,
+            "object_type": "stream",
+        })
+        return stream.to_dict()
 
 
 class StreamListResource(BaseResource):
@@ -30,12 +46,10 @@ class StreamListResource(BaseResource):
             models.Stream.data_source_id.in_(data_sources_ids)
         )
 
-        self.record_event(
-            {
-                "action": "list",
-                "object_type": "stream",
-            }
-        )
+        self.record_event({
+            "action": "list",
+            "object_type": "stream",
+        })
 
         return sorted(
             list(map(lambda x: x.to_dict(), streams)),
@@ -71,12 +85,10 @@ class StreamListResource(BaseResource):
         except IntegrityError as exc:
             abort(400, message=str(exc))
 
-        self.record_event(
-            {
-                "action": "create",
-                "object_id": stream.id,
-                "object_type": "stream",
-            }
-        )
+        self.record_event({
+            "action": "create",
+            "object_id": stream.id,
+            "object_type": "stream",
+        })
 
         return stream.to_dict()
