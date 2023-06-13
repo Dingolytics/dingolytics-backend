@@ -1,6 +1,7 @@
 from secrets import token_urlsafe
 from sqlalchemy import UniqueConstraint
 from sqlalchemy_utils.models import generic_repr
+from redash.settings import get_settings
 from .base import db, Column, primary_key, key_type
 from .datasources import DataSource
 from .mixins import TimestampMixin
@@ -45,8 +46,19 @@ class Stream(TimestampMixin, db.Model):
         return "%s | %s" % (self.id, self.db_table)
 
     @property
-    def ingest_url(self, host: str = "http://localhost:5000") -> str:
+    def ingest_url(self) -> str:
+        host = get_settings().VECTOR_INGEST_URL
         return "{}/ingest/{}".format(host, self.ingest_key)
+
+    @property
+    def ingest_example(self) -> dict:
+        curl_example = '\n'.join([
+            'curl -X POST -H "Content-Type: application/json" \\',
+            f"-d '{INGEST_APP_EVENTS_JSON}' \\\n{self.ingest_url}",
+        ])
+        return {
+            'curl': curl_example
+        }
 
     def to_dict(self):
         return {
@@ -55,6 +67,7 @@ class Stream(TimestampMixin, db.Model):
             "description": self.description,
             "ingest_key": self.ingest_key,
             "ingest_url": self.ingest_url,
+            "ingest_example": self.ingest_example,
             "data_source_id": self.data_source_id,
             "db_table": self.db_table,
             "db_table_preset": self.db_table_preset,
@@ -68,26 +81,29 @@ class Stream(TimestampMixin, db.Model):
         return cls.query.filter(cls.id == _id).one()
 
 
+CLICKHOUSE_APP_EVENTS_SQL = """
+CREATE TABLE {db_table} (
+    timestamp DateTime64(3),
+    level String,
+    message String,
+    platform String,
+    application String,
+    path String
+) ENGINE = MergeTree() ORDER BY (timestamp);
+""".strip()
+
+INGEST_APP_EVENTS_JSON = """
+{"path": "/", "level": "INFO", "application": "main", "platform": "web"}
+""".strip()
+
 STREAM_SCHEMAS = {
     "clickhouse": {
-        "app_events": """
-            CREATE TABLE {db_table} (
-                timestamp DateTime64(3),
-                level String,
-                message String,
-                platform String,
-                application String,
-                path String
-            ) ENGINE = MergeTree() ORDER BY (timestamp);
-        """,
+        "app_events": CLICKHOUSE_APP_EVENTS_SQL,
 
-        "raw_logs": """
-        """,
+        "raw_logs": "",
 
-        "web_logs": """
-        """,
+        "web_logs": "",
 
-        "metrics": """
-        """
+        "metrics": ""
     }
 }
