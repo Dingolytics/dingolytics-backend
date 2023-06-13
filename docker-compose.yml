@@ -28,8 +28,8 @@ services:
       - postgres
       - redis
     ports:
-      - "5000:5000"
-      - "5678:5678"
+      - "127.0.0.1:5000:5000"
+      - "127.0.0.1:5678:5678"
     environment:
       <<: *redash-environment
       PYTHONUNBUFFERED: 0
@@ -59,7 +59,7 @@ services:
   postgres:
     image: postgres:15.2-alpine
     ports:
-      - "15432:5432"
+      - "127.0.0.1:15432:5432"
     restart: unless-stopped
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
@@ -79,14 +79,38 @@ services:
     # restart: unless-stopped
     environment:
       VECTOR_WATCH_CONFIG: /etc/vector/vector.toml
+      # VECTOR_LOG: debug
     volumes:
       - vector-data:/var/lib/vector
       - vector-etc:/etc/vector:ro
-    ports:
-      - "8180:8180"
+    # ports:
+    #   - "8180:8180"
     command: --watch-config
 
+  clickhouse:
+    # restart: unless-stopped
+    build:
+      context: ./etc/clickhouse
+    # ports:
+    #   - "127.0.0.1:18123:8123"
+    #   - "127.0.0.1:19000:9000"
+    cap_add:
+      - NET_ADMIN
+      - SYS_NICE
+      - IPC_LOCK
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-default}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      CLICKHOUSE_INIT_TIMEOUT: 60
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - clickhouse-logs:/val/log/clickhouse-server
+
 volumes:
+  clickhouse-data:
+  clickhouse-logs:
   pgdata15:
   vector-data:
   vector-etc:

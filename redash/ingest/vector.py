@@ -34,7 +34,7 @@ def update_vector_config(
         route_key = stream.db_table.replace("_", "-").replace(".", "-")
         ingest_key = stream.ingest_key
         sink_key = f"{sink_prefix}{route_key}"
-        router.add_route(route_key, f'.{path_key} == "/{ingest_key}"')
+        router.add_route(route_key, f'.{path_key} == "/ingest/{ingest_key}"')
         options = stream.data_source.options.to_dict()
         sink = VectorClickHouseSink(
             key=sink_key,
@@ -60,9 +60,11 @@ class VectorSection(BaseModel):
 
 class VectorHTTPSource(VectorSection):
     type: str = VECTOR_HTTP_INPUT
-    address: str = "0.0.0.0:8000"
+    address: str = "0.0.0.0:8180"
     method = "POST"
+    path = "/ingest"
     path_key: str = VECTOR_HTTP_PATH_KEY
+    strict_path: bool = False
     decoding: dict = {"codec": "json"}
 
 
