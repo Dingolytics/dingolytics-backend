@@ -5,6 +5,7 @@ import time
 from flask import request
 from mock import patch
 from redash import models, settings
+from redash.settings import default
 from redash.authentication import (
     api_key_load_user_from_request,
     get_login_url,
@@ -331,14 +332,18 @@ class TestRemoteUserAuth(BaseTestCase):
         :param dict overrides: a dict of environmental variables to override
             when the settings are reloaded
         """
+        def reload_settings():
+            importlib.reload(default)
+            importlib.reload(settings)
+
         variables = self.DEFAULT_SETTING_OVERRIDES.copy()
         variables.update(overrides or {})
         with patch.dict(os.environ, variables):
-            importlib.reload(settings)
+            reload_settings()
 
         # Queue a cleanup routine that reloads the settings without overrides
         # once the test ends
-        self.addCleanup(lambda: importlib.reload(settings))
+        self.addCleanup(reload_settings)
 
     def assert_correct_user_attributes(
         self,

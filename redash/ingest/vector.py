@@ -27,7 +27,9 @@ def update_vector_config(
     path_key: str = VECTOR_HTTP_PATH_KEY, router_key: str = VECTOR_HTTP_ROUTER
 ) -> "VectorConfig":
     vector_config = get_vector_config()
-    if not clean:
+    if clean:
+        vector_config.clean()
+    else:
         vector_config.load()
     router = VectorRouteTransform(key=router_key)
     for stream in streams:
@@ -101,8 +103,12 @@ class VectorRouteTransform(VectorSection):
 
 class VectorConfig:
     def __init__(self, config_path: str) -> None:
-        self.config = {}
         self.config_path = Path(config_path)
+        self.config = {}
+        self.add_defaults()
+
+    def clean(self) -> None:
+        self.config = {}
         self.add_defaults()
 
     def load(self) -> None:
