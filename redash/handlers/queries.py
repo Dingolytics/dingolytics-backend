@@ -239,6 +239,7 @@ class QueryListResource(BaseQueryListResource):
         data_source = models.DataSource.get_by_id_and_org(
             query_def.pop("data_source_id"), self.current_org
         )
+
         require_access(data_source, self.current_user, not_view_only)
         require_access_to_dropdown_queries(self.current_user, query_def)
 
@@ -251,13 +252,14 @@ class QueryListResource(BaseQueryListResource):
             "last_modified_by",
         ]:
             query_def.pop(field, None)
-
         query_def["query_text"] = query_def.pop("query")
         query_def["user"] = self.current_user
         query_def["data_source"] = data_source
         query_def["org"] = self.current_org
         query_def["is_draft"] = True
-        # query_def["schedule"] = {}
+        # TODO: Ensure "schedule" and "options" are not NULL with better checks
+        query_def["schedule"] = query_def["schedule"] or {}
+        query_def["options"] = query_def["options"] or {}
         query = models.Query.create(**query_def)
         models.db.session.add(query)
         models.db.session.commit()
