@@ -12,7 +12,7 @@ from redash.query_runner import InterruptException
 from redash.tasks.worker import Queue, Job
 from redash.tasks.alerts import check_alerts_for_query
 from redash.tasks.failure_report import track_failure
-from redash.utils import gen_query_hash, json_dumps, utcnow
+from redash.utils import gen_query_hash, utcnow
 from redash.worker import get_job_logger
 
 logger = get_job_logger(__name__)
@@ -166,7 +166,8 @@ class QueryExecutor(object):
             else None
         )
 
-        # Close DB connection to prevent holding a connection for a long time while the query is executing.
+        # Close DB connection to prevent holding a connection
+        # for a long time while the query is executing.
         models.db.session.close()
         self.query_hash = gen_query_hash(self.query)
         self.is_scheduled_query = is_scheduled_query
