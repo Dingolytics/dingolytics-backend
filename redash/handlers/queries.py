@@ -258,8 +258,8 @@ class QueryListResource(BaseQueryListResource):
         query_def["org"] = self.current_org
         query_def["is_draft"] = True
         # TODO: Ensure "schedule" and "options" are not NULL with better checks
-        query_def["schedule"] = query_def["schedule"] or {}
-        query_def["options"] = query_def["options"] or {}
+        query_def["schedule"] = query_def.get("schedule") or {}
+        query_def["options"] = query_def.get("options") or {}
         query = models.Query.create(**query_def)
         models.db.session.add(query)
         models.db.session.commit()
