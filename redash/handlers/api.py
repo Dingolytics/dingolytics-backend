@@ -10,6 +10,10 @@ from redash.handlers.alerts import (
     AlertSubscriptionResource,
 )
 from redash.handlers.base import org_scoped_rule
+from redash.handlers.dashboard_widgets import (
+    WidgetListResource,
+    WidgetResource
+)
 from redash.handlers.dashboards import (
     MyDashboardsResource,
     DashboardFavoriteListResource,
@@ -98,10 +102,6 @@ from redash.handlers.users import (
 from redash.handlers.visualizations import (
     VisualizationListResource,
     VisualizationResource,
-)
-from redash.handlers.widgets import (
-    WidgetListResource,
-    WidgetResource
 )
 from redash.utils import json_dumps
 
@@ -279,9 +279,13 @@ api.add_org_resource(
     endpoint="dashboard_favorite",
 )
 
-api.add_org_resource(MyDashboardsResource, "/api/dashboards/my", endpoint="my_dashboards")
+api.add_org_resource(
+    MyDashboardsResource, "/api/dashboards/my", endpoint="my_dashboards"
+)
 
-api.add_org_resource(QueryTagsResource, "/api/queries/tags", endpoint="query_tags")
+api.add_org_resource(
+    QueryTagsResource, "/api/queries/tags", endpoint="query_tags"
+)
 api.add_org_resource(
     DashboardTagsResource, "/api/dashboards/tags", endpoint="dashboard_tags"
 )
@@ -295,14 +299,24 @@ api.add_org_resource(
 api.add_org_resource(
     QueryArchiveResource, "/api/queries/archive", endpoint="queries_archive"
 )
-api.add_org_resource(QueryListResource, "/api/queries", endpoint="queries")
-api.add_org_resource(MyQueriesResource, "/api/queries/my", endpoint="my_queries")
 api.add_org_resource(
-    QueryRefreshResource, "/api/queries/<query_id>/refresh", endpoint="query_refresh"
+    QueryListResource, "/api/queries", endpoint="queries"
 )
-api.add_org_resource(QueryResource, "/api/queries/<query_id>", endpoint="query")
 api.add_org_resource(
-    QueryForkResource, "/api/queries/<query_id>/fork", endpoint="query_fork"
+    MyQueriesResource, "/api/queries/my", endpoint="my_queries"
+)
+api.add_org_resource(
+    QueryRefreshResource,
+    "/api/queries/<query_id>/refresh",
+    endpoint="query_refresh"
+)
+api.add_org_resource(
+    QueryResource, "/api/queries/<query_id>", endpoint="query"
+)
+api.add_org_resource(
+    QueryForkResource,
+    "/api/queries/<query_id>/fork",
+    endpoint="query_fork"
 )
 api.add_org_resource(
     QueryRegenerateApiKeyResource,
@@ -350,8 +364,12 @@ api.add_org_resource(
     endpoint="job",
 )
 
-api.add_org_resource(UserListResource, "/api/users", endpoint="users")
-api.add_org_resource(UserResource, "/api/users/<user_id>", endpoint="user")
+api.add_org_resource(
+    UserListResource, "/api/users", endpoint="users"
+)
+api.add_org_resource(
+    UserResource, "/api/users/<user_id>", endpoint="user"
+)
 api.add_org_resource(
     UserInviteResource, "/api/users/<user_id>/invite", endpoint="user_invite"
 )
@@ -378,8 +396,12 @@ api.add_org_resource(
     endpoint="visualization",
 )
 
-api.add_org_resource(WidgetListResource, "/api/widgets", endpoint="widgets")
-api.add_org_resource(WidgetResource, "/api/widgets/<int:widget_id>", endpoint="widget")
+api.add_org_resource(
+    WidgetListResource, "/api/widgets", endpoint="widgets"
+)
+api.add_org_resource(
+    WidgetResource, "/api/widgets/<int:widget_id>", endpoint="widget"
+)
 
 api.add_org_resource(
     DestinationTypeListResource, "/api/destinations/types", endpoint="destination_types"
@@ -401,3 +423,14 @@ api.add_org_resource(
 api.add_org_resource(
     OrganizationSettings, "/api/settings/organization", endpoint="organization_settings"
 )
+
+# Special resources:
+#
+# - Widgets with anonymous access and query real-time evaluation
+# - etc.
+
+# api.add_resource(
+#     QueryWidgetResource,
+#     "/widgets/<query_id>",
+#     endpoint="query_widget",
+# )

@@ -1,89 +1,84 @@
-from flask import request
-
+from typing import Optional
+from json import loads as json_loads
+from flask import request, Response
+from jinja2 import Template
 from redash import models
-from redash.handlers.base import BaseResource
-from redash.serializers import serialize_widget
-from redash.permissions import (
-    require_access,
-    require_object_modify_permission,
-    require_permission,
-    view_only,
-)
-from redash.utils import json_dumps
+from redash.handlers.base import routes
+from redash.security import csp_allows_embeding
+from redash.utils import collect_parameters_from_request
+
+DEFAULT_TEMPLATES = {
+    "plain.svg": Template(
+        '<svg xmlns="http://www.w3.org/2000/svg" '
+            'width="{{ width }}" height="{{ height }}" '
+            'viewBox="0 0 {{ width }} {{ height }}">'
+        '<text x="{{ x }}" y="{{ y }}" fill="{{ color }}" '
+            'text-anchor="{{ anchor }}" dominant-baseline="auto" '
+            'font-size="{{ size }}" font-family="{{ font }}">'
+        '{{ value }}'
+        '</text>'
+        '</svg>'
+    )
+}
 
 
-class WidgetListResource(BaseResource):
-    @require_permission("edit_dashboard")
-    def post(self):
-        """
-        Add a widget to a dashboard.
 
-        :<json number dashboard_id: The ID for the dashboard being added to
-        :<json visualization_id: The ID of the visualization to put in this widget
-        :<json object options: Widget options
-        :<json string text: Text box contents
-        :<json number width: Width for widget display
+def template_response(
+    template: str, data: dict, error: Optional[str] = None
+) -> Optional[Response]:
+    # NOTE: We'd want to add custom templates here later.
+    if template not in DEFAULT_TEMPLATES:
+        return None
 
-        :>json object widget: The created widget
-        """
-        widget_properties = request.get_json(force=True)
-        dashboard = models.Dashboard.get_by_id_and_org(
-            widget_properties.get("dashboard_id"), self.current_org
-        )
-        require_object_modify_permission(dashboard, self.current_user)
-
-        widget_properties["options"] = json_dumps(widget_properties["options"])
-        widget_properties.pop("id", None)
-
-        visualization_id = widget_properties.pop("visualization_id")
-        if visualization_id:
-            visualization = models.Visualization.get_by_id_and_org(
-                visualization_id, self.current_org
+    if template.endswith(".svg"):
+        try:
+            value = data["rows"][0]["value"]
+        except (KeyError, IndexError):
+            return Response(
+                "Query must return a single row with a column named 'value'",
+                mimetype="text/plain",
+                status=422
             )
-            require_access(visualization.query_rel, self.current_user, view_only)
-        else:
-            visualization = None
+        params = request.args.copy()
+        params["value"] = value
+        params.setdefault("width", 128)
+        params.setdefault("height", 32)
+        params.setdefault("x", 0)
+        params.setdefault("y", 16)
+        params.setdefault("anchor", "start")
+        params.setdefault("color", "black")
+        params.setdefault("size", "1em")
+        params.setdefault("font", "sans-serif")
+        renderer = DEFAULT_TEMPLATES[template]
+        content = renderer.render(**params)
+        return Response(content, mimetype="image/svg+xml")
 
-        widget_properties["visualization"] = visualization
-
-        widget = models.Widget(**widget_properties)
-        models.db.session.add(widget)
-        models.db.session.commit()
-
-        models.db.session.commit()
-        return serialize_widget(widget)
+    return None
 
 
-class WidgetResource(BaseResource):
-    @require_permission("edit_dashboard")
-    def post(self, widget_id):
-        """
-        Updates a widget in a dashboard.
-        This method currently handles Text Box widgets only.
+@routes.route("/ext/widgets/<int:query_id>/<template>", methods=["GET"])
+@csp_allows_embeding
+def render_widget(query_id: int, template: str):
+    query = models.Query.get_by_id(query_id)
+    query_runner = query.data_source.query_runner
 
-        :param number widget_id: The ID of the widget to modify
+    parameterized = query.parameterized
+    parameterized.apply(
+        collect_parameters_from_request(request.args)
+    )
 
-        :<json string text: The new contents of the text box
-        """
-        widget = models.Widget.get_by_id_and_org(widget_id, self.current_org)
-        require_object_modify_permission(widget.dashboard, self.current_user)
-        widget_properties = request.get_json(force=True)
-        widget.text = widget_properties["text"]
-        widget.options = json_dumps(widget_properties["options"])
-        models.db.session.commit()
-        return serialize_widget(widget)
+    result_str, error = query_runner.run_query(
+        # query_runner.annotate_query(parameterized.text, {})
+        parameterized.text,
+        user=None
+    )
 
-    @require_permission("edit_dashboard")
-    def delete(self, widget_id):
-        """
-        Remove a widget from a dashboard.
+    if not error:
+        data = json_loads(result_str)
+    else:
+        data = None
 
-        :param number widget_id: ID of widget to remove
-        """
-        widget = models.Widget.get_by_id_and_org(widget_id, self.current_org)
-        require_object_modify_permission(widget.dashboard, self.current_user)
-        self.record_event(
-            {"action": "delete", "object_id": widget_id, "object_type": "widget"}
-        )
-        models.db.session.delete(widget)
-        models.db.session.commit()
+    return template_response(template, data, error) or {
+        "data": data,
+        "error": error,
+    }

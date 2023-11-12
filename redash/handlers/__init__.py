@@ -31,7 +31,9 @@ def init_app(app):
         admin,
         setup,
         organization,
+        widgets,
     )
 
     app.register_blueprint(routes)
+
     api.init_app(app)
