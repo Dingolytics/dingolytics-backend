@@ -95,15 +95,3 @@ CREATE TABLE {db_table} (
 INGEST_APP_EVENTS_JSON = """
 {"path": "/", "level": "INFO", "application": "main", "platform": "web"}
 """.strip()
-
-STREAM_SCHEMAS = {
-    "clickhouse": {
-        "app_events": CLICKHOUSE_APP_EVENTS_SQL,
-
-        "raw_logs": "",
-
-        "web_logs": "",
-
-        "metrics": ""
-    }
-}

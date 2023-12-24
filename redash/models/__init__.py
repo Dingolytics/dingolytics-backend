@@ -52,7 +52,7 @@ from .types import (
     json_cast_property
 )
 from .users import AccessPermission, AnonymousUser, ApiUser, Group, User  # noqa
-from dingolytics.models.streams import Stream, STREAM_SCHEMAS  # noqa
+from dingolytics.models.streams import Stream  # noqa
 
 # Activate triggers for the models
 
