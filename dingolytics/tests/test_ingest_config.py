@@ -1,4 +1,5 @@
-from mock import patch
+from unittest.mock import patch
+
 from tests import BaseTestCase
 from dingolytics.ingest import update_vector_config
 

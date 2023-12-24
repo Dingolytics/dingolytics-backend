@@ -55,7 +55,7 @@ make test
 or selectiely:
 
 ```bash
-docker-compose -f docker-compose.tests.yml run --rm server tests tests/models
+TEST_ARGS='tests/tasks' make test
 ```
 
 

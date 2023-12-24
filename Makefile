@@ -24,8 +24,8 @@ shell:
 
 test:
 	export COMPOSE_PROJECT_NAME=server-tests && \
-	$(TEST_COMPOSE_CMD) build && \
-	$(TEST_COMPOSE_CMD) run --rm server-tests tests -vs
+	$(TEST_COMPOSE_CMD) run --rm server-tests \
+		python -m pytest --import-mode=importlib -vs ${TEST_ARGS}
 
 test-clean:
 	export COMPOSE_PROJECT_NAME=server-tests && \
