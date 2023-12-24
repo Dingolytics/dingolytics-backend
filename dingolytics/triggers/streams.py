@@ -1,6 +1,6 @@
 from sqlalchemy import event
-from redash.models.streams import Stream, STREAM_SCHEMAS
-from redash.ingest import update_vector_config
+from dingolytics.models.streams import Stream, STREAM_SCHEMAS
+from dingolytics.ingest import update_vector_config
 
 
 @event.listens_for(Stream, "after_insert")
@@ -20,7 +20,7 @@ def create_table_for_stream(stream: Stream) -> None:
     # /DEBUG
     data_source = stream.data_source
     db_table = stream.db_table
-    db_table_preset = 'app_events'
+    db_table_preset = stream.db_table_preset
     query_text = STREAM_SCHEMAS[data_source.type][db_table_preset]
     query_text = query_text.format(db_table=db_table)
     enqueue_query(query_text, data_source, None)

@@ -1,6 +1,6 @@
 from mock import patch
 from tests import BaseTestCase
-from redash.ingest import update_vector_config
+from dingolytics.ingest import update_vector_config
 
 
 class TestIngestVectorConfig(BaseTestCase):

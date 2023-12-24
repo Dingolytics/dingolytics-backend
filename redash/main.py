@@ -1,7 +1,7 @@
-from .app import create_app
-from .ingest import sync_vector_config_to_streams
-from .version_check import reset_new_version_status
-from .models import db
+from dingolytics.ingest import sync_vector_config_to_streams
+from redash.app import create_app
+from redash.version_check import reset_new_version_status
+from redash.models import db
 
 
 def initialize_app():

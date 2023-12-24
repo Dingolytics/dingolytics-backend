@@ -52,11 +52,11 @@ from .types import (
     json_cast_property
 )
 from .users import AccessPermission, AnonymousUser, ApiUser, Group, User  # noqa
-from .streams import Stream, STREAM_SCHEMAS
+from dingolytics.models.streams import Stream, STREAM_SCHEMAS  # noqa
 
 # Activate triggers for the models
 
-from redash.triggers import streams  # noqa
+from dingolytics import triggers  # noqa
 
 logger = logging.getLogger(__name__)
 

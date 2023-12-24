@@ -2,8 +2,8 @@ from flask import request
 from flask_restful import abort
 from sqlalchemy.exc import IntegrityError
 
+from dingolytics.models.streams import STREAM_SCHEMAS
 from redash import models
-from redash.models.streams import STREAM_SCHEMAS
 from redash.handlers.base import (
     BaseResource,
     get_object_or_404,

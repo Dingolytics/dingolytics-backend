@@ -2,9 +2,9 @@ from secrets import token_urlsafe
 from sqlalchemy import UniqueConstraint
 from sqlalchemy_utils.models import generic_repr
 from redash.settings import get_settings
-from .base import db, Column, primary_key, key_type
-from .datasources import DataSource
-from .mixins import TimestampMixin
+from redash.models.base import db, Column, primary_key, key_type
+from redash.models.datasources import DataSource
+from redash.models.mixins import TimestampMixin
 
 
 def default_ingest_key(n: int = 16) -> str:
