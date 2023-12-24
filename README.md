@@ -55,7 +55,7 @@ make test
 or selectiely:
 
 ```bash
-TEST_ARGS='tests/tasks' make test
+TEST_ARGS='dingolytics/' make test
 ```
 
 
