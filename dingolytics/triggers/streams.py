@@ -1,7 +1,9 @@
 import logging
+from string import Template
 from sqlalchemy import event
 from dingolytics.models.streams import Stream
-from dingolytics.ingest import update_vector_config
+# from dingolytics.ingest import update_vector_config
+from dingolytics.ingest import sync_vector_config_to_streams
 from dingolytics.presets import default_presets
 
 logger = logging.getLogger(__name__)
@@ -21,7 +23,8 @@ def after_insert_stream(mapper, connection, target: Stream) -> None:
             return
     if target.db_table_query:
         create_table_for_stream(target)
-        update_vector_config([target], clean=False)
+        sync_vector_config_to_streams()
+        # update_vector_config([target], clean=False)
 
 
 def create_table_for_stream(target: Stream) -> None:
@@ -29,5 +32,9 @@ def create_table_for_stream(target: Stream) -> None:
     from redash.tasks.queries import enqueue_query
     data_source = target.data_source
     db_table = target.db_table
-    sql = target.db_table_query.format(db_table=db_table)
-    enqueue_query(sql, data_source, None)
+    sql = Template(target.db_table_query).substitute(db_table=db_table)
+    query_runner = data_source.query_runner
+    print('SQL', sql, flush=True)
+    results = query_runner.run_query(sql, None)
+    print('!!!', results, flush=True)
+    # enqueue_query(sql, data_source, None)

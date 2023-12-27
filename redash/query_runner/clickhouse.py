@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from uuid import uuid4
 
 import requests
-
+import clickhouse_connect
 from redash.query_runner import *
 from redash.query_runner import split_sql_statements
 from redash.utils import json_dumps, json_loads
@@ -94,6 +94,24 @@ class ClickHouse(BaseSQLQueryRunner):
         return list(schema.values())
 
     def _send_query(self, data, session_id=None, session_check=None):
+        client = clickhouse_connect.get_client(
+            dsn=self.configuration.get("url", "http://127.0.0.1:8123"),
+            username=self.configuration.get("user", "default"),
+            password=self.configuration.get("password", ""),
+        )
+        settings = {
+            "session_id": session_id,
+            "session_check": session_check,
+            "session_timeout": self.configuration.get("timeout", 30),
+            "allow_experimental_object_type": 1,
+        }
+        result = client.query(
+            query=data, settings=settings
+        )
+        print('!!!!', result)
+
+        return result
+
         url = self.configuration.get("url", "http://127.0.0.1:8123")
         timeout = self.configuration.get("timeout", 30)
 
@@ -158,7 +176,7 @@ class ClickHouse(BaseSQLQueryRunner):
     def _clickhouse_query(self, query, session_id=None, session_check=None):
         logger.debug("Clickhouse is about to execute query: %s", query)
 
-        query += "\nFORMAT JSON"
+        # query += "\nFORMAT JSON"
 
         response = self._send_query(query, session_id, session_check)
 
@@ -214,22 +232,21 @@ class ClickHouse(BaseSQLQueryRunner):
                 # If more than one query was given, a session is needed. Parameter session_check must be false
                 # for the first query
                 session_id = "redash_{}".format(uuid4().hex)
-
                 results = self._clickhouse_query(
                     queries[0], session_id, session_check=False
                 )
-
                 for query in queries[1:]:
                     results = self._clickhouse_query(
                         query, session_id, session_check=True
                     )
-
+                raise Exception(results)
             data = json_dumps(results)
             error = None
         except Exception as e:
             data = None
             logging.exception(e)
             error = str(e)
+
         return data, error
 
 

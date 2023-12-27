@@ -1,6 +1,6 @@
 SET allow_experimental_object_type = 1;
 
-CREATE TABLE {db_table} (
+CREATE TABLE ${db_table} (
   app String,
   level String,
   path String,
