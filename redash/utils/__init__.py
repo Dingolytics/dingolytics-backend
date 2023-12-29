@@ -5,6 +5,7 @@ import datetime
 import decimal
 import hashlib
 import io
+import json
 import os
 import random
 import re
@@ -12,7 +13,6 @@ import uuid
 
 import pystache
 import pytz
-import simplejson
 from flask import current_app
 from funcy import select_values
 from sqlalchemy.orm.query import Query
@@ -88,8 +88,8 @@ def generate_token(length):
     return "".join(rand.choice(chars) for x in range(length))
 
 
-class JSONEncoder(simplejson.JSONEncoder):
-    """Adapter for `simplejson.dumps`."""
+class JSONEncoder(json.JSONEncoder):
+    """Adapter for `json.dumps`."""
 
     def default(self, o):
         # Some SQLAlchemy collections are lazy.
@@ -125,19 +125,19 @@ class JSONEncoder(simplejson.JSONEncoder):
 
 def json_loads(data, *args, **kwargs):
     """A custom JSON loading function which passes all parameters to the
-    simplejson.loads function."""
-    return simplejson.loads(data, *args, **kwargs)
+    json.loads function."""
+    return json.loads(data, *args, **kwargs)
 
 
 def json_dumps(data, *args, **kwargs):
     """A custom JSON dumping function which passes all parameters to the
-    simplejson.dumps function."""
+    json.dumps function."""
     kwargs.setdefault("cls", JSONEncoder)
     kwargs.setdefault("encoding", None)
     # Float value nan or inf in Python should be render to None or null in json.
     # Using ignore_nan = False will make Python render nan as NaN, leading to parse error in front-end
-    kwargs.setdefault('ignore_nan', True)
-    return simplejson.dumps(data, *args, **kwargs)
+    kwargs.setdefault("ignore_nan", True)
+    return json.dumps(data, *args, **kwargs)
 
 
 def mustache_render(template, context=None, **kwargs):

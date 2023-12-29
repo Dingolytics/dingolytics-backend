@@ -1,7 +1,7 @@
 import logging
 import jwt
 import requests
-import simplejson
+import json
 
 logger = logging.getLogger("jwt_auth")
 
@@ -22,7 +22,7 @@ def get_public_keys(url):
             public_keys = []
             for key_dict in data["keys"]:
                 public_key = jwt.algorithms.RSAAlgorithm.from_jwk(
-                    simplejson.dumps(key_dict)
+                    json.dumps(key_dict)
                 )
                 public_keys.append(public_key)
 

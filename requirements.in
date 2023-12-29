@@ -30,7 +30,6 @@ maxminddb-geolite2==2018.703
 xlsxwriter~=3.0.9
 #
 aniso8601~=9.0.1
-simplejson~=3.18.4
 jsonschema~=4.17.3
 pyyaml~=5.1.2
 pystache~=0.6.0

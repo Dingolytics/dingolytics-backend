@@ -229,8 +229,6 @@ semver==2.13.0
     # via -r requirements.in
 sentry-sdk==1.18.0
     # via -r requirements.in
-simplejson==3.18.4
-    # via -r requirements.in
 six==1.16.0
     # via
     #   advocate

@@ -1,5 +1,6 @@
+import json
+
 import click
-import simplejson
 from flask import current_app
 from flask.cli import FlaskGroup, run_command, with_appcontext
 from rq import Connection
@@ -45,7 +46,7 @@ def version():
 @manager.command()
 def status():
     with Connection(rq_redis_connection):
-        print(simplejson.dumps(get_status(), indent=2))
+        print(json.dumps(get_status(), indent=2))
 
 
 @manager.command()
