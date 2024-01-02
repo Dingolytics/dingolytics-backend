@@ -23,7 +23,6 @@ def after_insert_stream(mapper, connection, target: Stream) -> None:
     if target.db_table_query:
         create_table_for_stream(target)
         sync_vector_config_to_streams()
-        # update_vector_config([target], clean=False)
 
 
 def create_table_for_stream(target: Stream) -> None:
@@ -31,8 +30,8 @@ def create_table_for_stream(target: Stream) -> None:
     db_table = target.db_table
     sql = Template(target.db_table_query).substitute(db_table=db_table)
     query_runner = data_source.query_runner
-    results = query_runner.run_query(sql, None)
+    data, error = query_runner.run_query(sql, None)
     logger.info(
-        "Created table for stream %s: %s results=%s",
-        target.id, db_table, results
+        "Created table for stream %s: %s data=%s error=%s",
+        target.id, db_table, data, error
     )
