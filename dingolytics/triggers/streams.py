@@ -2,7 +2,6 @@ import logging
 from string import Template
 from sqlalchemy import event
 from dingolytics.models.streams import Stream
-# from dingolytics.ingest import update_vector_config
 from dingolytics.ingest import sync_vector_config_to_streams
 from dingolytics.presets import default_presets
 
@@ -28,13 +27,12 @@ def after_insert_stream(mapper, connection, target: Stream) -> None:
 
 
 def create_table_for_stream(target: Stream) -> None:
-    # TODO: Better way to import enqueue_query (circular dependency)
-    from redash.tasks.queries import enqueue_query
     data_source = target.data_source
     db_table = target.db_table
     sql = Template(target.db_table_query).substitute(db_table=db_table)
     query_runner = data_source.query_runner
-    print('SQL', sql, flush=True)
     results = query_runner.run_query(sql, None)
-    print('!!!', results, flush=True)
-    # enqueue_query(sql, data_source, None)
+    logger.info(
+        "Created table for stream %s: %s results=%s",
+        target.id, db_table, results
+    )
