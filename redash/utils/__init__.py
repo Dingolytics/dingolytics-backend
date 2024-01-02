@@ -11,6 +11,8 @@ import random
 import re
 import uuid
 
+from json.encoder import INFINITY
+
 import pystache
 import pytz
 from flask import current_app
@@ -89,7 +91,56 @@ def generate_token(length):
 
 
 class JSONEncoder(json.JSONEncoder):
-    """Adapter for `json.dumps`."""
+    """
+    Custom JSON encoder that can handle more types.
+
+    - 'NaN' falues as nulls
+    - datetime and data objects
+    - Decimal objects
+    - UUID objects
+    - Query objects (SQLAlchemy)
+    - memoryview objects
+    - bytes objects (as hex strings)
+    """
+
+    def __init__(self, nan_str="null", **kwargs):
+        super().__init__(**kwargs)
+        self.nan_str = nan_str
+
+    def iterencode(self, o, _one_shot=False):
+        if self.check_circular:
+            markers = {}
+        else:
+            markers = None
+        if self.ensure_ascii:
+            _encoder = json.encoder.encode_basestring_ascii
+        else:
+            _encoder = json.encoder.encode_basestring
+        def floatstr(
+            o, allow_nan=self.allow_nan, _repr=float.__repr__,
+            _inf=json.encoder.INFINITY, _neginf=-json.encoder.INFINITY,
+            nan_str=self.nan_str
+        ) -> str:
+            if o != o:
+                text = nan_str
+            elif o == _inf:
+                text = 'Infinity'
+            elif o == _neginf:
+                text = '-Infinity'
+            else:
+                return _repr(o)
+            if not allow_nan:
+                raise ValueError(
+                    "Out of range float values are not JSON compliant: " +
+                    repr(o)
+                )
+            return text
+        _iterencode = json.encoder._make_iterencode(
+            markers, self.default, _encoder, self.indent, floatstr,
+            self.key_separator, self.item_separator, self.sort_keys,
+            self.skipkeys, _one_shot
+        )
+        return _iterencode(o, 0)
 
     def default(self, o):
         # Some SQLAlchemy collections are lazy.
@@ -119,7 +170,7 @@ class JSONEncoder(json.JSONEncoder):
         elif isinstance(o, bytes):
             result = binascii.hexlify(o).decode()
         else:
-            result = super(JSONEncoder, self).default(o)
+            result = super().default(o)
         return result
 
 
@@ -133,10 +184,6 @@ def json_dumps(data, *args, **kwargs):
     """A custom JSON dumping function which passes all parameters to the
     json.dumps function."""
     kwargs.setdefault("cls", JSONEncoder)
-    kwargs.setdefault("encoding", None)
-    # Float value nan or inf in Python should be render to None or null in json.
-    # Using ignore_nan = False will make Python render nan as NaN, leading to parse error in front-end
-    kwargs.setdefault("ignore_nan", True)
     return json.dumps(data, *args, **kwargs)
 
 

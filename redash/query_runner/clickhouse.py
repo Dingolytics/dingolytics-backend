@@ -1,9 +1,11 @@
 import logging
 import re
+from typing import Any, Optional, Tuple
 from urllib.parse import urlparse, ParseResult as URL
 from uuid import uuid4
 
 from clickhouse_connect import get_client as clickhouse_client
+from clickhouse_connect.datatypes.base import ClickHouseType
 from clickhouse_connect.driver.client import QueryResult
 
 from redash.query_runner import (
@@ -72,9 +74,7 @@ class ClickHouse(BaseSQLQueryRunner):
 
     @host.setter
     def host(self, host: str):
-        self._url = self._url._replace(
-            netloc="{}:{}".format(host, self._url.port)
-        )
+        self._url = self._url._replace(netloc=f"{host}:{self._url.port}")
 
     @property
     def port(self):
@@ -82,17 +82,17 @@ class ClickHouse(BaseSQLQueryRunner):
 
     @port.setter
     def port(self, port):
-        self._url = self._url._replace(
-            netloc="{}:{}".format(self._url.hostname, port)
-        )
+        self._url = self._url._replace(netloc=f"{self._url.hostname}:{port}")
 
-    def run_query(self, query, user):
+    def run_query(
+        self, query: str, user: Any
+    ) -> Tuple[Optional[str], Optional[str]]:
         queries = split_multi_query(query)
 
         if not queries:
-            json_data = None
+            data = None
             error = "Query is empty"
-            return json_data, error
+            return data, error
 
         try:
             # If just one query was given no session is needed.
@@ -120,26 +120,24 @@ class ClickHouse(BaseSQLQueryRunner):
         return data, error
 
     def _get_tables(self, schema):
+        system_databases = ', '.join([f"'{db}'" for db in (
+            "system",
+            "information_schema",
+            "INFORMATION_SCHEMA",
+        )])
         query = (
             "SELECT database, table, name FROM system.columns"
-            "   WHERE database NOT IN ('system')"
+            f" WHERE database NOT IN ({system_databases})"
         )
-
         results, error = self.run_query(query, None)
-
         if error is not None:
             self._handle_run_query_error(error)
-
         results = json_loads(results)
-
         for row in results["rows"]:
             table_name = "{}.{}".format(row["database"], row["table"])
-
             if table_name not in schema:
                 schema[table_name] = {"name": table_name, "columns": []}
-
             schema[table_name]["columns"].append(row["name"])
-
         return list(schema.values())
 
     def _send_query(
@@ -162,18 +160,18 @@ class ClickHouse(BaseSQLQueryRunner):
         return result
 
     @staticmethod
-    def _define_column_type(column):
-        c = column.lower()
-        f = re.search(r"^nullable\((.*)\)$", c)
-        if f is not None:
-            c = f.group(1)
-        if c.startswith("int") or c.startswith("uint"):
+    def _define_column_type(column: ClickHouseType) -> str:
+        col = column.name.lower()
+        nullable_search = re.search(r"^nullable\((.*)\)$", col)
+        if nullable_search is not None:
+            col = nullable_search.group(1)
+        if col.startswith("int") or col.startswith("uint"):
             return TYPE_INTEGER
-        elif c.startswith("float"):
+        elif col.startswith("float"):
             return TYPE_FLOAT
-        elif c == "datetime":
+        elif col == "datetime":
             return TYPE_DATETIME
-        elif c == "date":
+        elif col == "date":
             return TYPE_DATE
         else:
             return TYPE_STRING
@@ -214,7 +212,13 @@ class ClickHouse(BaseSQLQueryRunner):
                 "type": column_type
             })
 
-        rows = result.result_rows
+        # Official Python client returns rows as a list of tuples,
+        # but we need a list of dictionaries, and "FORMAT JSON" is ignored,
+        # so we manually convert the result.
+        # https://clickhouse.com/docs/en/integrations/python
+        rows = [
+            dict(zip(result.column_names, row)) for row in result.result_rows
+        ]
 
         # TODO: Check how to handle query containing "WITH TOTALS".
 
