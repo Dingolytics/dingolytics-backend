@@ -3,6 +3,7 @@
     <profiles>
         <default>
             <date_time_input_format>best_effort</date_time_input_format>
+            <allow_experimental_object_type>1</allow_experimental_object_type>
         </default>
     </profiles>
 </clickhouse>

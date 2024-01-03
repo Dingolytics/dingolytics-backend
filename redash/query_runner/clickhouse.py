@@ -150,7 +150,7 @@ class ClickHouse(BaseSQLQueryRunner):
         )
         settings = {
             "session_timeout": self.configuration.get("timeout", 30),
-            "allow_experimental_object_type": 1,
+            # "allow_experimental_object_type": 1,
         }
         if session_id:
             settings["session_id"] = session_id
