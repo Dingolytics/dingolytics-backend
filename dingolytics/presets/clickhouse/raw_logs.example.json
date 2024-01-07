@@ -1,0 +1,6 @@
+{
+  "app": "hello-app",
+  "level": "INFO",
+  "path": "/hello",
+  "message": "Hello, this is a test log message"
+}

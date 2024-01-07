@@ -1,6 +1,7 @@
+import json
 from functools import lru_cache
 from pathlib import Path
-from re import sub as re_sub
+# from re import sub as re_sub
 
 DEFAULT_PRESETS_PATH = Path(__file__).parent.absolute()
 
@@ -38,6 +39,7 @@ class PresetLoader:
     def __init__(self, base_path: str) -> None:
         self.base_path = Path(base_path)
         self._presets = {}
+        self._examples = {}
 
     def __getitem__(self, key):
         return self._presets[key]
@@ -57,19 +59,38 @@ class PresetLoader:
     # def get_item(self, group: str, name: str) -> str:
     #     return self._presets[group][name]
 
+    def get_example(self, group: str, name: str) -> dict:
+        return self._examples.get(group, {}).get(name, {})
+
     def load_all(self) -> None:
         for item in self.base_path.iterdir():
             if item.is_dir():
                 self.load_dir(item)
 
     def load_dir(self, path: Path) -> None:
+        group = path.name
         for item in path.glob("*.sql"):
-            presets = self._presets.setdefault(path.name, {})
-            self._load(path=item, presets=presets)
+            presets = self._presets.setdefault(group, {})
+            self._load_sql(path=item, presets=presets)
+        for item in path.glob("*.example.json"):
+            examples = self._examples.setdefault(group, {})
+            self._load_example(path=item, examples=examples)
 
-    def _load(self, path: Path, presets: dict) -> None:
+    def _load_example(self, path: Path, examples: dict) -> None:
         assert path.is_file()
         with open(path, "r") as fp:
-            text = fp.read()
-            text = re_sub(r"\s+", " ", text.strip())
-            presets[path.stem] = text
+            key = path.name.split(".")[0]
+            examples[key] = json.load(fp)
+        
+    def _load_sql(self, path: Path, presets: dict) -> None:
+        assert path.is_file()
+        text = ''
+        with open(path, "r") as fp:
+            for line in fp:
+                if line.startswith("--"):
+                    continue
+                if not line.strip():
+                    continue
+                text += line
+        key = path.name.split(".")[0]
+        presets[key] = text.strip()
