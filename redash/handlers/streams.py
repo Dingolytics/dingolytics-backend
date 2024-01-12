@@ -2,8 +2,8 @@ from flask import request
 from flask_restful import abort
 from sqlalchemy.exc import IntegrityError
 
+from dingolytics.presets import default_presets
 from redash import models
-from redash.models.streams import STREAM_SCHEMAS
 from redash.handlers.base import (
     BaseResource,
     get_object_or_404,
@@ -70,7 +70,12 @@ class StreamListResource(BaseResource):
         # TODO: Cleaner validation code
         db_type = data_source.type
         db_table_preset = req.get("db_table_preset", "app_events")
-        db_table_query = STREAM_SCHEMAS[db_type][db_table_preset]
+        presets = default_presets()
+        if db_type not in presets:
+            abort(400, message=f"Unsupported data source type: {db_type}")
+        if db_table_preset not in presets[db_type]:
+            abort(400, message=f"Unsupported table preset: {db_table_preset}")
+        db_table_query = presets[db_type][db_table_preset]
 
         try:
             stream = models.Stream(

@@ -1,15 +1,34 @@
+from json import dumps as json_dumps
 from secrets import token_urlsafe
 from sqlalchemy import UniqueConstraint
 from sqlalchemy_utils.models import generic_repr
+
+from dingolytics.presets import default_presets
 from redash.settings import get_settings
-from .base import db, Column, primary_key, key_type
-from .datasources import DataSource
-from .mixins import TimestampMixin
+from redash.models.base import db, Column, primary_key, key_type
+from redash.models.datasources import DataSource
+from redash.models.mixins import TimestampMixin
 
 
 def default_ingest_key(n: int = 16) -> str:
     """Generate a random ingest key."""
     return token_urlsafe(n)
+
+
+def default_ingest_example(
+    db_type: str, preset_name: str, ingest_url: str
+) -> dict:
+    json_example = json_dumps(
+        default_presets().get_example(db_type, preset_name),
+        # indent=2,
+    )
+    curl_example = '\n'.join([
+        'curl -X POST -H "Content-Type: application/json" \\',
+        f"-d '{json_example}' \\\n{ingest_url}",
+    ])
+    return {
+        'curl': curl_example
+    }
 
 
 @generic_repr("id", "name", "db_table", "is_enabled", "is_archived")
@@ -52,13 +71,11 @@ class Stream(TimestampMixin, db.Model):
 
     @property
     def ingest_example(self) -> dict:
-        curl_example = '\n'.join([
-            'curl -X POST -H "Content-Type: application/json" \\',
-            f"-d '{INGEST_APP_EVENTS_JSON}' \\\n{self.ingest_url}",
-        ])
-        return {
-            'curl': curl_example
-        }
+        return default_ingest_example(
+            db_type=self.data_source.type,
+            preset_name=self.db_table_preset,
+            ingest_url=self.ingest_url
+        )
 
     def to_dict(self):
         return {
@@ -79,31 +96,3 @@ class Stream(TimestampMixin, db.Model):
     @classmethod
     def get_by_id(cls, _id):
         return cls.query.filter(cls.id == _id).one()
-
-
-CLICKHOUSE_APP_EVENTS_SQL = """
-CREATE TABLE {db_table} (
-    timestamp DateTime64(3),
-    level String,
-    message String,
-    platform String,
-    application String,
-    path String
-) ENGINE = MergeTree() ORDER BY (timestamp);
-""".strip()
-
-INGEST_APP_EVENTS_JSON = """
-{"path": "/", "level": "INFO", "application": "main", "platform": "web"}
-""".strip()
-
-STREAM_SCHEMAS = {
-    "clickhouse": {
-        "app_events": CLICKHOUSE_APP_EVENTS_SQL,
-
-        "raw_logs": "",
-
-        "web_logs": "",
-
-        "metrics": ""
-    }
-}

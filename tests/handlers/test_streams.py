@@ -6,7 +6,9 @@ class TestStreamListResource(BaseTestCase):
         data_source = self.factory.create_data_source(
             type="clickhouse", options={
                 "dbname": "default",
-                "url": "http://localhost:8123",
+                "url": "http://clickhouse-tests:8123",
+                "user": "default",
+                "password": "test1234",
             }
         )
         admin = self.factory.create_admin()

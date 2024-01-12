@@ -83,17 +83,17 @@ services:
     volumes:
       - vector-data:/var/lib/vector
       - vector-etc:/etc/vector:ro
-    # ports:
-    #   - "8180:8180"
+    ports:
+      - "8180:8180"
     command: --watch-config
 
   clickhouse:
     # restart: unless-stopped
     build:
       context: ./etc/clickhouse
-    # ports:
-    #   - "127.0.0.1:18123:8123"
-    #   - "127.0.0.1:19000:9000"
+    ports:
+      - "127.0.0.1:18123:8123"
+      - "127.0.0.1:19000:9000"
     cap_add:
       - NET_ADMIN
       - SYS_NICE

@@ -19,6 +19,7 @@ services:
   server-tests:
     <<: *redash-service
     depends_on:
+      - clickhouse-tests
       - postgres-tests
       - redis-tests
     environment:
@@ -41,5 +42,23 @@ services:
     volumes:
       - pgdata15-tests:/var/lib/postgresql/data/pgdata
 
+  clickhouse-tests:
+    build:
+      context: ./etc/clickhouse
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: test1234
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      CLICKHOUSE_INIT_TIMEOUT: 60
+    volumes:
+      - chdata-tests:/var/lib/clickhouse
+    healthcheck:
+      test: curl --fail http://localhost:8123
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 volumes:
   pgdata15-tests:
+  chdata-tests:

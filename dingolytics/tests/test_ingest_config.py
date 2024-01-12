@@ -1,10 +1,11 @@
-from mock import patch
+from unittest.mock import patch
+
 from tests import BaseTestCase
-from redash.ingest import update_vector_config
+from dingolytics.ingest import update_vector_config
 
 
 class TestIngestVectorConfig(BaseTestCase):
-    @patch("redash.tasks.queries.enqueue_query")
+    @patch("dingolytics.triggers.streams.create_table_for_stream")
     def test_update_vector_config(self, enqueue_query):
         # Before adding streams 1 default sink is created
         vector_config = update_vector_config([], clean=True)

@@ -74,23 +74,12 @@ help() {
   echo "worker -- start a single RQ worker"
   echo "scheduler -- start an rq-scheduler instance"
   echo ""
-  echo "tests -- run tests"
   echo "shell -- open shell"
   echo "dev_scheduler -- start an rq-scheduler instance with code reloading"
   echo "dev_worker -- start a single RQ worker with code reloading"
   echo "dev_server -- start Flask development server with debugger and auto reload"
   echo "debug -- start Flask development server with remote debugger via ptvsd"
   echo ""
-}
-
-tests() {
-  if [ $# -eq 0 ]; then
-    TEST_ARGS=tests/
-  else
-    TEST_ARGS=$@
-  fi
-
-  exec pytest $TEST_ARGS
 }
 
 case "$1" in
@@ -141,10 +130,6 @@ case "$1" in
   manage)
     shift
     exec ./manage.py $*
-    ;;
-  tests)
-    shift
-    tests $@
     ;;
   help)
     shift
