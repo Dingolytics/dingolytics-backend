@@ -20,7 +20,7 @@ def default_ingest_example(
 ) -> dict:
     json_example = json_dumps(
         default_presets().get_example(db_type, preset_name),
-        indent=2,
+        # indent=2,
     )
     curl_example = '\n'.join([
         'curl -X POST -H "Content-Type: application/json" \\',

@@ -2,5 +2,5 @@
   "app": "hello-app",
   "name": "hello-event",
   "path": "/hello",
-  "attrs": {"_n": [{"k": "age", "v": 30}]}
+  "attrs_raw": "{\"random_key\": 42}"
 }

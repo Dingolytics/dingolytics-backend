@@ -2,9 +2,11 @@ CREATE TABLE ${db_table} (
   app String,
   name String,
   path String,
-  attrs JSON DEFAULT '{}',
+  attrs_raw Nullable(String),
   user_id Nullable(String),
 
+  ip_addr_v4 Nullable(IPv4),
+  ip_addr_v6 Nullable(IPv6),
   client_agent Nullable(String),
   client_name Nullable(String),
   client_version Nullable(String),

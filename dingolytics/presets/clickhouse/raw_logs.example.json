@@ -2,5 +2,6 @@
   "app": "hello-app",
   "level": "INFO",
   "path": "/hello",
-  "message": "Hello, this is a test log message"
+  "message": "Hello, this is a test log message",
+  "attrs_raw": "{\"random_key\": 42}"
 }

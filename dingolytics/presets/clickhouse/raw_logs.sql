@@ -3,8 +3,10 @@ CREATE TABLE ${db_table} (
   level String,
   path String,
   message String,
-  attrs JSON DEFAULT '{}',
+  attrs_raw Nullable(String),
 
+  ip_addr_v4 Nullable(IPv4),
+  ip_addr_v6 Nullable(IPv6),
   client_agent Nullable(String),
   client_name Nullable(String),
   client_version Nullable(String),
