@@ -2,13 +2,15 @@ CREATE TABLE ${db_table} (
   app String,
   name String,
   path String,
+  host Nullable(String),
   attrs_raw Nullable(String),
   user_id Nullable(String),
 
   ip_addr_v4 Nullable(IPv4),
   ip_addr_v6 Nullable(IPv6),
-  client_agent Nullable(String),
+  client_id Nullable(String),
   client_name Nullable(String),
+  client_user_agent Nullable(String),
   client_version Nullable(String),
   is_mobile Nullable(UInt8),
   os_name Nullable(String),
@@ -16,7 +18,5 @@ CREATE TABLE ${db_table} (
   referrer Nullable(String),
 
   timestamp DateTime64(3) DEFAULT now(),
-  month UInt32 DEFAULT toYYYYMM(timestamp)
 ) ENGINE = MergeTree()
-PARTITION BY month
-ORDER BY (timestamp, app, path);
+ORDER BY (timestamp, app, name, path);

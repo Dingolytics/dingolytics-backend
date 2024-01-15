@@ -2,5 +2,6 @@
   "app": "hello-app",
   "name": "hello-event",
   "path": "/hello",
+  "host": "app.example.com",
   "attrs_raw": "{\"random_key\": 42}"
 }
