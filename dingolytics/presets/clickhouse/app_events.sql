@@ -1,6 +1,6 @@
 CREATE TABLE ${db_table} (
   app String,
-  name String,
+  event String,
   path String,
   host Nullable(String),
   attrs_raw Nullable(String),
@@ -19,4 +19,4 @@ CREATE TABLE ${db_table} (
 
   timestamp DateTime64(3) DEFAULT now(),
 ) ENGINE = MergeTree()
-ORDER BY (timestamp, app, name, path);
+ORDER BY (timestamp, app, event, path);
