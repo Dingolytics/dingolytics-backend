@@ -127,7 +127,7 @@ class DataSourceCommandTests(BaseTestCase):
         )
         runner = CliRunner()
         result = runner.invoke(manager, ["ds", "test", "test1"])
-        self.assertFalse(result.exception)
+        self.assertFalse(result.exception, msg=result.exception)
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Success", result.output)
 
