@@ -1,11 +1,10 @@
 from redash import settings
-
 from advocate.exceptions import UnacceptableAddressException
+
 if settings.ENFORCE_PRIVATE_ADDRESS_BLOCK:
     import advocate as requests_or_advocate
 else:
     import requests as requests_or_advocate
-
 
 
 class ConfiguredSession(requests_or_advocate.Session):

@@ -11,9 +11,12 @@ x-redash-service: &redash-service
 
 x-redash-environment: &redash-environment
   REDASH_LOG_LEVEL: "INFO"
+  VECTOR_CONFIG_PATH: "/tmp/vector/vector.toml"
+  REDIS_URL: "redis://redis-tests:6379/0"
+  RQ_REDIS_URL: "redis://redis-tests:6379/0"
+  # Older (with prefix):
   REDASH_REDIS_URL: "redis://redis-tests:6379/0"
   REDASH_DATABASE_URL: "postgresql://postgres@postgres-tests/tests"
-  VECTOR_CONFIG_PATH: "/tmp/vector/vector.toml"
 
 services:
   server-tests:

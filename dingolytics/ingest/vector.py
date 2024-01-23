@@ -2,6 +2,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 from pydantic import BaseModel
+from toml.encoder import TomlEncoder
 import toml
 
 VECTOR_CONFIG_TEMPLATE = '''
@@ -119,7 +120,7 @@ class VectorConfig:
     def save(self) -> None:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.config_path, "w") as f:
-            toml.dump(self.config, f)
+            toml.dump(self.config, f, encoder=TomlEncoder(preserve=True))
 
     def add_defaults(self) -> None:
         self.config = toml.loads(VECTOR_CONFIG_TEMPLATE)

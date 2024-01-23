@@ -1,18 +1,14 @@
-from datetime import timedelta
+# from datetime import timedelta
 from functools import partial
 
-from flask import current_app
+# from flask import current_app
 import logging
 
 from rq import get_current_job
 from rq.decorators import job as rq_job
 
-from redash import (
-    create_app,
-    settings,
-    redis_connection,
-    rq_redis_connection,
-)
+from redash import settings, rq_redis_connection
+# from redash.app import create_app
 from redash.tasks.worker import Queue as RedashQueue
 
 

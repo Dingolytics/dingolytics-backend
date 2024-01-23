@@ -10,8 +10,7 @@ from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from statsd import StatsClient
 
-from . import settings
-from .app import create_app  # noqa
+from .settings import S
 from .query_runner import import_query_runners
 from .destinations import import_destinations
 
@@ -28,14 +27,16 @@ if os.environ.get("REMOTE_DEBUG"):
 
 
 def setup_logging():
-    handler = logging.StreamHandler(sys.stdout if settings.LOG_STDOUT else sys.stderr)
-    formatter = logging.Formatter(settings.LOG_FORMAT)
+    handler = logging.StreamHandler(
+        sys.stdout if S.LOG_STDOUT else sys.stderr
+    )
+    formatter = logging.Formatter(S.LOG_FORMAT)
     handler.setFormatter(formatter)
     logging.getLogger().addHandler(handler)
-    logging.getLogger().setLevel(settings.LOG_LEVEL)
+    logging.getLogger().setLevel(S.LOG_LEVEL)
 
     # Make noisy libraries less noisy
-    if settings.LOG_LEVEL != "DEBUG":
+    if S.LOG_LEVEL != "DEBUG":
         for name in [
             "passlib",
             "requests.packages.urllib3",
@@ -47,25 +48,25 @@ def setup_logging():
 
 setup_logging()
 
-redis_connection = redis.from_url(settings.REDIS_URL)
+redis_connection = redis.from_url(S.REDIS_FULL_URL)
 
-rq_redis_connection = redis.from_url(settings.RQ_REDIS_URL)
+rq_redis_connection = redis.from_url(S.RQ_REDIS_URL)
 
 mail = Mail()
 
 migrate = Migrate(compare_type=True)
 
 statsd_client = StatsClient(
-    host=settings.STATSD_HOST,
-    port=settings.STATSD_PORT,
-    prefix=settings.STATSD_PREFIX
+    host=S.STATSD_HOST,
+    port=S.STATSD_PORT,
+    prefix=S.STATSD_PREFIX
 )
 
 limiter = Limiter(
     key_func=get_remote_address,
-    storage_uri=settings.LIMITER_STORAGE
+    storage_uri=S.LIMITER_STORAGE
 )
 
-import_query_runners(settings.QUERY_RUNNERS)
+import_query_runners(S.QUERY_RUNNERS)
 
-import_destinations(settings.DESTINATIONS)
+import_destinations(S.DESTINATIONS)
