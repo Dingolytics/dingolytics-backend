@@ -26,7 +26,18 @@ class Settings(BaseSettings):
     DATASOURCE_SECRET_KEY: str = ""
     PROXIES_COUNT: int = 1
 
+    CSRF_TIME_LIMIT: int = 3600 * 6
+    CSRF_ENFORCED: bool = True
+
     VECTOR_INGEST_URL: str = "http://localhost:8180"
+
+    SQLALCHEMY_DATABASE_URI: str = "postgresql://postgres@postgres/postgres"
+    SQLALCHEMY_MAX_OVERFLOW: int = None
+    SQLALCHEMY_POOL_SIZE: int = None
+    SQLALCHEMY_DISABLE_POOL: bool = False
+    SQLALCHEMY_ENABLE_POOL_PRE_PING: bool = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = False
 
     REDIS_URL: str = "redis://localhost:6379/0"
     RQ_REDIS_URL: str = REDIS_URL
@@ -45,8 +56,8 @@ class Settings(BaseSettings):
     STATSD_USE_TAGS: bool = False
 
     RATELIMIT_ENABLED: bool = False
+    RATELIMIT_STORAGE: str = "memory://"
     THROTTLE_LOGIN_PATTERN: str = "50/hour"
-    LIMITER_STORAGE: str = "memory://"
     THROTTLE_PASS_RESET_PATTERN: str = "10/hour"
 
     DESTINATIONS_DEFAULT: List[str] = [
@@ -68,6 +79,15 @@ class Settings(BaseSettings):
         "redash.query_runner.sqlite",
     ]
     QUERY_RUNNERS_DISABLED: List[str] = []
+
+    # Options for HTTP requests (requests / advocate)
+    REQUESTS_ALLOW_REDIRECTS: bool = True
+    REQUESTS_PRIVATE_ADDRESS_BLOCK: bool = True
+
+    # Support for Sentry (https://getsentry.com/).
+    # Just set your Sentry DSN to enable it:
+    SENTRY_DSN: str = ""
+    SENTRY_ENVIRONMENT: str = ""
 
     @property
     def REDIS_FULL_URL(self) -> str:

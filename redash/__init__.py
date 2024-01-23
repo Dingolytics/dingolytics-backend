@@ -64,7 +64,7 @@ statsd_client = StatsClient(
 
 limiter = Limiter(
     key_func=get_remote_address,
-    storage_uri=S.LIMITER_STORAGE
+    storage_uri=S.RATELIMIT_STORAGE
 )
 
 import_query_runners(S.QUERY_RUNNERS)

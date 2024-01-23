@@ -22,10 +22,10 @@ def before_send(event, hint):
 
 
 def init():
-    if settings.SENTRY_DSN:
+    if settings.S.SENTRY_DSN:
         sentry_sdk.init(
-            dsn=settings.SENTRY_DSN,
-            environment=settings.SENTRY_ENVIRONMENT,
+            dsn=settings.S.SENTRY_DSN,
+            environment=settings.S.SENTRY_ENVIRONMENT,
             release=__version__,
             before_send=before_send,
             send_default_pii=True,
@@ -39,4 +39,7 @@ def init():
         )
 
 
-capture_exception = iffy(lambda _: settings.SENTRY_DSN, sentry_sdk.capture_exception)
+capture_exception = iffy(
+    lambda _: settings.S.SENTRY_DSN,
+    sentry_sdk.capture_exception
+)

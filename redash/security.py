@@ -29,14 +29,14 @@ def init_app(app):
 
     app.config["WTF_CSRF_CHECK_DEFAULT"] = False
     app.config["WTF_CSRF_SSL_STRICT"] = False
-    app.config["WTF_CSRF_TIME_LIMIT"] = settings.CSRF_TIME_LIMIT
+    app.config["WTF_CSRF_TIME_LIMIT"] = settings.S.CSRF_TIME_LIMIT
 
     @app.after_request
     def inject_csrf_token(response):
         response.set_cookie("csrf_token", generate_csrf())
         return response
 
-    if settings.ENFORCE_CSRF:
+    if settings.S.CSRF_ENFORCED:
         @app.before_request
         def check_csrf():
             # BEGIN workaround until https://github.com/lepture/flask-wtf/pull/419 is merged

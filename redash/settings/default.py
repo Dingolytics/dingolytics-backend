@@ -15,19 +15,6 @@ from .helpers import (
 )
 from .organization import DATE_FORMAT, TIME_FORMAT  # noqa
 
-# _REDIS_URL is the unchanged REDIS_URL we get from env vars, to be used later with RQ
-_REDIS_URL = os.environ.get(
-    "REDASH_REDIS_URL", os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-)
-# This is the one to use for Redash' own connection:
-REDIS_URL = add_decode_responses_to_redis_url(_REDIS_URL)
-PROXIES_COUNT = int(os.environ.get("REDASH_PROXIES_COUNT", "1"))
-
-STATSD_HOST = os.environ.get("REDASH_STATSD_HOST", "127.0.0.1")
-STATSD_PORT = int(os.environ.get("REDASH_STATSD_PORT", "8125"))
-STATSD_PREFIX = os.environ.get("REDASH_STATSD_PREFIX", "redash")
-STATSD_USE_TAGS = parse_boolean(os.environ.get("REDASH_STATSD_USE_TAGS", "false"))
-
 # Connection settings for Redash's own database (where we store the queries, results, etc)
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "REDASH_DATABASE_URL", os.environ.get("DATABASE_URL", "postgresql:///postgres")
@@ -42,8 +29,6 @@ SQLALCHEMY_ENABLE_POOL_PRE_PING = parse_boolean(
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = False
-
-RQ_REDIS_URL = os.environ.get("RQ_REDIS_URL", _REDIS_URL)
 
 # The following enables periodic job (every 5 minutes) of removing unused query results.
 QUERY_RESULTS_CLEANUP_ENABLED = parse_boolean(
@@ -79,11 +64,6 @@ ENFORCE_HTTPS_PERMANENT = parse_boolean(
 )
 # Whether file downloads are enforced or not.
 ENFORCE_FILE_SAVE = parse_boolean(os.environ.get("REDASH_ENFORCE_FILE_SAVE", "true"))
-
-# Whether api calls using the json query runner will block private addresses
-ENFORCE_PRIVATE_ADDRESS_BLOCK = parse_boolean(
-    os.environ.get("REDASH_ENFORCE_PRIVATE_IP_BLOCK", "true")
-)
 
 # Whether to use secure cookies by default.
 COOKIES_SECURE = parse_boolean(
@@ -254,17 +234,10 @@ JOB_DEFAULT_FAILURE_TTL = int(
     os.environ.get("REDASH_JOB_DEFAULT_FAILURE_TTL", 7 * 24 * 60 * 60)
 )
 
-LOG_LEVEL = os.environ.get("REDASH_LOG_LEVEL", "INFO")
-LOG_STDOUT = parse_boolean(os.environ.get("REDASH_LOG_STDOUT", "false"))
-LOG_PREFIX = os.environ.get("REDASH_LOG_PREFIX", "")
-LOG_FORMAT = os.environ.get(
-    "REDASH_LOG_FORMAT",
-    LOG_PREFIX + "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s",
-)
 RQ_WORKER_JOB_LOG_FORMAT = os.environ.get(
     "REDASH_RQ_WORKER_JOB_LOG_FORMAT",
     (
-        LOG_PREFIX + "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] "
+        "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] "
         "job.func_name=%(job_func_name)s "
         "job.id=%(job_id)s %(message)s"
     ),
@@ -301,15 +274,6 @@ ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE = os.environ.get(
     "REDASH_ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE", "({state}) {alert_name}"
 )
 
-# How many requests are allowed per IP to the login page before
-# being throttled?
-# See https://flask-limiter.readthedocs.io/en/stable/#rate-limit-string-notation
-
-RATELIMIT_ENABLED = parse_boolean(os.environ.get("REDASH_RATELIMIT_ENABLED", "true"))
-THROTTLE_LOGIN_PATTERN = os.environ.get("REDASH_THROTTLE_LOGIN_PATTERN", "50/hour")
-LIMITER_STORAGE = os.environ.get("REDASH_LIMITER_STORAGE", REDIS_URL)
-THROTTLE_PASS_RESET_PATTERN = os.environ.get("REDASH_THROTTLE_PASS_RESET_PATTERN", "10/hour")
-
 # CORS settings for the Query Result API (and possibly future external APIs).
 # In most cases all you need to do is set REDASH_CORS_ACCESS_CONTROL_ALLOW_ORIGIN
 # to the calling domain (or domains in a comma separated list).
@@ -326,117 +290,13 @@ ACCESS_CONTROL_ALLOW_HEADERS = os.environ.get(
     "REDASH_CORS_ACCESS_CONTROL_ALLOW_HEADERS", "Content-Type"
 )
 
-# Query Runners
-default_query_runners = [
-    "redash.query_runner.athena",
-    "redash.query_runner.big_query",
-    "redash.query_runner.google_spreadsheets",
-    "redash.query_runner.graphite",
-    "redash.query_runner.mongodb",
-    "redash.query_runner.couchbase",
-    "redash.query_runner.mysql",
-    "redash.query_runner.pg",
-    "redash.query_runner.url",
-    "redash.query_runner.influx_db",
-    "redash.query_runner.elasticsearch",
-    "redash.query_runner.elasticsearch2",
-    "redash.query_runner.amazon_elasticsearch",
-    "redash.query_runner.trino",
-    "redash.query_runner.presto",
-    "redash.query_runner.pinot",
-    "redash.query_runner.databricks",
-    "redash.query_runner.hive_ds",
-    "redash.query_runner.impala_ds",
-    "redash.query_runner.vertica",
-    "redash.query_runner.clickhouse",
-    "redash.query_runner.yandex_metrica",
-    "redash.query_runner.rockset",
-    "redash.query_runner.treasuredata",
-    "redash.query_runner.sqlite",
-    "redash.query_runner.dynamodb_sql",
-    "redash.query_runner.mssql",
-    "redash.query_runner.mssql_odbc",
-    "redash.query_runner.memsql_ds",
-    "redash.query_runner.mapd",
-    "redash.query_runner.jql",
-    "redash.query_runner.google_analytics",
-    "redash.query_runner.axibase_tsd",
-    "redash.query_runner.salesforce",
-    "redash.query_runner.query_results",
-    "redash.query_runner.prometheus",
-    "redash.query_runner.qubole",
-    "redash.query_runner.db2",
-    "redash.query_runner.druid",
-    "redash.query_runner.kylin",
-    "redash.query_runner.drill",
-    "redash.query_runner.uptycs",
-    "redash.query_runner.snowflake",
-    "redash.query_runner.phoenix",
-    "redash.query_runner.json_ds",
-    "redash.query_runner.cass",
-    "redash.query_runner.dgraph",
-    "redash.query_runner.azure_kusto",
-    "redash.query_runner.exasol",
-    "redash.query_runner.cloudwatch",
-    "redash.query_runner.cloudwatch_insights",
-    "redash.query_runner.corporate_memory",
-    "redash.query_runner.sparql_endpoint",
-    "redash.query_runner.excel",
-    "redash.query_runner.csv",
-    "redash.query_runner.firebolt",
-    "redash.query_runner.databend",
-    "redash.query_runner.nz",
-    "redash.query_runner.arango"
-]
-
-enabled_query_runners = array_from_string(
-    os.environ.get("REDASH_ENABLED_QUERY_RUNNERS", ",".join(default_query_runners))
-)
-additional_query_runners = array_from_string(
-    os.environ.get("REDASH_ADDITIONAL_QUERY_RUNNERS", "")
-)
-disabled_query_runners = array_from_string(
-    os.environ.get("REDASH_DISABLED_QUERY_RUNNERS", "")
-)
-
-QUERY_RUNNERS = remove(
-    set(disabled_query_runners),
-    distinct(enabled_query_runners + additional_query_runners),
-)
-
 dynamic_settings = importlib.import_module(
     os.environ.get("REDASH_DYNAMIC_SETTINGS_MODULE", "redash.settings.dynamic_settings")
 )
 
-# Destinations
-default_destinations = [
-    "redash.destinations.email",
-    "redash.destinations.slack",
-    "redash.destinations.webhook",
-    "redash.destinations.hipchat",
-    "redash.destinations.mattermost",
-    "redash.destinations.chatwork",
-    "redash.destinations.pagerduty",
-    "redash.destinations.hangoutschat",
-    "redash.destinations.microsoft_teams_webhook",
-]
-
-enabled_destinations = array_from_string(
-    os.environ.get("REDASH_ENABLED_DESTINATIONS", ",".join(default_destinations))
-)
-additional_destinations = array_from_string(
-    os.environ.get("REDASH_ADDITIONAL_DESTINATIONS", "")
-)
-
-DESTINATIONS = distinct(enabled_destinations + additional_destinations)
-
 EVENT_REPORTING_WEBHOOKS = array_from_string(
     os.environ.get("REDASH_EVENT_REPORTING_WEBHOOKS", "")
 )
-
-# Support for Sentry (https://getsentry.com/). Just set your Sentry DSN to enable it:
-SENTRY_DSN = os.environ.get("REDASH_SENTRY_DSN", "")
-SENTRY_ENVIRONMENT = os.environ.get("REDASH_SENTRY_ENVIRONMENT")
 
 # Client side toggles:
 ALLOW_SCRIPTS_IN_USER_INPUT = parse_boolean(
@@ -493,13 +353,6 @@ FEATURE_EXTENDED_ALERT_OPTIONS = parse_boolean(
 # BigQuery
 BIGQUERY_HTTP_TIMEOUT = int(os.environ.get("REDASH_BIGQUERY_HTTP_TIMEOUT", "600"))
 
-# Allow Parameters in Embeds
-# WARNING: Deprecated!
-# See https://discuss.redash.io/t/support-for-parameters-in-embedded-visualizations/3337 for more details.
-ALLOW_PARAMETERS_IN_EMBEDS = parse_boolean(
-    os.environ.get("REDASH_ALLOW_PARAMETERS_IN_EMBEDS", "false")
-)
-
 # Enhance schema fetching
 SCHEMA_RUN_TABLE_SIZE_CALCULATIONS = parse_boolean(
     os.environ.get("REDASH_SCHEMA_RUN_TABLE_SIZE_CALCULATIONS", "false")
@@ -517,21 +370,6 @@ SQLPARSE_FORMAT_OPTIONS = {
     "reindent": parse_boolean(os.environ.get("SQLPARSE_FORMAT_REINDENT", "true")),
     "keyword_case": os.environ.get("SQLPARSE_FORMAT_KEYWORD_CASE", "upper"),
 }
-
-# requests
-REQUESTS_ALLOW_REDIRECTS = parse_boolean(
-    os.environ.get("REDASH_REQUESTS_ALLOW_REDIRECTS", "false")
-)
-
-# Enforces CSRF token validation on API requests.
-# This is turned off by default to avoid breaking any existing deployments but it is highly recommended to turn this toggle on to prevent CSRF attacks.
-ENFORCE_CSRF = parse_boolean(
-    os.environ.get("REDASH_ENFORCE_CSRF", "false")
-)
-
-# Databricks
-
-CSRF_TIME_LIMIT = int(os.environ.get("REDASH_CSRF_TIME_LIMIT", 3600 * 6))
 
 # Email blocked domains, use delimiter comma to separated multiple domains
 BLOCKED_DOMAINS = set_from_string(os.environ.get("REDASH_BLOCKED_DOMAINS", "qq.com"))

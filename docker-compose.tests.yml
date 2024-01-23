@@ -10,7 +10,7 @@ x-redash-service: &redash-service
     - .env
 
 x-redash-environment: &redash-environment
-  REDASH_LOG_LEVEL: "INFO"
+  LOG_LEVEL: "INFO"
   VECTOR_CONFIG_PATH: "/tmp/vector/vector.toml"
   REDIS_URL: "redis://redis-tests:6379/0"
   RQ_REDIS_URL: "redis://redis-tests:6379/0"
