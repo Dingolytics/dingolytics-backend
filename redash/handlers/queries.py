@@ -63,10 +63,8 @@ def format_sql_query(org_slug=None):
     """
     arguments = request.get_json(force=True)
     query = arguments.get("query", "")
-
-    return jsonify(
-        {"query": sqlparse.format(query, **settings.SQLPARSE_FORMAT_OPTIONS)}
-    )
+    options = settings.S.SQLPARSE_FORMAT_OPTIONS
+    return jsonify({"query": sqlparse.format(query, **options)})
 
 
 class QuerySearchResource(BaseResource):

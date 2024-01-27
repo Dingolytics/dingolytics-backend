@@ -5,7 +5,6 @@ import time
 from flask import request
 from mock import patch
 from redash import models, settings
-from redash.settings import default
 from redash.authentication import (
     api_key_load_user_from_request,
     get_login_url,
@@ -13,7 +12,6 @@ from redash.authentication import (
     sign,
 )
 from redash.authentication.google_oauth import create_and_login_user, verify_profile
-from redash.utils import utcnow
 from sqlalchemy.orm.exc import NoResultFound
 from tests import BaseTestCase
 
@@ -333,7 +331,6 @@ class TestRemoteUserAuth(BaseTestCase):
             when the settings are reloaded
         """
         def reload_settings():
-            importlib.reload(default)
             importlib.reload(settings)
 
         variables = self.DEFAULT_SETTING_OVERRIDES.copy()

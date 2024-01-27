@@ -29,7 +29,7 @@ def empty_schedules():
 
 
 def _should_refresh_query(query):
-    if settings.FEATURE_DISABLE_REFRESH_QUERIES:
+    if settings.S.FEATURE_DISABLE_REFRESH_QUERIES:
         logger.info("Disabled refresh queries.")
         return False
     elif query.org.is_disabled:

@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+
 def query_time_limit(is_scheduled, user_id, org_id):
     """Replace this method with your own implementation in
     case you want to limit the time limit on certain
@@ -24,11 +25,6 @@ def periodic_jobs():
     ]
     """
     pass
-
-
-# This provides the ability to override the way we store QueryResult's
-# data column. Reference implementation: redash.models.DBPersistence
-QueryResultPersistence = None
 
 
 def ssh_tunnel_auth():
@@ -57,9 +53,15 @@ def database_key_definitions(default):
             # })
         }
     )
-
     return definitions
 
-# Since you can define custom primary key types using `database_key_definitions`, you may want to load certain extensions when creating the database. 
-# To do so, simply add the name of the extension you'd like to load to this list.
+
+# Since you can define custom primary key types using `database_key_definitions`,
+# you may want to load certain extensions when creating the database. To do so,
+# simply add the name of the extension you'd like to load to this list.
 database_extensions = []
+
+
+# This provides the ability to override the way we store QueryResult's
+# data column. Reference implementation: redash.models.DBPersistence
+QueryResultPersistence = None

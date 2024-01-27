@@ -65,10 +65,8 @@ def invite_user(org, inviter, user, send_email=True):
 
 
 def require_allowed_email(email):
-    # `example.com` and `example.com.` are equal - last dot stands for DNS root but usually is omitted
     _, domain = email.lower().rstrip(".").split("@", 1)
-
-    if domain in blacklist or domain in settings.BLOCKED_DOMAINS:
+    if (domain in blacklist) or (domain in settings.S.BLOCKED_DOMAINS):
         abort(400, message="Bad email address.")
 
 

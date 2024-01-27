@@ -91,7 +91,7 @@ def periodic_job_definitions():
         },
     ]
 
-    if settings.VERSION_CHECK:
+    if settings.S.FEATURE_VERSION_CHECK:
         jobs.append({
             "func": version_check,
             "interval": timedelta(days=1)

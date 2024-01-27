@@ -10,9 +10,20 @@ from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from statsd import StatsClient
 
-from .settings import S
+from . import overrides
+from . import settings
 from .query_runner import import_query_runners
 from .destinations import import_destinations
+
+__all__ = [
+    "redis_connection",
+    "rq_redis_connection",
+    "mail",
+    "migrate",
+    "statsd_client",
+    "limiter",
+    "overrides",
+]
 
 __version__ = "11.0.1-dev"
 
@@ -28,15 +39,15 @@ if os.environ.get("REMOTE_DEBUG"):
 
 def setup_logging():
     handler = logging.StreamHandler(
-        sys.stdout if S.LOG_STDOUT else sys.stderr
+        sys.stdout if settings.S.LOG_STDOUT else sys.stderr
     )
-    formatter = logging.Formatter(S.LOG_FORMAT)
+    formatter = logging.Formatter(settings.S.LOG_FORMAT)
     handler.setFormatter(formatter)
     logging.getLogger().addHandler(handler)
-    logging.getLogger().setLevel(S.LOG_LEVEL)
+    logging.getLogger().setLevel(settings.S.LOG_LEVEL)
 
     # Make noisy libraries less noisy
-    if S.LOG_LEVEL != "DEBUG":
+    if settings.S.LOG_LEVEL != "DEBUG":
         for name in [
             "passlib",
             "requests.packages.urllib3",
@@ -48,25 +59,25 @@ def setup_logging():
 
 setup_logging()
 
-redis_connection = redis.from_url(S.REDIS_FULL_URL)
+redis_connection = redis.from_url(settings.S.REDIS_FULL_URL)
 
-rq_redis_connection = redis.from_url(S.RQ_REDIS_URL)
+rq_redis_connection = redis.from_url(settings.S.RQ_REDIS_URL)
 
 mail = Mail()
 
 migrate = Migrate(compare_type=True)
 
 statsd_client = StatsClient(
-    host=S.STATSD_HOST,
-    port=S.STATSD_PORT,
-    prefix=S.STATSD_PREFIX
+    host=settings.S.STATSD_HOST,
+    port=settings.S.STATSD_PORT,
+    prefix=settings.S.STATSD_PREFIX
 )
 
 limiter = Limiter(
     key_func=get_remote_address,
-    storage_uri=S.RATELIMIT_STORAGE
+    storage_uri=settings.S.RATELIMIT_STORAGE
 )
 
-import_query_runners(S.QUERY_RUNNERS)
+import_query_runners(settings.S.QUERY_RUNNERS)
 
-import_destinations(S.DESTINATIONS)
+import_destinations(settings.S.DESTINATIONS)

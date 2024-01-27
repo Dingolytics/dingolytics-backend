@@ -285,8 +285,9 @@ def client_config():
     ):
         client_config["showBeaconConsentMessage"] = True
 
+    S = settings.S
     defaults = {
-        "allowScriptsInUserInput": settings.ALLOW_SCRIPTS_IN_USER_INPUT,
+        "allowScriptsInUserInput": S.ALLOW_SCRIPTS_IN_USER_INPUT,
         "showPermissionsControl": current_org.get_setting(
             "feature_show_permissions_control"
         ),
@@ -294,17 +295,17 @@ def client_config():
             "hide_plotly_mode_bar"
         ),
         "disablePublicUrls": current_org.get_setting("disable_public_urls"),
-        "allowCustomJSVisualizations": settings.FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS,
-        "autoPublishNamedQueries": settings.FEATURE_AUTO_PUBLISH_NAMED_QUERIES,
-        "extendedAlertOptions": settings.FEATURE_EXTENDED_ALERT_OPTIONS,
-        "mailSettingsMissing": not settings.S.email_configured(),
-        "dashboardRefreshIntervals": settings.DASHBOARD_REFRESH_INTERVALS,
-        "queryRefreshIntervals": settings.QUERY_REFRESH_INTERVALS,
-        "googleLoginEnabled": settings.S.GOOGLE_OAUTH_ENABLED,
-        "ldapLoginEnabled": settings.S.LDAP_LOGIN_ENABLED,
-        "pageSize": settings.PAGE_SIZE,
-        "pageSizeOptions": settings.PAGE_SIZE_OPTIONS,
-        "tableCellMaxJSONSize": settings.TABLE_CELL_MAX_JSON_SIZE,
+        "allowCustomJSVisualizations": S.FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS,
+        "autoPublishNamedQueries": S.FEATURE_AUTO_PUBLISH_NAMED_QUERIES,
+        "extendedAlertOptions": S.FEATURE_EXTENDED_ALERT_OPTIONS,
+        "mailSettingsMissing": not S.email_configured(),
+        "dashboardRefreshIntervals": S.DASHBOARD_REFRESH_INTERVALS,
+        "queryRefreshIntervals": S.QUERY_REFRESH_INTERVALS,
+        "googleLoginEnabled": S.GOOGLE_OAUTH_ENABLED,
+        "ldapLoginEnabled": S.LDAP_LOGIN_ENABLED,
+        "pageSize": S.PAGE_SIZE_DEFAULT,
+        "pageSizeOptions": S.PAGE_SIZE_OPTIONS,
+        "tableCellMaxJSONSize": S.TABLE_CELL_MAX_JSON_SIZE,
     }
 
     client_config.update(defaults)

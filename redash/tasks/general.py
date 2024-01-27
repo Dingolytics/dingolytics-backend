@@ -17,7 +17,7 @@ def record_event(raw_event):
     event = models.Event.record(raw_event)
     models.db.session.commit()
 
-    for hook in settings.EVENT_REPORTING_WEBHOOKS:
+    for hook in settings.S.EVENT_REPORTING_WEBHOOKS:
         logger.debug("Forwarding event to: %s", hook)
         try:
             data = {

@@ -1,19 +1,31 @@
 from functools import lru_cache
-from typing import List
-from pydantic import BaseSettings  #, ValidationError, validator
+from typing import Dict, List, Any
+from pydantic import BaseSettings, PyObject  #, ValidationError, validator
 
 from .helpers import (
     fix_assets_path,
-    array_from_string,
+#     array_from_string,
     parse_boolean,
-    int_or_none,
-    set_from_string,
+#     int_or_none,
+#     set_from_string,
     add_decode_responses_to_redis_url,
-    cast_int_or_default
+#     cast_int_or_default
 )
-from .default import *  # noqa
+from .organization import DATE_FORMAT, TIME_FORMAT  # noqa
 
-__all__ = ["S"]
+__all__ = [
+    "S",
+    "dynamic_settings",
+
+    # TODO: Import explicitly from helpers
+    "parse_boolean",
+    "fix_assets_path",
+    "add_decode_responses_to_redis_url",
+
+    # TODO: Check if these are actually used (organization settings)
+    "DATE_FORMAT",
+    "TIME_FORMAT",
+]
 
 
 @lru_cache()
@@ -38,6 +50,38 @@ class Settings(BaseSettings):
     JOB_DEFAULT_FAILURE_TTL: int = 3600 * 24 * 7
     SEND_FAILURE_EMAIL_INTERVAL: int = 60
     MAX_FAILURE_REPORTS_PER_QUERY: int = 100
+    ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE: str = "({state}) {alert_name}"
+    EVENT_REPORTING_WEBHOOKS: List[str] = []
+    SQLPARSE_FORMAT_OPTIONS: Dict[str, Any] = {
+        "reindent": True,
+        "keyword_case": "upper",
+    }
+    BLOCKED_DOMAINS: List[str] = ["qq.com"]
+    OVERRIDES_MODULE: PyObject = "redash.overrides"
+
+    # Client side options
+    ALLOW_SCRIPTS_IN_USER_INPUT: bool = False
+    DASHBOARD_REFRESH_INTERVALS: List[int] = [
+        30, 60, 300, 600, 1800, 3600, 43200, 86400
+    ]
+    QUERY_REFRESH_INTERVALS: List[int] = [
+        60, 300, 600, 900, 1800, 3600, 7200, 10800,
+        14400, 18000, 21600, 25200, 28800, 32400, 36000,
+        39600, 43200, 86400, 604800, 1209600, 2592000
+    ]
+    PAGE_SIZE_DEFAULT: int = 20
+    PAGE_SIZE_OPTIONS: List[int] = [
+        5, 10, 20, 50, 100
+    ]
+    TABLE_CELL_MAX_JSON_SIZE: int = 50000
+
+    # Features settings
+    FEATURE_VERSION_CHECK: bool = True
+    FEATURE_DISABLE_REFRESH_QUERIES: bool = False
+    FEATURE_SHOW_QUERY_RESULTS_COUNT: bool = True
+    FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS: bool = False
+    FEATURE_AUTO_PUBLISH_NAMED_QUERIES: bool = True
+    FEATURE_EXTENDED_ALERT_OPTIONS: bool = False
 
     # Flask-Mail settings
     MAIL_SERVER: str = "localhost"
@@ -175,6 +219,9 @@ class Settings(BaseSettings):
     REQUESTS_ALLOW_REDIRECTS: bool = True
     REQUESTS_PRIVATE_ADDRESS_BLOCK: bool = True
 
+    # BigQuery client settings
+    BIGQUERY_HTTP_TIMEOUT: int = 600
+
     # Remote login settings
     #
     # Enables the use of an externally-provided and trusted remote user
@@ -278,5 +325,6 @@ class Settings(BaseSettings):
     def email_configured(self) -> bool:
         return self.MAIL_DEFAULT_SENDER is not None
 
-
 S = get_settings()
+
+dynamic_settings = S.OVERRIDES_MODULE

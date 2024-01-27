@@ -2,7 +2,7 @@ import logging
 
 from flask_mail import Message
 from redash import mail, settings
-from redash.destinations import *
+from redash.destinations import BaseDestination, register
 
 
 class Email(BaseDestination):
@@ -14,7 +14,7 @@ class Email(BaseDestination):
                 "addresses": {"type": "string"},
                 "subject_template": {
                     "type": "string",
-                    "default": settings.ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE,
+                    "default": settings.S.ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE,
                     "title": "Subject Template",
                 },
             },
@@ -51,7 +51,8 @@ class Email(BaseDestination):
                 subject = alert.custom_subject
             else:
                 subject_template = options.get(
-                    "subject_template", settings.ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE
+                    "subject_template",
+                    settings.S.ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE
                 )
                 subject = subject_template.format(alert_name=alert.name, state=state)
 
@@ -59,6 +60,5 @@ class Email(BaseDestination):
             mail.send(message)
         except Exception:
             logging.exception("Mail send error.")
-
 
 register(Email)
