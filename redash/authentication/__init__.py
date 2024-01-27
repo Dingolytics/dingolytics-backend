@@ -255,12 +255,13 @@ def init_app(app):
 
     login_manager.init_app(app)
     login_manager.anonymous_user = models.AnonymousUser
-    login_manager.REMEMBER_COOKIE_DURATION = settings.REMEMBER_COOKIE_DURATION
+    login_manager.REMEMBER_COOKIE_DURATION = settings.S.REMEMBER_COOKIE_DURATION
 
     @app.before_request
     def extend_session():
+        lifetime = timedelta(seconds=settings.S.SESSION_EXPIRY_TIME)
         session.permanent = True
-        app.permanent_session_lifetime = timedelta(seconds=settings.SESSION_EXPIRY_TIME)
+        app.permanent_session_lifetime = lifetime
 
     # Authlib's flask oauth client requires a Flask app to initialize
     for blueprint in [

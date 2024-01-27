@@ -57,7 +57,7 @@ def check_settings():
 
 
 @manager.command()
-@click.argument("email", default=settings.MAIL_DEFAULT_SENDER, required=False)
+@click.argument("email", default=None, required=False)
 def send_test_mail(email=None):
     """
     Send test message to EMAIL (default: the address you defined in MAIL_DEFAULT_SENDER)
@@ -66,11 +66,12 @@ def send_test_mail(email=None):
     from flask_mail import Message
 
     if email is None:
-        email = settings.MAIL_DEFAULT_SENDER
+        email = settings.S.MAIL_DEFAULT_SENDER
 
     mail.send(
         Message(
-            subject="Test Message from Redash", recipients=[email], body="Test message."
+            subject="Test Message from Redash",
+            recipients=[email], body="Test message."
         )
     )
 

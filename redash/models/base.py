@@ -25,9 +25,9 @@ def get_engine_options() -> dict:
     """Get engine options for SQLAlchemy."""
     # TODO: Utilize the `SQLALCHEMY_ENGINE_OPTIONS` setting via `app.config`
     engine_options = {"json_serializer": json_dumps}
-    if settings.SQLALCHEMY_ENABLE_POOL_PRE_PING:
+    if settings.S.SQLALCHEMY_ENABLE_POOL_PRE_PING:
         engine_options.update(pool_pre_ping=True)
-    if settings.SQLALCHEMY_DISABLE_POOL:
+    if settings.S.SQLALCHEMY_DISABLE_POOL:
         engine_options.update(poolclass=NullPool)
         engine_options.pop("max_overflow", None)
     return engine_options

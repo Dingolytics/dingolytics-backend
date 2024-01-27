@@ -9,7 +9,8 @@ from redash.utils import base_url
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 logger = logging.getLogger(__name__)
-serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
+
+serializer = URLSafeTimedSerializer(settings.S.SECRET_KEY)
 
 
 def invite_token(user):

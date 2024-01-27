@@ -405,7 +405,7 @@ class QueryResultResource(BaseResource):
             }
             response = response_builders[filetype](query_result)
 
-            if len(settings.ACCESS_CONTROL_ALLOW_ORIGIN) > 0:
+            if len(settings.S.ACCESS_CONTROL_ALLOW_ORIGIN) > 0:
                 self.add_cors_headers(response.headers)
 
             if should_cache:

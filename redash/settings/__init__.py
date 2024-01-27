@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     REMEMBER_COOKIE_DURATION: int = 3600 * 24 * 31
     SESSION_COOKIE_SECURE: bool = True
     SESSION_COOKIE_HTTPONLY: bool = True
-    SESSION_EXPIRY_TIME: str = 3600 * 6
+    SESSION_EXPIRY_TIME: int = 3600 * 6
 
     # CSRF protection settings
     CSRF_TIME_LIMIT: int = 3600 * 6
@@ -110,7 +110,7 @@ class Settings(BaseSettings):
         "default-src 'self'; style-src 'self' 'unsafe-inline'; "
         "script-src 'self' 'unsafe-eval'; font-src 'self' data:; "
         "img-src 'self' http: https: data: blob:; object-src 'none'; "
-        "frame-ancestors 'none';",
+        "frame-ancestors 'none';"
     )
     CONTENT_SECURITY_POLICY_REPORT_URI: str = ""
     CONTENT_SECURITY_POLICY_REPORT_ONLY: bool = False
