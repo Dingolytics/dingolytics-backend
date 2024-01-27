@@ -21,9 +21,9 @@ logger = logging.getLogger("authentication")
 
 
 def get_login_url(external=False, next="/"):
-    if settings.MULTI_ORG and current_org == None:
+    if settings.S.MULTI_ORG and current_org == None:
         login_url = "/"
-    elif settings.MULTI_ORG:
+    elif settings.S.MULTI_ORG:
         login_url = url_for(
             "redash.login", org_slug=current_org.slug, next=next, _external=external
         )
@@ -64,14 +64,14 @@ def load_user(user_id_with_identity):
 def request_loader(request):
     user = None
 
-    if settings.AUTH_TYPE == "hmac":
+    if settings.S.AUTH_TYPE == "hmac":
         user = hmac_load_user_from_request(request)
-    elif settings.AUTH_TYPE == "api_key":
+    elif settings.S.AUTH_TYPE == "api_key":
         user = api_key_load_user_from_request(request)
     else:
         logger.warning(
             "Unknown authentication type ({}). Using default (HMAC).".format(
-                settings.AUTH_TYPE
+                settings.S.AUTH_TYPE
             )
         )
         user = hmac_load_user_from_request(request)
@@ -234,9 +234,9 @@ def redirect_to_login():
 def logout_and_redirect_to_index():
     logout_user()
 
-    if settings.MULTI_ORG and current_org == None:
+    if settings.S.MULTI_ORG and current_org == None:
         index_url = "/"
-    elif settings.MULTI_ORG:
+    elif settings.S.MULTI_ORG:
         index_url = url_for("redash.index", org_slug=current_org.slug, _external=False)
     else:
         index_url = url_for("redash.index", _external=False)

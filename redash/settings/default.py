@@ -15,138 +15,6 @@ from .helpers import (
 )
 from .organization import DATE_FORMAT, TIME_FORMAT  # noqa
 
-# Connection settings for Redash's own database (where we store the queries, results, etc)
-SQLALCHEMY_DATABASE_URI = os.environ.get(
-    "REDASH_DATABASE_URL", os.environ.get("DATABASE_URL", "postgresql:///postgres")
-)
-SQLALCHEMY_MAX_OVERFLOW = int_or_none(os.environ.get("SQLALCHEMY_MAX_OVERFLOW"))
-SQLALCHEMY_POOL_SIZE = int_or_none(os.environ.get("SQLALCHEMY_POOL_SIZE"))
-SQLALCHEMY_DISABLE_POOL = parse_boolean(
-    os.environ.get("SQLALCHEMY_DISABLE_POOL", "false")
-)
-SQLALCHEMY_ENABLE_POOL_PRE_PING = parse_boolean(
-    os.environ.get("SQLALCHEMY_ENABLE_POOL_PRE_PING", "false")
-)
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_ECHO = False
-
-# The following enables periodic job (every 5 minutes) of removing unused query results.
-QUERY_RESULTS_CLEANUP_ENABLED = parse_boolean(
-    os.environ.get("REDASH_QUERY_RESULTS_CLEANUP_ENABLED", "true")
-)
-QUERY_RESULTS_CLEANUP_COUNT = int(
-    os.environ.get("REDASH_QUERY_RESULTS_CLEANUP_COUNT", "100")
-)
-QUERY_RESULTS_CLEANUP_MAX_AGE = int(
-    os.environ.get("REDASH_QUERY_RESULTS_CLEANUP_MAX_AGE", "7")
-)
-
-SCHEMAS_REFRESH_SCHEDULE = int(os.environ.get("REDASH_SCHEMAS_REFRESH_SCHEDULE", 30))
-
-AUTH_TYPE = os.environ.get("REDASH_AUTH_TYPE", "api_key")
-INVITATION_TOKEN_MAX_AGE = int(
-    os.environ.get("REDASH_INVITATION_TOKEN_MAX_AGE", 60 * 60 * 24 * 7)
-)
-
-# The secret key to use in the Flask app for various cryptographic features
-SECRET_KEY = os.environ.get("REDASH_COOKIE_SECRET")
-
-if SECRET_KEY is None:
-    raise Exception("You must set the REDASH_COOKIE_SECRET environment variable. Visit http://redash.io/help/open-source/admin-guide/secrets for more information.")
-
-# The secret key to use when encrypting data source options
-DATASOURCE_SECRET_KEY = os.environ.get("REDASH_SECRET_KEY", SECRET_KEY)
-
-# Whether and how to redirect non-HTTP requests to HTTPS. Disabled by default.
-ENFORCE_HTTPS = parse_boolean(os.environ.get("REDASH_ENFORCE_HTTPS", "false"))
-ENFORCE_HTTPS_PERMANENT = parse_boolean(
-    os.environ.get("REDASH_ENFORCE_HTTPS_PERMANENT", "false")
-)
-# Whether file downloads are enforced or not.
-ENFORCE_FILE_SAVE = parse_boolean(os.environ.get("REDASH_ENFORCE_FILE_SAVE", "true"))
-
-# Whether to use secure cookies by default.
-COOKIES_SECURE = parse_boolean(
-    os.environ.get("REDASH_COOKIES_SECURE", str(ENFORCE_HTTPS))
-)
-# Whether the session cookie is set to secure.
-SESSION_COOKIE_SECURE = parse_boolean(
-    os.environ.get("REDASH_SESSION_COOKIE_SECURE") or str(COOKIES_SECURE)
-)
-# Whether the session cookie is set HttpOnly.
-SESSION_COOKIE_HTTPONLY = parse_boolean(
-    os.environ.get("REDASH_SESSION_COOKIE_HTTPONLY", "true")
-)
-SESSION_EXPIRY_TIME = int(os.environ.get("REDASH_SESSION_EXPIRY_TIME", 60 * 60 * 6))
-
-# Whether the session cookie is set to secure.
-REMEMBER_COOKIE_SECURE = parse_boolean(
-    os.environ.get("REDASH_REMEMBER_COOKIE_SECURE") or str(COOKIES_SECURE)
-)
-# Whether the remember cookie is set HttpOnly.
-REMEMBER_COOKIE_HTTPONLY = parse_boolean(
-    os.environ.get("REDASH_REMEMBER_COOKIE_HTTPONLY", "true")
-)
-# The amount of time before the remember cookie expires.
-REMEMBER_COOKIE_DURATION = int(
-    os.environ.get("REDASH_REMEMBER_COOKIE_DURATION", 60 * 60 * 24 * 31)
-)
-
-# Doesn't set X-Frame-Options by default since it's highly dependent
-# on the specific deployment.
-# See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-# for more information.
-FRAME_OPTIONS = os.environ.get("REDASH_FRAME_OPTIONS", "deny")
-FRAME_OPTIONS_ALLOW_FROM = os.environ.get("REDASH_FRAME_OPTIONS_ALLOW_FROM", "")
-
-# Whether and how to send Strict-Transport-Security response headers.
-# See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
-# for more information.
-HSTS_ENABLED = parse_boolean(
-    os.environ.get("REDASH_HSTS_ENABLED") or str(ENFORCE_HTTPS)
-)
-HSTS_PRELOAD = parse_boolean(os.environ.get("REDASH_HSTS_PRELOAD", "false"))
-HSTS_MAX_AGE = int(os.environ.get("REDASH_HSTS_MAX_AGE", talisman.ONE_YEAR_IN_SECS))
-HSTS_INCLUDE_SUBDOMAINS = parse_boolean(
-    os.environ.get("REDASH_HSTS_INCLUDE_SUBDOMAINS", "false")
-)
-
-# Whether and how to send Content-Security-Policy response headers.
-# See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
-# for more information.
-# Overriding this value via an environment variables requires setting it
-# as a string in the general CSP format of a semicolon separated list of
-# individual CSP directives, see https://github.com/GoogleCloudPlatform/flask-talisman#example-7
-# for more information. E.g.:
-CONTENT_SECURITY_POLICY = os.environ.get(
-    "REDASH_CONTENT_SECURITY_POLICY",
-    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval'; font-src 'self' data:; img-src 'self' http: https: data: blob:; object-src 'none'; frame-ancestors 'none'; frame-src redash.io;",
-)
-CONTENT_SECURITY_POLICY_REPORT_URI = os.environ.get(
-    "REDASH_CONTENT_SECURITY_POLICY_REPORT_URI", ""
-)
-CONTENT_SECURITY_POLICY_REPORT_ONLY = parse_boolean(
-    os.environ.get("REDASH_CONTENT_SECURITY_POLICY_REPORT_ONLY", "false")
-)
-CONTENT_SECURITY_POLICY_NONCE_IN = array_from_string(
-    os.environ.get("REDASH_CONTENT_SECURITY_POLICY_NONCE_IN", "")
-)
-
-# Whether and how to send Referrer-Policy response headers. Defaults to
-# 'strict-origin-when-cross-origin'.
-# See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
-# for more information.
-REFERRER_POLICY = os.environ.get(
-    "REDASH_REFERRER_POLICY", "strict-origin-when-cross-origin"
-)
-# Whether and how to send Feature-Policy response headers. Defaults to
-# an empty value.
-# See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
-# for more information.
-FEATURE_POLICY = os.environ.get("REDASH_REFERRER_POLICY", "")
-
-MULTI_ORG = parse_boolean(os.environ.get("REDASH_MULTI_ORG", "false"))
-
 GOOGLE_CLIENT_ID = os.environ.get("REDASH_GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("REDASH_GOOGLE_CLIENT_SECRET", "")
 GOOGLE_OAUTH_ENABLED = bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
@@ -161,36 +29,6 @@ SAML_SCHEME_OVERRIDE = os.environ.get("REDASH_SAML_SCHEME_OVERRIDE", "")
 SAML_ENCRYPTION_PEM_PATH = os.environ.get("REDASH_SAML_ENCRYPTION_PEM_PATH", "")
 SAML_ENCRYPTION_CERT_PATH = os.environ.get("REDASH_SAML_ENCRYPTION_CERT_PATH", "")
 SAML_ENCRYPTION_ENABLED = SAML_ENCRYPTION_PEM_PATH != "" and SAML_ENCRYPTION_CERT_PATH != ""
-
-# Enables the use of an externally-provided and trusted remote user via an HTTP
-# header.  The "user" must be an email address.
-#
-# By default the trusted header is X-Forwarded-Remote-User.  You can change
-# this by setting REDASH_REMOTE_USER_HEADER.
-#
-# Enabling this authentication method is *potentially dangerous*, and it is
-# your responsibility to ensure that only a trusted frontend (usually on the
-# same server) can talk to the redash backend server, otherwise people will be
-# able to login as anyone they want by directly talking to the redash backend.
-# You must *also* ensure that any special header in the original request is
-# removed or always overwritten by your frontend, otherwise your frontend may
-# pass it through to the backend unchanged.
-#
-# Note that redash will only check the remote user once, upon the first need
-# for a login, and then set a cookie which keeps the user logged in.  Dropping
-# the remote user header after subsequent requests won't automatically log the
-# user out.  Doing so could be done with further work, but usually it's
-# unnecessary.
-#
-# If you also set the organization setting auth_password_login_enabled to false,
-# then your authentication will be seamless.  Otherwise a link will be presented
-# on the login page to trigger remote user auth.
-REMOTE_USER_LOGIN_ENABLED = parse_boolean(
-    os.environ.get("REDASH_REMOTE_USER_LOGIN_ENABLED", "false")
-)
-REMOTE_USER_HEADER = os.environ.get(
-    "REDASH_REMOTE_USER_HEADER", "X-Forwarded-Remote-User"
-)
 
 # If the organization setting auth_password_login_enabled is not false, then users will still be
 # able to login through Redash instead of the LDAP server
@@ -221,73 +59,8 @@ LDAP_SEARCH_DN = os.environ.get(
     "REDASH_LDAP_SEARCH_DN", os.environ.get("REDASH_SEARCH_DN")
 )
 
-# Time limit (in seconds) for scheduled queries. Set this to -1 to execute without a time limit.
-SCHEDULED_QUERY_TIME_LIMIT = int(
-    os.environ.get("REDASH_SCHEDULED_QUERY_TIME_LIMIT", -1)
-)
-
-# Time limit (in seconds) for adhoc queries. Set this to -1 to execute without a time limit.
-ADHOC_QUERY_TIME_LIMIT = int(os.environ.get("REDASH_ADHOC_QUERY_TIME_LIMIT", -1))
-
-JOB_EXPIRY_TIME = int(os.environ.get("REDASH_JOB_EXPIRY_TIME", 3600 * 12))
-JOB_DEFAULT_FAILURE_TTL = int(
-    os.environ.get("REDASH_JOB_DEFAULT_FAILURE_TTL", 7 * 24 * 60 * 60)
-)
-
-RQ_WORKER_JOB_LOG_FORMAT = os.environ.get(
-    "REDASH_RQ_WORKER_JOB_LOG_FORMAT",
-    (
-        "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] "
-        "job.func_name=%(job_func_name)s "
-        "job.id=%(job_id)s %(message)s"
-    ),
-)
-
-# Mail settings:
-MAIL_SERVER = os.environ.get("REDASH_MAIL_SERVER", "localhost")
-MAIL_PORT = int(os.environ.get("REDASH_MAIL_PORT", 25))
-MAIL_USE_TLS = parse_boolean(os.environ.get("REDASH_MAIL_USE_TLS", "false"))
-MAIL_USE_SSL = parse_boolean(os.environ.get("REDASH_MAIL_USE_SSL", "false"))
-MAIL_USERNAME = os.environ.get("REDASH_MAIL_USERNAME", None)
-MAIL_PASSWORD = os.environ.get("REDASH_MAIL_PASSWORD", None)
-MAIL_DEFAULT_SENDER = os.environ.get("REDASH_MAIL_DEFAULT_SENDER", None)
-MAIL_MAX_EMAILS = os.environ.get("REDASH_MAIL_MAX_EMAILS", None)
-MAIL_ASCII_ATTACHMENTS = parse_boolean(
-    os.environ.get("REDASH_MAIL_ASCII_ATTACHMENTS", "false")
-)
-
-
-def email_server_is_configured():
-    return MAIL_DEFAULT_SENDER is not None
-
-
-HOST = os.environ.get("REDASH_HOST", "")
-
-SEND_FAILURE_EMAIL_INTERVAL = int(
-    os.environ.get("REDASH_SEND_FAILURE_EMAIL_INTERVAL", 60)
-)
-MAX_FAILURE_REPORTS_PER_QUERY = int(
-    os.environ.get("REDASH_MAX_FAILURE_REPORTS_PER_QUERY", 100)
-)
-
 ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE = os.environ.get(
     "REDASH_ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE", "({state}) {alert_name}"
-)
-
-# CORS settings for the Query Result API (and possibly future external APIs).
-# In most cases all you need to do is set REDASH_CORS_ACCESS_CONTROL_ALLOW_ORIGIN
-# to the calling domain (or domains in a comma separated list).
-ACCESS_CONTROL_ALLOW_ORIGIN = set_from_string(
-    os.environ.get("REDASH_CORS_ACCESS_CONTROL_ALLOW_ORIGIN", "")
-)
-ACCESS_CONTROL_ALLOW_CREDENTIALS = parse_boolean(
-    os.environ.get("REDASH_CORS_ACCESS_CONTROL_ALLOW_CREDENTIALS", "false")
-)
-ACCESS_CONTROL_REQUEST_METHOD = os.environ.get(
-    "REDASH_CORS_ACCESS_CONTROL_REQUEST_METHOD", "GET, POST, PUT"
-)
-ACCESS_CONTROL_ALLOW_HEADERS = os.environ.get(
-    "REDASH_CORS_ACCESS_CONTROL_ALLOW_HEADERS", "Content-Type"
 )
 
 dynamic_settings = importlib.import_module(
@@ -352,11 +125,6 @@ FEATURE_EXTENDED_ALERT_OPTIONS = parse_boolean(
 
 # BigQuery
 BIGQUERY_HTTP_TIMEOUT = int(os.environ.get("REDASH_BIGQUERY_HTTP_TIMEOUT", "600"))
-
-# Enhance schema fetching
-SCHEMA_RUN_TABLE_SIZE_CALCULATIONS = parse_boolean(
-    os.environ.get("REDASH_SCHEMA_RUN_TABLE_SIZE_CALCULATIONS", "false")
-)
 
 # kylin
 KYLIN_OFFSET = int(os.environ.get("REDASH_KYLIN_OFFSET", 0))

@@ -90,7 +90,7 @@ def enqueue_query(
                     "scheduled_query_id": scheduled_query_id,
                     "is_api_key": is_api_key,
                     "job_timeout": time_limit,
-                    "failure_ttl": settings.JOB_DEFAULT_FAILURE_TTL,
+                    "failure_ttl": settings.S.JOB_DEFAULT_FAILURE_TTL,
                     "meta": {
                         "data_source_id": data_source.id,
                         "org_id": data_source.org_id,
@@ -101,7 +101,7 @@ def enqueue_query(
                 }
 
                 if not scheduled_query:
-                    enqueue_kwargs["result_ttl"] = settings.JOB_EXPIRY_TIME
+                    enqueue_kwargs["result_ttl"] = settings.S.JOB_EXPIRY_TIME
 
                 job = queue.enqueue(
                     execute_query, query, data_source.id, metadata, **enqueue_kwargs
@@ -111,7 +111,7 @@ def enqueue_query(
                 pipe.set(
                     _job_lock_id(query_hash, data_source.id),
                     job.id,
-                    settings.JOB_EXPIRY_TIME,
+                    settings.S.JOB_EXPIRY_TIME,
                 )
                 pipe.execute()
             break

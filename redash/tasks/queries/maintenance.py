@@ -120,19 +120,19 @@ def refresh_queries():
 def cleanup_query_results():
     """
     Job to cleanup unused query results -- such that no query links to them anymore, and older than
-    settings.QUERY_RESULTS_CLEANUP_MAX_AGE (a week by default, so it's less likely to be open in someone's browser and be used).
+    QUERY_RESULTS_CLEANUP_MAX_AGE (a week by default, so it's less likely to be open in someone's browser and be used).
 
-    Each time the job deletes only settings.QUERY_RESULTS_CLEANUP_COUNT (100 by default) query results so it won't choke
+    Each time the job deletes only QUERY_RESULTS_CLEANUP_COUNT (100 by default) query results so it won't choke
     the database in case of many such results.
     """
     logger.info(
         "Running query results clean up (removing maximum of %d unused results, that are %d days old or more)",
-        settings.QUERY_RESULTS_CLEANUP_COUNT,
-        settings.QUERY_RESULTS_CLEANUP_MAX_AGE,
+        settings.S.QUERY_RESULTS_CLEANUP_COUNT,
+        settings.S.QUERY_RESULTS_CLEANUP_MAX_AGE,
     )
     unused_query_results_ids = (
-        models.QueryResult.unused(settings.QUERY_RESULTS_CLEANUP_MAX_AGE)
-        .limit(settings.QUERY_RESULTS_CLEANUP_COUNT)
+        models.QueryResult.unused(settings.S.QUERY_RESULTS_CLEANUP_MAX_AGE)
+        .limit(settings.S.QUERY_RESULTS_CLEANUP_COUNT)
         .with_entities(models.QueryResult.id)
         .subquery()
     )

@@ -100,10 +100,10 @@ class TestLogin(BaseTestCase):
     def test_get_login_form_remote_auth(self):
         """Make sure the remote auth link can be rendered correctly on the
         login page when the remote user login feature is enabled"""
-        old_remote_user_enabled = settings.REMOTE_USER_LOGIN_ENABLED
+        old_remote_user_enabled = settings.S.REMOTE_USER_LOGIN_ENABLED
         old_ldap_login_enabled = settings.LDAP_LOGIN_ENABLED
         try:
-            settings.REMOTE_USER_LOGIN_ENABLED = True
+            settings.S.REMOTE_USER_LOGIN_ENABLED = True
             settings.LDAP_LOGIN_ENABLED = True
             rv = self.client.get("/default/login")
             self.assertEqual(rv.status_code, 200)
@@ -114,7 +114,7 @@ class TestLogin(BaseTestCase):
                 "/{}/ldap/login".format(self.factory.org.slug), rv.data.decode()
             )
         finally:
-            settings.REMOTE_USER_LOGIN_ENABLED = old_remote_user_enabled
+            settings.S.REMOTE_USER_LOGIN_ENABLED = old_remote_user_enabled
             settings.LDAP_LOGIN_ENABLED = old_ldap_login_enabled
 
     def test_submit_non_existing_user(self):

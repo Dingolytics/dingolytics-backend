@@ -19,13 +19,13 @@ def login(org_slug=None):
     unsafe_next_path = request.args.get("next")
     next_path = get_next_path(unsafe_next_path)
 
-    if not settings.REMOTE_USER_LOGIN_ENABLED:
+    if not settings.S.REMOTE_USER_LOGIN_ENABLED:
         logger.error(
             "Cannot use remote user for login without being enabled in settings"
         )
         return redirect(url_for("redash.index", next=next_path, org_slug=org_slug))
 
-    email = request.headers.get(settings.REMOTE_USER_HEADER)
+    email = request.headers.get(settings.S.REMOTE_USER_HEADER)
 
     # Some Apache auth configurations will, stupidly, set (null) instead of a
     # falsey value.  Special case that here so it Just Works for more installs.
@@ -37,7 +37,7 @@ def login(org_slug=None):
     if not email:
         logger.error(
             "Cannot use remote user for login when it's not provided in the request (looked in headers['"
-            + settings.REMOTE_USER_HEADER
+            + settings.S.REMOTE_USER_HEADER
             + "'])"
         )
         return redirect(url_for("redash.index", next=next_path, org_slug=org_slug))

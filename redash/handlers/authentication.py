@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_google_auth_url(next_path):
-    if settings.MULTI_ORG:
+    if settings.S.MULTI_ORG:
         google_auth_url = url_for(
             "google_oauth.authorize_org", next=next_path, org_slug=current_org.slug
         )
@@ -100,7 +100,7 @@ def render_token_login_page(template, org_slug, token, invite):
             show_google_openid=settings.GOOGLE_OAUTH_ENABLED,
             google_auth_url=google_auth_url,
             show_saml_login=current_org.get_setting("auth_saml_enabled"),
-            show_remote_user_login=settings.REMOTE_USER_LOGIN_ENABLED,
+            show_remote_user_login=settings.S.REMOTE_USER_LOGIN_ENABLED,
             show_ldap_login=settings.LDAP_LOGIN_ENABLED,
             org_slug=org_slug,
             user=user,
@@ -141,7 +141,7 @@ def verify(token, org_slug=None):
     models.db.session.add(user)
     models.db.session.commit()
 
-    template_context = {"org_slug": org_slug} if settings.MULTI_ORG else {}
+    template_context = {"org_slug": org_slug} if settings.S.MULTI_ORG else {}
     next_url = url_for("redash.index", **template_context)
 
     return render_template("verify.html", next_url=next_url)
@@ -187,7 +187,7 @@ def verification_email(org_slug=None):
 def login(org_slug=None):
     # We intentionally use == as otherwise it won't actually use the proxy. So weird :O
     # noinspection PyComparisonWithNone
-    if current_org == None and not settings.MULTI_ORG:
+    if current_org == None and not settings.S.MULTI_ORG:
         return redirect("/setup")
     elif current_org == None:
         return redirect("/")
@@ -230,7 +230,7 @@ def login(org_slug=None):
         google_auth_url=google_auth_url,
         show_password_login=current_org.get_setting("auth_password_login_enabled"),
         show_saml_login=current_org.get_setting("auth_saml_enabled"),
-        show_remote_user_login=settings.REMOTE_USER_LOGIN_ENABLED,
+        show_remote_user_login=settings.S.REMOTE_USER_LOGIN_ENABLED,
         show_ldap_login=settings.LDAP_LOGIN_ENABLED,
     )
 
@@ -242,7 +242,7 @@ def logout(org_slug=None):
 
 
 def base_href():
-    if settings.MULTI_ORG:
+    if settings.S.MULTI_ORG:
         base_href = url_for("redash.index", _external=True, org_slug=current_org.slug)
     else:
         base_href = url_for("redash.index", _external=True)
@@ -297,7 +297,7 @@ def client_config():
         "allowCustomJSVisualizations": settings.FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS,
         "autoPublishNamedQueries": settings.FEATURE_AUTO_PUBLISH_NAMED_QUERIES,
         "extendedAlertOptions": settings.FEATURE_EXTENDED_ALERT_OPTIONS,
-        "mailSettingsMissing": not settings.email_server_is_configured(),
+        "mailSettingsMissing": not settings.S.email_configured(),
         "dashboardRefreshIntervals": settings.DASHBOARD_REFRESH_INTERVALS,
         "queryRefreshIntervals": settings.QUERY_REFRESH_INTERVALS,
         "googleLoginEnabled": settings.GOOGLE_OAUTH_ENABLED,

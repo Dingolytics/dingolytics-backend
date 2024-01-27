@@ -56,7 +56,7 @@ def invite_user(org, inviter, user, send_email=True):
     d = user.to_dict()
 
     invite_url = invite_link_for_user(user)
-    if settings.email_server_is_configured() and send_email:
+    if settings.S.email_configured() and send_email:
         send_invite_email(inviter, user, invite_url, org)
     else:
         d["invite_link"] = invite_url
@@ -268,7 +268,7 @@ class UserResource(BaseResource):
 
         email_address_changed = "email" in params and params["email"] != user.email
         needs_to_verify_email = (
-            email_address_changed and settings.email_server_is_configured()
+            email_address_changed and settings.S.email_configured()
         )
         if needs_to_verify_email:
             user.is_email_verified = False

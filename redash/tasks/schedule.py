@@ -77,7 +77,7 @@ def periodic_job_definitions():
         },
         {
             "func": refresh_schemas,
-            "interval": timedelta(minutes=settings.SCHEMAS_REFRESH_SCHEDULE),
+            "interval": timedelta(minutes=settings.S.SCHEMAS_REFRESH_SCHEDULE),
         },
         {
             "func": sync_user_details,
@@ -87,15 +87,21 @@ def periodic_job_definitions():
         },
         {
             "func": send_aggregated_errors,
-            "interval": timedelta(minutes=settings.SEND_FAILURE_EMAIL_INTERVAL),
+            "interval": timedelta(minutes=settings.S.SEND_FAILURE_EMAIL_INTERVAL),
         },
     ]
 
     if settings.VERSION_CHECK:
-        jobs.append({"func": version_check, "interval": timedelta(days=1)})
+        jobs.append({
+            "func": version_check,
+            "interval": timedelta(days=1)
+        })
 
-    if settings.QUERY_RESULTS_CLEANUP_ENABLED:
-        jobs.append({"func": cleanup_query_results, "interval": timedelta(minutes=5)})
+    if settings.S.QUERY_RESULTS_CLEANUP_ENABLED:
+        jobs.append({
+            "func": cleanup_query_results,
+            "interval": timedelta(minutes=5)
+        })
 
     # Add your own custom periodic jobs in your dynamic_settings module.
     jobs.extend(settings.dynamic_settings.periodic_jobs() or [])

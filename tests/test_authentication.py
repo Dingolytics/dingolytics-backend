@@ -310,7 +310,7 @@ class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
 
 
 class TestRemoteUserAuth(BaseTestCase):
-    DEFAULT_SETTING_OVERRIDES = {"REDASH_REMOTE_USER_LOGIN_ENABLED": "true"}
+    DEFAULT_SETTING_OVERRIDES = {"REMOTE_USER_LOGIN_ENABLED": "true"}
 
     def setUp(self):
         # Apply default setting overrides to every test
@@ -374,7 +374,7 @@ class TestRemoteUserAuth(BaseTestCase):
         return models.User.get_by_email_and_org(email, org or self.factory.org)
 
     def test_remote_login_disabled(self):
-        self.override_settings({"REDASH_REMOTE_USER_LOGIN_ENABLED": "false"})
+        self.override_settings({"REMOTE_USER_LOGIN_ENABLED": "false"})
 
         self.get_request(
             "/remote_user/login",
@@ -395,7 +395,7 @@ class TestRemoteUserAuth(BaseTestCase):
         self.assert_correct_user_attributes(self.get_test_user())
 
     def test_remote_login_custom_header(self):
-        self.override_settings({"REDASH_REMOTE_USER_HEADER": "X-Custom-User"})
+        self.override_settings({"REMOTE_USER_HEADER": "X-Custom-User"})
 
         self.get_request(
             "/remote_user/login",

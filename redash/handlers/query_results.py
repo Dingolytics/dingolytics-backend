@@ -248,10 +248,10 @@ class QueryResultResource(BaseResource):
         if "Origin" in request.headers:
             origin = request.headers["Origin"]
 
-            if set(["*", origin]) & settings.ACCESS_CONTROL_ALLOW_ORIGIN:
+            if set(["*", origin]) & settings.S.ACCESS_CONTROL_ALLOW_ORIGIN:
                 headers["Access-Control-Allow-Origin"] = origin
                 headers["Access-Control-Allow-Credentials"] = str(
-                    settings.ACCESS_CONTROL_ALLOW_CREDENTIALS
+                    settings.S.ACCESS_CONTROL_ALLOW_CREDENTIALS
                 ).lower()
 
     @require_any_of_permission(("view_query", "execute_query"))
@@ -259,15 +259,15 @@ class QueryResultResource(BaseResource):
         headers = {}
         self.add_cors_headers(headers)
 
-        if settings.ACCESS_CONTROL_REQUEST_METHOD:
+        if settings.S.ACCESS_CONTROL_REQUEST_METHOD:
             headers[
                 "Access-Control-Request-Method"
-            ] = settings.ACCESS_CONTROL_REQUEST_METHOD
+            ] = settings.S.ACCESS_CONTROL_REQUEST_METHOD
 
-        if settings.ACCESS_CONTROL_ALLOW_HEADERS:
+        if settings.S.ACCESS_CONTROL_ALLOW_HEADERS:
             headers[
                 "Access-Control-Allow-Headers"
-            ] = settings.ACCESS_CONTROL_ALLOW_HEADERS
+            ] = settings.S.ACCESS_CONTROL_ALLOW_HEADERS
 
         return make_response("", 200, headers)
 

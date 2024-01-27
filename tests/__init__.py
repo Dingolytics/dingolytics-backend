@@ -7,7 +7,7 @@ from contextlib import contextmanager
 # Dummy values for oauth login
 os.environ["REDASH_GOOGLE_CLIENT_ID"] = "dummy"
 os.environ["REDASH_GOOGLE_CLIENT_SECRET"] = "dummy"
-os.environ["REDASH_MULTI_ORG"] = "true"
+os.environ["MULTI_ORG"] = "true"
 
 # Make sure rate limit is enabled
 os.environ["RATELIMIT_ENABLED"] = "true"

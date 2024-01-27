@@ -104,7 +104,7 @@ def paginate(query_set: Query, page, page_size, serializer, **kwargs):
 
 
 def org_scoped_rule(rule):
-    if settings.MULTI_ORG:
+    if settings.S.MULTI_ORG:
         return "/<org_slug>{}".format(rule)
 
     return rule

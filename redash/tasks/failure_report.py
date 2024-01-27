@@ -15,11 +15,11 @@ def key(user_id):
 
 def comment_for(failure):
     schedule_failures = failure.get("schedule_failures")
-    if schedule_failures > settings.MAX_FAILURE_REPORTS_PER_QUERY * 0.75:
+    if schedule_failures > settings.S.MAX_FAILURE_REPORTS_PER_QUERY * 0.75:
         return """NOTICE: This query has failed a total of {schedule_failures} times.
         Reporting may stop when the query exceeds {max_failure_reports} overall failures.""".format(
             schedule_failures=schedule_failures,
-            max_failure_reports=settings.MAX_FAILURE_REPORTS_PER_QUERY,
+            max_failure_reports=settings.S.MAX_FAILURE_REPORTS_PER_QUERY,
         )
 
 
@@ -69,7 +69,7 @@ def send_failure_report(user_id):
 def notify_of_failure(message, query):
     subscribed = query.org.get_setting("send_email_on_failed_scheduled_queries")
     exceeded_threshold = (
-        query.schedule_failures >= settings.MAX_FAILURE_REPORTS_PER_QUERY
+        query.schedule_failures >= settings.S.MAX_FAILURE_REPORTS_PER_QUERY
     )
 
     if subscribed and not query.user.is_disabled and not exceeded_threshold:

@@ -16,7 +16,7 @@ class Redash(Flask):
             x_host=1
         )
         # Configure Redash using our settings
-        self.config.from_object("redash.settings")
+        self.config.from_object("redash.settings.S")
 
 
 def create_app():

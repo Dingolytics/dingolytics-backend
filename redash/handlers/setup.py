@@ -53,7 +53,7 @@ def create_org(org_name, user_name, email, password):
 
 @routes.route("/setup", methods=["GET", "POST"])
 def setup():
-    if current_org != None or settings.MULTI_ORG:
+    if current_org != None or settings.S.MULTI_ORG:
         return redirect("/")
 
     form = SetupForm(request.form)

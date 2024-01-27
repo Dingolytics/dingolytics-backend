@@ -38,7 +38,7 @@ def reset_link_for_user(user):
 
 
 def validate_token(token):
-    max_token_age = settings.INVITATION_TOKEN_MAX_AGE
+    max_token_age = settings.S.INVITATION_TOKEN_MAX_AGE
     return serializer.loads(token, max_age=max_token_age)
 
 

@@ -31,12 +31,12 @@ class TestSendAggregatedErrorsTask(BaseTestCase):
         return context["failures"]
 
     def test_schedules_email_if_failure_count_is_beneath_limit(self):
-        key = self.notify(schedule_failures=settings.MAX_FAILURE_REPORTS_PER_QUERY - 1)
+        key = self.notify(schedule_failures=settings.S.MAX_FAILURE_REPORTS_PER_QUERY - 1)
         email_pending = redis_connection.exists(key)
         self.assertTrue(email_pending)
 
     def test_does_not_report_if_failure_count_is_beyond_limit(self):
-        key = self.notify(schedule_failures=settings.MAX_FAILURE_REPORTS_PER_QUERY)
+        key = self.notify(schedule_failures=settings.S.MAX_FAILURE_REPORTS_PER_QUERY)
         email_pending = redis_connection.exists(key)
         self.assertFalse(email_pending)
 
@@ -53,13 +53,13 @@ class TestSendAggregatedErrorsTask(BaseTestCase):
         self.assertFalse(email_pending)
 
     def test_does_not_indicate_when_not_near_limit_for_a_query(self):
-        self.notify(schedule_failures=settings.MAX_FAILURE_REPORTS_PER_QUERY / 2)
+        self.notify(schedule_failures=settings.S.MAX_FAILURE_REPORTS_PER_QUERY / 2)
         failures = self.send_email(self.factory.user)
 
         self.assertFalse(failures[0]["comment"])
 
     def test_indicates_when_near_limit_for_a_query(self):
-        self.notify(schedule_failures=settings.MAX_FAILURE_REPORTS_PER_QUERY - 1)
+        self.notify(schedule_failures=settings.S.MAX_FAILURE_REPORTS_PER_QUERY - 1)
         failures = self.send_email(self.factory.user)
 
         self.assertTrue(failures[0]["comment"])

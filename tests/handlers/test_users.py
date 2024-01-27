@@ -47,7 +47,7 @@ class TestUserListResourcePost(BaseTestCase):
         self.assertEqual(rv.json["name"], test_user["name"])
         self.assertEqual(rv.json["email"], test_user["email"])
 
-    @patch("redash.settings.email_server_is_configured", return_value=False)
+    @patch("redash.settings.Settings.email_configured", return_value=False)
     def test_shows_invite_link_when_email_is_not_configured(self, _):
         admin = self.factory.create_admin()
 
@@ -57,7 +57,7 @@ class TestUserListResourcePost(BaseTestCase):
         self.assertEqual(rv.status_code, 200)
         self.assertTrue("invite_link" in rv.json)
 
-    @patch("redash.settings.email_server_is_configured", return_value=True)
+    @patch("redash.settings.Settings.email_configured", return_value=True)
     def test_does_not_show_invite_link_when_email_is_configured(self, _):
         admin = self.factory.create_admin()
 
@@ -273,7 +273,7 @@ class TestUserResourcePost(BaseTestCase):
         )
         self.assertEqual(rv.status_code, 200)
 
-    @patch("redash.settings.email_server_is_configured", return_value=True)
+    @patch("redash.settings.Settings.email_configured", return_value=True)
     def test_marks_email_as_not_verified_when_changed(self, _):
         user = self.factory.user
         user.is_email_verified = True
@@ -282,7 +282,7 @@ class TestUserResourcePost(BaseTestCase):
         )
         self.assertFalse(user.is_email_verified)
 
-    @patch("redash.settings.email_server_is_configured", return_value=False)
+    @patch("redash.settings.Settings.email_configured", return_value=False)
     def test_doesnt_mark_email_as_not_verified_when_changed_and_email_server_is_not_configured(
         self, _
     ):

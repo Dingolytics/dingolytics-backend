@@ -10,7 +10,7 @@ from werkzeug.utils import safe_join
 
 def render_index():
     return {"message": "Open index page via frontend app."}, 200
-    if settings.MULTI_ORG:
+    if settings.S.MULTI_ORG:
         response = render_template("multi_org.html", base_href=base_href())
     else:
         full_path = safe_join(settings.STATIC_ASSETS_PATH, "index.html")
