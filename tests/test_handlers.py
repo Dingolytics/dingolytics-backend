@@ -101,10 +101,10 @@ class TestLogin(BaseTestCase):
         """Make sure the remote auth link can be rendered correctly on the
         login page when the remote user login feature is enabled"""
         old_remote_user_enabled = settings.S.REMOTE_USER_LOGIN_ENABLED
-        old_ldap_login_enabled = settings.LDAP_LOGIN_ENABLED
+        old_ldap_login_enabled = settings.S.LDAP_LOGIN_ENABLED
         try:
             settings.S.REMOTE_USER_LOGIN_ENABLED = True
-            settings.LDAP_LOGIN_ENABLED = True
+            settings.S.LDAP_LOGIN_ENABLED = True
             rv = self.client.get("/default/login")
             self.assertEqual(rv.status_code, 200)
             self.assertIn(
@@ -115,7 +115,7 @@ class TestLogin(BaseTestCase):
             )
         finally:
             settings.S.REMOTE_USER_LOGIN_ENABLED = old_remote_user_enabled
-            settings.LDAP_LOGIN_ENABLED = old_ldap_login_enabled
+            settings.S.LDAP_LOGIN_ENABLED = old_ldap_login_enabled
 
     def test_submit_non_existing_user(self):
         with patch("redash.handlers.authentication.login_user") as login_user_mock:

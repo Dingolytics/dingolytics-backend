@@ -211,6 +211,35 @@ class Settings(BaseSettings):
     # Vector settings
     VECTOR_INGEST_URL: str = "http://localhost:8180"
 
+    # SAML settings
+    SAML_SCHEME_OVERRIDE: str = ""
+    SAML_ENCRYPTION_PEM_PATH: str = ""
+    SAML_ENCRYPTION_CERT_PATH: str = ""
+    SAML_ENCRYPTION_ENABLED = False
+
+    # Google OAuth settings
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_OAUTH_ENABLED: bool = False
+
+    # LDAP settings
+    # If the organization setting auth_password_login_enabled is not false,
+    # then users will still be able to login through Redash instead of
+    # the LDAP server.
+    LDAP_LOGIN_ENABLED: bool = False
+    LDAP_SSL: bool = False
+    # Choose authentication method(SIMPLE, ANONYMOUS or NTLM).
+    LDAP_AUTH_METHOD: str = "SIMPLE"
+    # The LDAP directory address (ex. ldap://10.0.10.1:389)
+    LDAP_HOST_URL: str = None
+    LDAP_BIND_DN: str = None
+    LDAP_BIND_DN_PASSWORD: str = ""
+    LDAP_DISPLAY_NAME_KEY: str = "displayName"
+    LDAP_EMAIL_KEY: str = "mail"
+    LDAP_CUSTOM_USERNAME_PROMPT: str = "LDAP/AD/SSO username:"
+    LDAP_SEARCH_TEMPLATE: str = "(cn=%(username)s)"
+    LDAP_SEARCH_DN: str = None
+
     @property
     def REDIS_FULL_URL(self) -> str:
         return add_decode_responses_to_redis_url(self.REDIS_URL)

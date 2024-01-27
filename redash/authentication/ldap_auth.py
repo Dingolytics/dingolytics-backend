@@ -9,7 +9,7 @@ from flask_login import current_user
 try:
     from ldap3 import Server, Connection
 except ImportError:
-    if settings.LDAP_LOGIN_ENABLED:
+    if settings.S.LDAP_LOGIN_ENABLED:
         print(
             "The ldap3 library was not found. This is required to use LDAP"
             "authentication (see requirements.txt)."
@@ -35,7 +35,7 @@ def login(org_slug=None):
     unsafe_next_path = request.args.get("next", index_url)
     next_path = get_next_path(unsafe_next_path)
 
-    if not settings.LDAP_LOGIN_ENABLED:
+    if not settings.S.LDAP_LOGIN_ENABLED:
         logger.error("Cannot use LDAP for login without being enabled in settings")
         return redirect(url_for("redash.index", next=next_path))
 
@@ -48,8 +48,8 @@ def login(org_slug=None):
         if ldap_user is not None:
             user = create_and_login_user(
                 current_org,
-                ldap_user[settings.LDAP_DISPLAY_NAME_KEY][0],
-                ldap_user[settings.LDAP_EMAIL_KEY][0],
+                ldap_user[settings.S.LDAP_DISPLAY_NAME_KEY][0],
+                ldap_user[settings.S.LDAP_EMAIL_KEY][0],
             )
             if user is None:
                 return logout_and_redirect_to_index()
@@ -64,28 +64,31 @@ def login(org_slug=None):
         next=next_path,
         email=request.form.get("email", ""),
         show_password_login=True,
-        username_prompt=settings.LDAP_CUSTOM_USERNAME_PROMPT,
+        username_prompt=settings.S.LDAP_CUSTOM_USERNAME_PROMPT,
         hide_forgot_password=True,
     )
 
 
 def auth_ldap_user(username, password):
-    server = Server(settings.LDAP_HOST_URL, use_ssl=settings.LDAP_SSL)
-    if settings.LDAP_BIND_DN is not None:
+    server = Server(settings.S.LDAP_HOST_URL, use_ssl=settings.S.LDAP_SSL)
+    if settings.S.LDAP_BIND_DN is not None:
         conn = Connection(
             server,
-            settings.LDAP_BIND_DN,
-            password=settings.LDAP_BIND_DN_PASSWORD,
-            authentication=settings.LDAP_AUTH_METHOD,
+            settings.S.LDAP_BIND_DN,
+            password=settings.S.LDAP_BIND_DN_PASSWORD,
+            authentication=settings.S.LDAP_AUTH_METHOD,
             auto_bind=True,
         )
     else:
         conn = Connection(server, auto_bind=True)
 
     conn.search(
-        settings.LDAP_SEARCH_DN,
-        settings.LDAP_SEARCH_TEMPLATE % {"username": username},
-        attributes=[settings.LDAP_DISPLAY_NAME_KEY, settings.LDAP_EMAIL_KEY],
+        settings.S.LDAP_SEARCH_DN,
+        settings.S.LDAP_SEARCH_TEMPLATE % {"username": username},
+        attributes=[
+            settings.S.LDAP_DISPLAY_NAME_KEY,
+            settings.S.LDAP_EMAIL_KEY
+        ],
     )
 
     if len(conn.entries) == 0:

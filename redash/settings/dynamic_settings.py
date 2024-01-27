@@ -1,9 +1,11 @@
 from collections import defaultdict
 
-# Replace this method with your own implementation in case you want to limit the time limit on certain queries or users.
 def query_time_limit(is_scheduled, user_id, org_id):
+    """Replace this method with your own implementation in
+    case you want to limit the time limit on certain
+    queries or users.
+    """
     from redash import settings
-
     if is_scheduled:
         return settings.S.SCHEDULED_QUERY_TIME_LIMIT
     else:
@@ -24,8 +26,8 @@ def periodic_jobs():
     pass
 
 
-# This provides the ability to override the way we store QueryResult's data column.
-# Reference implementation: redash.models.DBPersistence
+# This provides the ability to override the way we store QueryResult's
+# data column. Reference implementation: redash.models.DBPersistence
 QueryResultPersistence = None
 
 

@@ -15,50 +15,6 @@ from .helpers import (
 )
 from .organization import DATE_FORMAT, TIME_FORMAT  # noqa
 
-GOOGLE_CLIENT_ID = os.environ.get("REDASH_GOOGLE_CLIENT_ID", "")
-GOOGLE_CLIENT_SECRET = os.environ.get("REDASH_GOOGLE_CLIENT_SECRET", "")
-GOOGLE_OAUTH_ENABLED = bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
-
-# If Redash is behind a proxy it might sometimes receive a X-Forwarded-Proto of HTTP
-# even if your actual Redash URL scheme is HTTPS. This will cause Flask to build
-# the SAML redirect URL incorrect thus failing auth. This is especially common if
-# you're behind a SSL/TCP configured AWS ELB or similar.
-# This setting will force the URL scheme.
-SAML_SCHEME_OVERRIDE = os.environ.get("REDASH_SAML_SCHEME_OVERRIDE", "")
-
-SAML_ENCRYPTION_PEM_PATH = os.environ.get("REDASH_SAML_ENCRYPTION_PEM_PATH", "")
-SAML_ENCRYPTION_CERT_PATH = os.environ.get("REDASH_SAML_ENCRYPTION_CERT_PATH", "")
-SAML_ENCRYPTION_ENABLED = SAML_ENCRYPTION_PEM_PATH != "" and SAML_ENCRYPTION_CERT_PATH != ""
-
-# If the organization setting auth_password_login_enabled is not false, then users will still be
-# able to login through Redash instead of the LDAP server
-LDAP_LOGIN_ENABLED = parse_boolean(os.environ.get("REDASH_LDAP_LOGIN_ENABLED", "false"))
-# Bind LDAP using SSL. Default is False
-LDAP_SSL = parse_boolean(os.environ.get("REDASH_LDAP_USE_SSL", "false"))
-# Choose authentication method(SIMPLE, ANONYMOUS or NTLM). Default is SIMPLE
-LDAP_AUTH_METHOD = os.environ.get("REDASH_LDAP_AUTH_METHOD", "SIMPLE")
-# The LDAP directory address (ex. ldap://10.0.10.1:389)
-LDAP_HOST_URL = os.environ.get("REDASH_LDAP_URL", None)
-# The DN & password used to connect to LDAP to determine the identity of the user being authenticated.
-# For AD this should be "org\\user".
-LDAP_BIND_DN = os.environ.get("REDASH_LDAP_BIND_DN", None)
-LDAP_BIND_DN_PASSWORD = os.environ.get("REDASH_LDAP_BIND_DN_PASSWORD", "")
-# AD/LDAP email and display name keys
-LDAP_DISPLAY_NAME_KEY = os.environ.get("REDASH_LDAP_DISPLAY_NAME_KEY", "displayName")
-LDAP_EMAIL_KEY = os.environ.get("REDASH_LDAP_EMAIL_KEY", "mail")
-# Prompt that should be shown above username/email field.
-LDAP_CUSTOM_USERNAME_PROMPT = os.environ.get(
-    "REDASH_LDAP_CUSTOM_USERNAME_PROMPT", "LDAP/AD/SSO username:"
-)
-# LDAP Search DN TEMPLATE (for AD this should be "(sAMAccountName=%(username)s)"")
-LDAP_SEARCH_TEMPLATE = os.environ.get(
-    "REDASH_LDAP_SEARCH_TEMPLATE", "(cn=%(username)s)"
-)
-# The schema to bind to (ex. cn=users,dc=ORG,dc=local)
-LDAP_SEARCH_DN = os.environ.get(
-    "REDASH_LDAP_SEARCH_DN", os.environ.get("REDASH_SEARCH_DN")
-)
-
 ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE = os.environ.get(
     "REDASH_ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE", "({state}) {alert_name}"
 )
