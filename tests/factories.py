@@ -1,5 +1,5 @@
 from passlib.apps import custom_app_context as pwd_context
-import redash.models
+from redash import models
 from redash.models import db
 from redash.permissions import ACCESS_TYPE_MODIFY
 from redash.utils import gen_query_hash, utcnow
@@ -41,7 +41,7 @@ class Sequence(object):
 
 
 user_factory = ModelFactory(
-    redash.models.User,
+    models.User,
     name="John Doe",
     email=Sequence("test{}@example.com"),
     password_hash=pwd_context.hash("test1234"),
@@ -50,19 +50,19 @@ user_factory = ModelFactory(
 )
 
 org_factory = ModelFactory(
-    redash.models.Organization,
+    models.Organization,
     name=Sequence("Org {}"),
     slug=Sequence("org{}.example.com"),
     settings={},
 )
 
 group_factory = ModelFactory(
-    redash.models.Group,
+    models.Group,
     name=Sequence("Test {}"),
 )
 
 data_source_factory = ModelFactory(
-    redash.models.DataSource,
+    models.DataSource,
     name=Sequence("Test {}"),
     type="pg",
     # If we don't use lambda here it will reuse the same options between tests:
@@ -71,14 +71,14 @@ data_source_factory = ModelFactory(
 )
 
 stream_factory = ModelFactory(
-    redash.models.Stream,
+    models.Stream,
     name=Sequence("Test {}"),
     data_source=data_source_factory.create,
     db_table='test_stream',    
 )
 
 dashboard_factory = ModelFactory(
-    redash.models.Dashboard,
+    models.Dashboard,
     name="test",
     user=user_factory.create,
     layout="[]",
@@ -86,10 +86,10 @@ dashboard_factory = ModelFactory(
     org=1,
 )
 
-api_key_factory = ModelFactory(redash.models.ApiKey, object=dashboard_factory.create)
+api_key_factory = ModelFactory(models.ApiKey, object=dashboard_factory.create)
 
 query_factory = ModelFactory(
-    redash.models.Query,
+    models.Query,
     name="Query",
     description="",
     query_text="SELECT 1",
@@ -102,7 +102,7 @@ query_factory = ModelFactory(
 )
 
 query_with_params_factory = ModelFactory(
-    redash.models.Query,
+    models.Query,
     name="New Query with Params",
     description="",
     query_text="SELECT {{param1}}",
@@ -115,16 +115,16 @@ query_with_params_factory = ModelFactory(
 )
 
 access_permission_factory = ModelFactory(
-    redash.models.AccessPermission,
+    models.AccessPermission,
     object_id=query_factory.create,
-    object_type=redash.models.Query.__name__,
+    object_type=models.Query.__name__,
     access_type=ACCESS_TYPE_MODIFY,
     grantor=user_factory.create,
     grantee=user_factory.create,
 )
 
 alert_factory = ModelFactory(
-    redash.models.Alert,
+    models.Alert,
     name=Sequence("Alert {}"),
     query_rel=query_factory.create,
     user=user_factory.create,
@@ -132,7 +132,7 @@ alert_factory = ModelFactory(
 )
 
 query_result_factory = ModelFactory(
-    redash.models.QueryResult,
+    models.QueryResult,
     data='{"columns":{}, "rows":[]}',
     runtime=1,
     retrieved_at=utcnow,
@@ -143,7 +143,7 @@ query_result_factory = ModelFactory(
 )
 
 visualization_factory = ModelFactory(
-    redash.models.Visualization,
+    models.Visualization,
     type="CHART",
     query_rel=query_factory.create,
     name="Chart",
@@ -152,7 +152,7 @@ visualization_factory = ModelFactory(
 )
 
 widget_factory = ModelFactory(
-    redash.models.Widget,
+    models.Widget,
     width=1,
     options="{}",
     dashboard=dashboard_factory.create,
@@ -160,7 +160,7 @@ widget_factory = ModelFactory(
 )
 
 destination_factory = ModelFactory(
-    redash.models.NotificationDestination,
+    models.NotificationDestination,
     org_id=1,
     user=user_factory.create,
     name=Sequence("Destination {}"),
@@ -169,14 +169,14 @@ destination_factory = ModelFactory(
 )
 
 alert_subscription_factory = ModelFactory(
-    redash.models.AlertSubscription,
+    models.AlertSubscription,
     user=user_factory.create,
     destination=destination_factory.create,
     alert=alert_factory.create,
 )
 
 query_snippet_factory = ModelFactory(
-    redash.models.QuerySnippet,
+    models.QuerySnippet,
     trigger=Sequence("trigger {}"),
     description="description",
     snippet="snippet",
@@ -185,7 +185,7 @@ query_snippet_factory = ModelFactory(
 
 class Factory(object):
     def __init__(self):
-        self.org, self.admin_group, self.default_group = redash.models.init_db()
+        self.org, self.admin_group, self.default_group = models.init_db()
         self._data_source = None
         self._user = None
 
@@ -203,8 +203,9 @@ class Factory(object):
         if self._data_source is None:
             self._data_source = data_source_factory.create(org=self.org)
             db.session.add(
-                redash.models.DataSourceGroup(
-                    group=self.default_group, data_source=self._data_source
+                models.DataSourceGroup(
+                    group=self.default_group,
+                    data_source=self._data_source
                 )
             )
         return self._data_source
@@ -212,15 +213,17 @@ class Factory(object):
     def create_org(self, **kwargs):
         org = org_factory.create(**kwargs)
         self.create_group(
-            org=org, type=redash.models.Group.BUILTIN_GROUP, name="default"
+            name="default",
+            permissions=models.Group.DEFAULT_PERMISSIONS,
+            org=org,
+            type=models.Group.BUILTIN_GROUP,
         )
         self.create_group(
-            org=org,
-            type=redash.models.Group.BUILTIN_GROUP,
             name="admin",
             permissions=["admin"],
+            org=org,
+            type=models.Group.BUILTIN_GROUP,
         )
-
         return org
 
     def create_user(self, **kwargs):
@@ -251,7 +254,7 @@ class Factory(object):
         args = {"name": "Group", "org": self.org}
         args.update(kwargs)
         return group_factory.create(**args)
-        # g = redash.models.Group(**args)
+        # g = models.Group(**args)
         # return g
 
     def create_alert(self, **kwargs):
@@ -281,7 +284,7 @@ class Factory(object):
 
         if group:
             db.session.add(
-                redash.models.DataSourceGroup(
+                models.DataSourceGroup(
                     group=group, data_source=data_source, view_only=view_only
                 )
             )

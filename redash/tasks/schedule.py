@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import logging
 import hashlib
 import json
@@ -7,7 +6,7 @@ from datetime import datetime, timedelta
 from rq.job import Job
 from rq_scheduler import Scheduler
 
-from redash import settings, rq_redis_connection, statsd_client
+from redash import settings, rq_redis_connection
 from redash.tasks import (
     sync_user_details,
     refresh_queries,
@@ -32,7 +31,9 @@ class StatsdRecordingScheduler(Scheduler):
 
 
 rq_scheduler = StatsdRecordingScheduler(
-    connection=rq_redis_connection, queue_name="periodic", interval=5
+    connection=rq_redis_connection,
+    queue_name="periodic",
+    interval=5
 )
 
 

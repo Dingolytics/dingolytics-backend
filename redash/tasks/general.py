@@ -1,6 +1,4 @@
 import requests
-from datetime import datetime
-
 from flask_mail import Message
 from redash import mail, models, settings
 from redash.models import users

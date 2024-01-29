@@ -5,7 +5,7 @@ import time
 from functools import reduce
 from operator import or_
 
-from flask import current_app as app, url_for, request_started
+from flask import url_for, request_started
 from flask_login import current_user, AnonymousUserMixin, UserMixin
 from passlib.apps import custom_app_context as pwd_context
 # from sqlalchemy.exc import DBAPIError
