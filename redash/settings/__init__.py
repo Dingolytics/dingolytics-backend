@@ -11,7 +11,6 @@ from .helpers import (
     add_decode_responses_to_redis_url,
 #     cast_int_or_default
 )
-from .organization import DATE_FORMAT, TIME_FORMAT  # noqa
 
 __all__ = [
     "S",
@@ -21,10 +20,6 @@ __all__ = [
     "parse_boolean",
     "fix_assets_path",
     "add_decode_responses_to_redis_url",
-
-    # TODO: Check if these are actually used (organization settings)
-    "DATE_FORMAT",
-    "TIME_FORMAT",
 ]
 
 
@@ -59,6 +54,12 @@ class Settings(BaseSettings):
     BLOCKED_DOMAINS: List[str] = ["qq.com"]
     OVERRIDES_MODULE: PyObject = "redash.overrides"
 
+    # Format settings
+    DATE_FORMAT: str = "DD/MM/YY"
+    TIME_FORMAT: str = "HH:mm"
+    INTEGER_FORMAT: str = "0,0"
+    FLOAT_FORMAT: str = "0,0.00"
+
     # Client side options
     ALLOW_SCRIPTS_IN_USER_INPUT: bool = False
     DASHBOARD_REFRESH_INTERVALS: List[int] = [
@@ -82,6 +83,11 @@ class Settings(BaseSettings):
     FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS: bool = False
     FEATURE_AUTO_PUBLISH_NAMED_QUERIES: bool = True
     FEATURE_EXTENDED_ALERT_OPTIONS: bool = False
+    FEATURE_SHOW_PERMISSIONS_CONTROL: bool = False
+    FEATURE_MULTI_BYTE_SEARCH: bool = False
+    FEATURE_SEND_EMAIL_ON_FAILED_SCHEDULED_QUERIES: bool = False
+    FEATURE_HIDE_PLOTLY_MODE_BAR: bool = False
+    FEATURE_DISABLE_PUBLIC_URLS: bool = False
 
     # Flask-Mail settings
     MAIL_SERVER: str = "localhost"
@@ -219,8 +225,8 @@ class Settings(BaseSettings):
     REQUESTS_ALLOW_REDIRECTS: bool = True
     REQUESTS_PRIVATE_ADDRESS_BLOCK: bool = True
 
-    # BigQuery client settings
-    BIGQUERY_HTTP_TIMEOUT: int = 600
+    # Password login settings
+    PASSWORD_LOGIN_ENABLED: bool = True
 
     # Remote login settings
     #
@@ -250,13 +256,14 @@ class Settings(BaseSettings):
     REMOTE_USER_LOGIN_ENABLED: bool = False
     REMOTE_USER_HEADER: str = "X-Forwarded-Remote-User"
 
-    # Support for Sentry (https://getsentry.com/).
-    # Just set your Sentry DSN to enable it:
-    SENTRY_DSN: str = ""
-    SENTRY_ENVIRONMENT: str = ""
-
-    # Vector settings
-    VECTOR_INGEST_URL: str = "http://localhost:8180"
+    # JWT settings
+    JWT_LOGIN_ENABLED: bool = False
+    JWT_AUTH_ISSUER: str = ""
+    JWT_AUTH_PUBLIC_CERTS_URL: str = ""
+    JWT_AUTH_AUDIENCE: str = ""
+    JWT_AUTH_ALGORITHMS: List[str] = ["HS256", "RS256", "ES256"]
+    JWT_AUTH_COOKIE_NAME: str = ""
+    JWT_AUTH_HEADER_NAME: str = ""
 
     # SAML settings
     SAML_SCHEME_OVERRIDE: str = ""
@@ -287,6 +294,26 @@ class Settings(BaseSettings):
     LDAP_SEARCH_TEMPLATE: str = "(cn=%(username)s)"
     LDAP_SEARCH_DN: str = None
 
+    # SAML settings
+    SAML_LOGIN_TYPE: str = ""
+    SAML_METADATA_URL: str = ""
+    SAML_ENTITY_ID: str = ""
+    SAML_NAMEID_FORMAT: str = ""
+    SAML_SSO_URL: str = ""
+    SAML_X509_CERT: str = ""
+    SAML_SP_SETTINGS: str = ""
+
+    # Support for Sentry (https://getsentry.com/).
+    # Just set your Sentry DSN to enable it:
+    SENTRY_DSN: str = ""
+    SENTRY_ENVIRONMENT: str = ""
+
+    # BigQuery client settings
+    BIGQUERY_HTTP_TIMEOUT: int = 600
+
+    # Vector settings
+    VECTOR_INGEST_URL: str = "http://localhost:8180"
+
     @property
     def REDIS_FULL_URL(self) -> str:
         return add_decode_responses_to_redis_url(self.REDIS_URL)
@@ -302,6 +329,13 @@ class Settings(BaseSettings):
         default_set = set(self.DESTINATIONS_DEFAULT)
         disabled_set = set(self.DESTINATIONS_DISABLED)
         return list(default_set - disabled_set)
+
+    @property
+    def SAML_LOGIN_ENABLED(self) -> bool:
+        if self.SAML_LOGIN_TYPE == "static":
+            return bool(self.SAML_SSO_URL and self.SAML_METADATA_URL)
+        else:
+            return bool(self.SAML_METADATA_URL)
 
     # @validator("SECRET_KEY")
     # def validate_secret_key(cls, v):
@@ -324,6 +358,36 @@ class Settings(BaseSettings):
 
     def email_configured(self) -> bool:
         return self.MAIL_DEFAULT_SENDER is not None
+
+    def org_settings(self) -> dict:
+        return {
+            "beacon_consent": None,
+            "auth_password_login_enabled": self.PASSWORD_LOGIN_ENABLED,
+            "auth_saml_enabled": self.SAML_LOGIN_ENABLED,
+            "auth_saml_type": self.SAML_LOGIN_TYPE,
+            "auth_saml_entity_id": self.SAML_ENTITY_ID,
+            "auth_saml_metadata_url": self.SAML_METADATA_URL,
+            "auth_saml_nameid_format": self.SAML_NAMEID_FORMAT,
+            "auth_saml_sso_url": self.SAML_SSO_URL,
+            "auth_saml_x509_cert": self.SAML_X509_CERT,
+            "auth_saml_sp_settings": self.SAML_SP_SETTINGS,
+            "date_format": self.DATE_FORMAT,
+            "time_format": self.TIME_FORMAT,
+            "integer_format": self.INTEGER_FORMAT,
+            "float_format": self.FLOAT_FORMAT,
+            "auth_jwt_login_enabled": self.JWT_LOGIN_ENABLED,
+            "auth_jwt_auth_issuer": self.JWT_AUTH_ISSUER,
+            "auth_jwt_auth_public_certs_url": self.JWT_AUTH_PUBLIC_CERTS_URL,
+            "auth_jwt_auth_audience": self.JWT_AUTH_AUDIENCE,
+            "auth_jwt_auth_algorithms": self.JWT_AUTH_ALGORITHMS,
+            "auth_jwt_auth_cookie_name": self.JWT_AUTH_COOKIE_NAME,
+            "auth_jwt_auth_header_name": self.JWT_AUTH_HEADER_NAME,
+            "multi_byte_search_enabled": self.FEATURE_MULTI_BYTE_SEARCH,
+            "feature_show_permissions_control": self.FEATURE_SHOW_PERMISSIONS_CONTROL,
+            "send_email_on_failed_scheduled_queries": self.FEATURE_SEND_EMAIL_ON_FAILED_SCHEDULED_QUERIES,
+            "hide_plotly_mode_bar": self.FEATURE_HIDE_PLOTLY_MODE_BAR,
+            "disable_public_urls": self.FEATURE_DISABLE_PUBLIC_URLS,
+        }
 
 S = get_settings()
 

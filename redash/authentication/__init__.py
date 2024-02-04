@@ -10,7 +10,6 @@ from flask_login import LoginManager, login_user, logout_user, user_logged_in
 from redash import models, settings
 from redash.authentication import jwt_auth
 from redash.authentication.org_resolving import current_org
-from redash.settings.organization import settings as org_settings
 from redash.tasks import record_event
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
@@ -76,7 +75,7 @@ def request_loader(request):
         )
         user = hmac_load_user_from_request(request)
 
-    if org_settings["auth_jwt_login_enabled"] and user is None:
+    if settings.S.org_settings()["auth_jwt_login_enabled"] and user is None:
         user = jwt_token_load_user_from_request(request)
 
     return user
@@ -169,8 +168,8 @@ def api_key_load_user_from_request(request):
 
 
 def jwt_token_load_user_from_request(request):
+    org_settings = settings.S.org_settings()
     org = current_org._get_current_object()
-
     payload = None
 
     if org_settings["auth_jwt_auth_cookie_name"]:
