@@ -125,7 +125,7 @@ class TestEnqueueTask(BaseTestCase):
 
         self.assertEqual(2, enqueue.call_count)
 
-    @patch("redash.settings.dynamic_settings.query_time_limit", return_value=60)
+    @patch("redash.settings.D.query_time_limit", return_value=60)
     def test_limits_query_time(self, _, enqueue, __):
         query = self.factory.create_query()
 
