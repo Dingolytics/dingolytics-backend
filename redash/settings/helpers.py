@@ -7,18 +7,6 @@ def fix_assets_path(path):
     return fullpath
 
 
-def array_from_string(s):
-    array = s.split(",")
-    if "" in array:
-        array.remove("")
-
-    return array
-
-
-def set_from_string(s):
-    return set(array_from_string(s))
-
-
 def parse_boolean(s):
     """Takes a string and returns the equivalent as a boolean value."""
     s = s.strip().lower()
@@ -28,20 +16,6 @@ def parse_boolean(s):
         return False
     else:
         raise ValueError("Invalid boolean value %r" % s)
-
-
-def cast_int_or_default(val, default=None):
-    try:
-        return int(val)
-    except (ValueError, TypeError):
-        return default
-
-
-def int_or_none(value):
-    if value is None:
-        return value
-
-    return int(value)
 
 
 def add_decode_responses_to_redis_url(url):

@@ -4,12 +4,8 @@ from pydantic import BaseSettings, PyObject  #, ValidationError, validator
 
 from .helpers import (
     fix_assets_path,
-#     array_from_string,
     parse_boolean,
-#     int_or_none,
-#     set_from_string,
     add_decode_responses_to_redis_url,
-#     cast_int_or_default
 )
 
 __all__ = [
@@ -53,6 +49,9 @@ class Settings(BaseSettings):
     }
     BLOCKED_DOMAINS: List[str] = ["qq.com"]
     OVERRIDES_MODULE: PyObject = "redash.overrides"
+
+    # Vector settings
+    VECTOR_INGEST_URL: str = "http://localhost:8180"
 
     # Format settings
     DATE_FORMAT: str = "DD/MM/YY"
@@ -311,8 +310,8 @@ class Settings(BaseSettings):
     # BigQuery client settings
     BIGQUERY_HTTP_TIMEOUT: int = 600
 
-    # Vector settings
-    VECTOR_INGEST_URL: str = "http://localhost:8180"
+    # DataBricks client settings
+    DATABRICKS_ROW_LIMIT: int = 20000
 
     @property
     def REDIS_FULL_URL(self) -> str:

@@ -1,7 +1,5 @@
 import datetime
 import logging
-import os
-import sqlparse
 from redash.query_runner import (
     NotSupported,
     register,
@@ -13,7 +11,6 @@ from redash.query_runner import (
     TYPE_INTEGER,
     TYPE_FLOAT,
 )
-from redash.settings import cast_int_or_default
 from redash.utils import json_dumps, json_loads
 from redash.query_runner import split_sql_statements
 from redash import __version__, settings, statsd_client
@@ -33,8 +30,6 @@ TYPES_MAP = {
     int: TYPE_INTEGER,
     float: TYPE_FLOAT,
 }
-
-ROW_LIMIT = cast_int_or_default(os.environ.get("DATABRICKS_ROW_LIMIT"), 20000)
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +90,7 @@ class Databricks(BaseSQLQueryRunner):
         return connection.cursor()
 
     def run_query(self, query, user):
+        row_limit = settings.S.DATABRICKS_ROW_LIMIT
         try:
             cursor = self._get_cursor()
 
@@ -103,7 +99,7 @@ class Databricks(BaseSQLQueryRunner):
                 cursor.execute(stmt)
 
             if cursor.description is not None:
-                result_set = cursor.fetchmany(ROW_LIMIT)
+                result_set = cursor.fetchmany(row_limit)
                 columns = self.fetch_columns(
                     [
                         (i[0], TYPES_MAP.get(i[1], TYPE_STRING))
@@ -119,7 +115,7 @@ class Databricks(BaseSQLQueryRunner):
                 data = {"columns": columns, "rows": rows}
 
                 if (
-                    len(result_set) >= ROW_LIMIT
+                    len(result_set) >= row_limit
                     and cursor.fetchone() is not None
                 ):
                     logger.warning("Truncated result set.")
