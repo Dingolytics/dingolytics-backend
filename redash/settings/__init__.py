@@ -39,10 +39,6 @@ class Settings(BaseSettings):
     MAX_FAILURE_REPORTS_PER_QUERY: int = 100
     ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE: str = "({state}) {alert_name}"
     EVENT_REPORTING_WEBHOOKS: List[str] = []
-    SQLPARSE_FORMAT_OPTIONS: Dict[str, Any] = {
-        "reindent": True,
-        "keyword_case": "upper",
-    }
     BLOCKED_DOMAINS: List[str] = ["qq.com"]
     DYNAMIC_SETTINGS_MODULE: PyObject = "redash.overrides"
 
@@ -50,10 +46,16 @@ class Settings(BaseSettings):
     VECTOR_INGEST_URL: str = "http://localhost:8180"
 
     # Format settings
-    DATE_FORMAT: str = "DD/MM/YY"
-    TIME_FORMAT: str = "HH:mm"
-    INTEGER_FORMAT: str = "0,0"
-    FLOAT_FORMAT: str = "0,0.00"
+    FORMAT_DATE: str = "DD/MM/YY"
+    FORMAT_TIME: str = "HH:mm"
+    FORMAT_INTEGER: str = "0,0"
+    FORMAT_FLOAT: str = "0,0.00"
+
+    # SQL parser settings
+    SQLPARSE_FORMAT_OPTIONS: Dict[str, Any] = {
+        "reindent": True,
+        "keyword_case": "upper",
+    }
 
     # Client side options
     ALLOW_SCRIPTS_IN_USER_INPUT: bool = False
@@ -95,11 +97,13 @@ class Settings(BaseSettings):
     MAIL_MAX_EMAILS: int = None
     MAIL_ASCII_ATTACHMENTS: bool = False
 
-    # Cookie settings
-    COOKIES_SECURE: bool = True
+    # Flask-Login cookie settings
+    # https://flask-login.readthedocs.io/en/latest/#cookie-settings
     REMEMBER_COOKIE_SECURE: bool = True
     REMEMBER_COOKIE_HTTPONLY: bool = True
     REMEMBER_COOKIE_DURATION: int = 3600 * 24 * 31
+
+    # Flask session settings
     SESSION_COOKIE_SECURE: bool = True
     SESSION_COOKIE_HTTPONLY: bool = True
     SESSION_EXPIRY_TIME: int = 3600 * 6
@@ -366,10 +370,10 @@ class Settings(BaseSettings):
             "auth_saml_sso_url": self.SAML_SSO_URL,
             "auth_saml_x509_cert": self.SAML_X509_CERT,
             "auth_saml_sp_settings": self.SAML_SP_SETTINGS,
-            "date_format": self.DATE_FORMAT,
-            "time_format": self.TIME_FORMAT,
-            "integer_format": self.INTEGER_FORMAT,
-            "float_format": self.FLOAT_FORMAT,
+            "date_format": self.FORMAT_DATE,
+            "time_format": self.FORMAT_TIME,
+            "integer_format": self.FORMAT_INTEGER,
+            "float_format": self.FORMAT_FLOAT,
             "auth_jwt_login_enabled": self.JWT_LOGIN_ENABLED,
             "auth_jwt_auth_issuer": self.JWT_AUTH_ISSUER,
             "auth_jwt_auth_public_certs_url": self.JWT_AUTH_PUBLIC_CERTS_URL,
