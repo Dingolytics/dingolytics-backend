@@ -2,26 +2,22 @@ from functools import lru_cache
 from typing import Dict, List, Any
 from pydantic import BaseSettings, PyObject  #, ValidationError, validator
 
-from .helpers import (
+from ._helpers import (
     fix_assets_path,
     parse_boolean,
     add_decode_responses_to_redis_url,
 )
 
 __all__ = [
-    "S",
-    "dynamic_settings",
+    "S",  # Default global settings
+    "D",  # Dynamic settings module
+    "get_settings",
 
-    # TODO: Import explicitly from helpers
+    # Helpers
     "parse_boolean",
     "fix_assets_path",
     "add_decode_responses_to_redis_url",
 ]
-
-
-@lru_cache()
-def get_settings() -> 'Settings':
-    return Settings()
 
 
 class Settings(BaseSettings):
@@ -48,7 +44,7 @@ class Settings(BaseSettings):
         "keyword_case": "upper",
     }
     BLOCKED_DOMAINS: List[str] = ["qq.com"]
-    OVERRIDES_MODULE: PyObject = "redash.overrides"
+    DYNAMIC_SETTINGS_MODULE: PyObject = "redash.overrides"
 
     # Vector settings
     VECTOR_INGEST_URL: str = "http://localhost:8180"
@@ -388,6 +384,12 @@ class Settings(BaseSettings):
             "disable_public_urls": self.FEATURE_DISABLE_PUBLIC_URLS,
         }
 
+
+@lru_cache()
+def get_settings() -> "Settings":
+    return Settings()
+
+
 S = get_settings()
 
-dynamic_settings = S.OVERRIDES_MODULE
+D = S.DYNAMIC_SETTINGS_MODULE

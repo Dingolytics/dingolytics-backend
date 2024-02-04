@@ -501,7 +501,7 @@ def with_ssh_tunnel(query_runner, details):
                 remote_address = (remote_host, remote_port)
                 auth = {
                     "ssh_username": details["ssh_username"],
-                    **settings.dynamic_settings.ssh_tunnel_auth(),
+                    **settings.D.ssh_tunnel_auth(),
                 }
                 server = stack.enter_context(
                     open_tunnel(

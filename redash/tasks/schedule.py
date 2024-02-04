@@ -105,7 +105,7 @@ def periodic_job_definitions():
         })
 
     # Add your own custom periodic jobs in your dynamic_settings module.
-    jobs.extend(settings.dynamic_settings.periodic_jobs() or [])
+    jobs.extend(settings.D.periodic_jobs() or [])
 
     return jobs
 

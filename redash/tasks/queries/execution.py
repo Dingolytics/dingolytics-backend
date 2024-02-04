@@ -79,7 +79,7 @@ def enqueue_query(
                     queue_name = data_source.queue_name
                     scheduled_query_id = None
 
-                time_limit = settings.dynamic_settings.query_time_limit(
+                time_limit = settings.D.query_time_limit(
                     scheduled_query, user_id, data_source.org_id
                 )
                 metadata["Queue"] = queue_name

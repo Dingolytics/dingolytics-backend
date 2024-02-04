@@ -104,7 +104,7 @@ class GFKBase(object):
         self.object_id = value.id
 
 
-key_definitions = settings.dynamic_settings.database_key_definitions((db.Integer, {}))
+key_definitions = settings.D.database_key_definitions((db.Integer, {}))
 
 
 def key_type(name):

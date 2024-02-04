@@ -109,7 +109,7 @@ class DBPersistence(object):
 
 
 QueryResultPersistence = (
-    settings.dynamic_settings.QueryResultPersistence or DBPersistence
+    settings.D.QueryResultPersistence or DBPersistence
 )
 
 
