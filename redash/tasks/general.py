@@ -1,6 +1,4 @@
 import requests
-from datetime import datetime
-
 from flask_mail import Message
 from redash import mail, models, settings
 from redash.models import users
@@ -17,7 +15,7 @@ def record_event(raw_event):
     event = models.Event.record(raw_event)
     models.db.session.commit()
 
-    for hook in settings.EVENT_REPORTING_WEBHOOKS:
+    for hook in settings.S.EVENT_REPORTING_WEBHOOKS:
         logger.debug("Forwarding event to: %s", hook)
         try:
             data = {

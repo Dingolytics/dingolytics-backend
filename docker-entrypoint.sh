@@ -56,9 +56,9 @@ server() {
   # See http://docs.gunicorn.org/en/stable/settings.html#max-requests
   MAX_REQUESTS=${MAX_REQUESTS:-1000}
   MAX_REQUESTS_JITTER=${MAX_REQUESTS_JITTER:-100}
-  TIMEOUT=${REDASH_GUNICORN_TIMEOUT:-60}
+  TIMEOUT=${GUNICORN_TIMEOUT:-60}
   exec gunicorn -b 0.0.0.0:5000 --name redash \
-    -w${REDASH_WEB_WORKERS:-4} redash.main:app \
+    -w${GUNICORN_WEB_WORKERS:-4} redash.main:app \
     --max-requests $MAX_REQUESTS --max-requests-jitter \
     $MAX_REQUESTS_JITTER --timeout $TIMEOUT
 }

@@ -1,18 +1,14 @@
-from datetime import timedelta
+# from datetime import timedelta
 from functools import partial
 
-from flask import current_app
+# from flask import current_app
 import logging
 
 from rq import get_current_job
 from rq.decorators import job as rq_job
 
-from redash import (
-    create_app,
-    settings,
-    redis_connection,
-    rq_redis_connection,
-)
+from redash import settings, rq_redis_connection
+# from redash.app import create_app
 from redash.tasks.worker import Queue as RedashQueue
 
 
@@ -29,7 +25,11 @@ class StatsdRecordingJobDecorator(rq_job):  # noqa
     queue_class = RedashQueue
 
 
-job = partial(StatsdRecordingJobDecorator, connection=rq_redis_connection, failure_ttl=settings.JOB_DEFAULT_FAILURE_TTL)
+job = partial(
+    StatsdRecordingJobDecorator,
+    connection=rq_redis_connection,
+    failure_ttl=settings.S.JOB_DEFAULT_FAILURE_TTL
+)
 
 
 class CurrentJobFilter(logging.Filter):
@@ -46,7 +46,7 @@ def get_job_logger(name):
     logger = logging.getLogger("rq.job." + name)
 
     handler = logging.StreamHandler()
-    handler.formatter = logging.Formatter(settings.RQ_WORKER_JOB_LOG_FORMAT)
+    handler.formatter = logging.Formatter(settings.S.RQ_WORKER_LOG_FORMAT)
     handler.addFilter(CurrentJobFilter())
 
     logger.addHandler(handler)

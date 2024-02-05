@@ -56,7 +56,6 @@ def validate_data_source_type(type):
                 type, ", ".join(query_runners.keys())
             )
         )
-        print("OJNK")
         exit(1)
 
 

@@ -10,7 +10,6 @@ from flask_login import LoginManager, login_user, logout_user, user_logged_in
 from redash import models, settings
 from redash.authentication import jwt_auth
 from redash.authentication.org_resolving import current_org
-from redash.settings.organization import settings as org_settings
 from redash.tasks import record_event
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
@@ -21,9 +20,9 @@ logger = logging.getLogger("authentication")
 
 
 def get_login_url(external=False, next="/"):
-    if settings.MULTI_ORG and current_org == None:
+    if settings.S.MULTI_ORG and current_org == None:
         login_url = "/"
-    elif settings.MULTI_ORG:
+    elif settings.S.MULTI_ORG:
         login_url = url_for(
             "redash.login", org_slug=current_org.slug, next=next, _external=external
         )
@@ -64,19 +63,19 @@ def load_user(user_id_with_identity):
 def request_loader(request):
     user = None
 
-    if settings.AUTH_TYPE == "hmac":
+    if settings.S.AUTH_TYPE == "hmac":
         user = hmac_load_user_from_request(request)
-    elif settings.AUTH_TYPE == "api_key":
+    elif settings.S.AUTH_TYPE == "api_key":
         user = api_key_load_user_from_request(request)
     else:
         logger.warning(
             "Unknown authentication type ({}). Using default (HMAC).".format(
-                settings.AUTH_TYPE
+                settings.S.AUTH_TYPE
             )
         )
         user = hmac_load_user_from_request(request)
 
-    if org_settings["auth_jwt_login_enabled"] and user is None:
+    if settings.S.org_settings()["auth_jwt_login_enabled"] and user is None:
         user = jwt_token_load_user_from_request(request)
 
     return user
@@ -169,8 +168,8 @@ def api_key_load_user_from_request(request):
 
 
 def jwt_token_load_user_from_request(request):
+    org_settings = settings.S.org_settings()
     org = current_org._get_current_object()
-
     payload = None
 
     if org_settings["auth_jwt_auth_cookie_name"]:
@@ -234,9 +233,9 @@ def redirect_to_login():
 def logout_and_redirect_to_index():
     logout_user()
 
-    if settings.MULTI_ORG and current_org == None:
+    if settings.S.MULTI_ORG and current_org == None:
         index_url = "/"
-    elif settings.MULTI_ORG:
+    elif settings.S.MULTI_ORG:
         index_url = url_for("redash.index", org_slug=current_org.slug, _external=False)
     else:
         index_url = url_for("redash.index", _external=False)
@@ -255,12 +254,13 @@ def init_app(app):
 
     login_manager.init_app(app)
     login_manager.anonymous_user = models.AnonymousUser
-    login_manager.REMEMBER_COOKIE_DURATION = settings.REMEMBER_COOKIE_DURATION
+    login_manager.REMEMBER_COOKIE_DURATION = settings.S.REMEMBER_COOKIE_DURATION
 
     @app.before_request
     def extend_session():
+        lifetime = timedelta(seconds=settings.S.SESSION_EXPIRY_TIME)
         session.permanent = True
-        app.permanent_session_lifetime = timedelta(seconds=settings.SESSION_EXPIRY_TIME)
+        app.permanent_session_lifetime = lifetime
 
     # Authlib's flask oauth client requires a Flask app to initialize
     for blueprint in [

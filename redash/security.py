@@ -29,14 +29,14 @@ def init_app(app):
 
     app.config["WTF_CSRF_CHECK_DEFAULT"] = False
     app.config["WTF_CSRF_SSL_STRICT"] = False
-    app.config["WTF_CSRF_TIME_LIMIT"] = settings.CSRF_TIME_LIMIT
+    app.config["WTF_CSRF_TIME_LIMIT"] = settings.S.CSRF_TIME_LIMIT
 
     @app.after_request
     def inject_csrf_token(response):
         response.set_cookie("csrf_token", generate_csrf())
         return response
 
-    if settings.ENFORCE_CSRF:
+    if settings.S.CSRF_ENFORCED:
         @app.before_request
         def check_csrf():
             # BEGIN workaround until https://github.com/lepture/flask-wtf/pull/419 is merged
@@ -55,21 +55,21 @@ def init_app(app):
 
     talisman.init_app(
         app,
-        feature_policy=settings.FEATURE_POLICY,
-        force_https=settings.ENFORCE_HTTPS,
-        force_https_permanent=settings.ENFORCE_HTTPS_PERMANENT,
-        force_file_save=settings.ENFORCE_FILE_SAVE,
-        frame_options=settings.FRAME_OPTIONS,
-        frame_options_allow_from=settings.FRAME_OPTIONS_ALLOW_FROM,
-        strict_transport_security=settings.HSTS_ENABLED,
-        strict_transport_security_preload=settings.HSTS_PRELOAD,
-        strict_transport_security_max_age=settings.HSTS_MAX_AGE,
-        strict_transport_security_include_subdomains=settings.HSTS_INCLUDE_SUBDOMAINS,
-        content_security_policy=settings.CONTENT_SECURITY_POLICY,
-        content_security_policy_report_uri=settings.CONTENT_SECURITY_POLICY_REPORT_URI,
-        content_security_policy_report_only=settings.CONTENT_SECURITY_POLICY_REPORT_ONLY,
-        content_security_policy_nonce_in=settings.CONTENT_SECURITY_POLICY_NONCE_IN,
-        referrer_policy=settings.REFERRER_POLICY,
-        session_cookie_secure=settings.SESSION_COOKIE_SECURE,
-        session_cookie_http_only=settings.SESSION_COOKIE_HTTPONLY,
+        feature_policy=settings.S.TALISMAN_FEATURE_POLICY,
+        force_https=settings.S.TALISMAN_ENFORCE_HTTPS,
+        force_https_permanent=settings.S.TALISMAN_ENFORCE_HTTPS_PERMANENT,
+        force_file_save=settings.S.TALISMAN_ENFORCE_FILE_SAVE,
+        frame_options=settings.S.TALISMAN_FRAME_OPTIONS,
+        frame_options_allow_from=settings.S.TALISMAN_FRAME_OPTIONS_ALLOW_FROM,
+        strict_transport_security=settings.S.TALISMAN_HSTS_ENABLED,
+        strict_transport_security_preload=settings.S.TALISMAN_HSTS_PRELOAD,
+        strict_transport_security_max_age=settings.S.TALISMAN_HSTS_MAX_AGE,
+        strict_transport_security_include_subdomains=settings.S.TALISMAN_HSTS_INCLUDE_SUBDOMAINS,
+        content_security_policy=settings.S.CONTENT_SECURITY_POLICY,
+        content_security_policy_report_uri=settings.S.CONTENT_SECURITY_POLICY_REPORT_URI,
+        content_security_policy_report_only=settings.S.CONTENT_SECURITY_POLICY_REPORT_ONLY,
+        content_security_policy_nonce_in=settings.S.CONTENT_SECURITY_POLICY_NONCE_IN,
+        referrer_policy=settings.S.TALISMAN_REFERRER_POLICY,
+        session_cookie_secure=settings.S.SESSION_COOKIE_SECURE,
+        session_cookie_http_only=settings.S.SESSION_COOKIE_HTTPONLY,
     )

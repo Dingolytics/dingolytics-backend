@@ -35,7 +35,7 @@ class ClickHouse(BaseSQLQueryRunner):
         return {
             "type": "object",
             "properties": {
-                "url": {"type": "string", "default": "http://127.0.0.1:8123"},
+                "url": {"type": "string", "default": "http://localhost:8123"},
                 "user": {"type": "string", "default": "default"},
                 "password": {"type": "string"},
                 "dbname": {"type": "string", "title": "Database Name"},

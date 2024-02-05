@@ -33,7 +33,7 @@ class DataSource(BelongsToOrgMixin, db.Model):
         "encrypted_options",
         ConfigurationContainer.as_mutable(
             EncryptedConfiguration(
-                db.Text, settings.DATASOURCE_SECRET_KEY, FernetEngine
+                db.Text, settings.S.DATASOURCE_SECRET_KEY, FernetEngine
             )
         ),
     )

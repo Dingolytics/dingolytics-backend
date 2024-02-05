@@ -11,8 +11,6 @@ import random
 import re
 import uuid
 
-from json.encoder import INFINITY
-
 import pystache
 import pytz
 from flask import current_app
@@ -240,19 +238,16 @@ class UnicodeWriter:
 
 def collect_parameters_from_request(args):
     parameters = {}
-
     for k, v in args.items():
         if k.startswith("p_"):
             parameters[k[2:]] = v
-
     return parameters
 
 
 def base_url(org):
-    if settings.MULTI_ORG:
-        return "https://{}/{}".format(settings.HOST, org.slug)
-
-    return settings.HOST
+    if settings.S.MULTI_ORG:
+        return "https://{}/{}".format(settings.S.HOST, org.slug)
+    return settings.S.HOST
 
 
 def filter_none(d):
@@ -269,7 +264,6 @@ def deprecated():
     def wrapper(K):
         setattr(K, "deprecated", True)
         return K
-
     return wrapper
 
 

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_google_auth_url(next_path):
-    if settings.MULTI_ORG:
+    if settings.S.MULTI_ORG:
         google_auth_url = url_for(
             "google_oauth.authorize_org", next=next_path, org_slug=current_org.slug
         )
@@ -97,11 +97,11 @@ def render_token_login_page(template, org_slug, token, invite):
     return (
         render_template(
             template,
-            show_google_openid=settings.GOOGLE_OAUTH_ENABLED,
+            show_google_openid=settings.S.GOOGLE_OAUTH_ENABLED,
             google_auth_url=google_auth_url,
             show_saml_login=current_org.get_setting("auth_saml_enabled"),
-            show_remote_user_login=settings.REMOTE_USER_LOGIN_ENABLED,
-            show_ldap_login=settings.LDAP_LOGIN_ENABLED,
+            show_remote_user_login=settings.S.REMOTE_USER_LOGIN_ENABLED,
+            show_ldap_login=settings.S.LDAP_LOGIN_ENABLED,
             org_slug=org_slug,
             user=user,
         ),
@@ -141,14 +141,14 @@ def verify(token, org_slug=None):
     models.db.session.add(user)
     models.db.session.commit()
 
-    template_context = {"org_slug": org_slug} if settings.MULTI_ORG else {}
+    template_context = {"org_slug": org_slug} if settings.S.MULTI_ORG else {}
     next_url = url_for("redash.index", **template_context)
 
     return render_template("verify.html", next_url=next_url)
 
 
 @routes.route(org_scoped_rule("/forgot"), methods=["GET", "POST"])
-@limiter.limit(settings.THROTTLE_PASS_RESET_PATTERN)
+@limiter.limit(settings.S.THROTTLE_PASS_RESET_PATTERN)
 def forgot_password(org_slug=None):
     if not current_org.get_setting("auth_password_login_enabled"):
         abort(404)
@@ -183,11 +183,11 @@ def verification_email(org_slug=None):
 
 
 @routes.route(org_scoped_rule("/login"), methods=["GET", "POST"])
-@limiter.limit(settings.THROTTLE_LOGIN_PATTERN)
+@limiter.limit(settings.S.THROTTLE_LOGIN_PATTERN)
 def login(org_slug=None):
     # We intentionally use == as otherwise it won't actually use the proxy. So weird :O
     # noinspection PyComparisonWithNone
-    if current_org == None and not settings.MULTI_ORG:
+    if current_org == None and not settings.S.MULTI_ORG:
         return redirect("/setup")
     elif current_org == None:
         return redirect("/")
@@ -226,12 +226,12 @@ def login(org_slug=None):
         org_slug=org_slug,
         next=next_path,
         email=request.form.get("email", ""),
-        show_google_openid=settings.GOOGLE_OAUTH_ENABLED,
+        show_google_openid=settings.S.GOOGLE_OAUTH_ENABLED,
         google_auth_url=google_auth_url,
         show_password_login=current_org.get_setting("auth_password_login_enabled"),
         show_saml_login=current_org.get_setting("auth_saml_enabled"),
-        show_remote_user_login=settings.REMOTE_USER_LOGIN_ENABLED,
-        show_ldap_login=settings.LDAP_LOGIN_ENABLED,
+        show_remote_user_login=settings.S.REMOTE_USER_LOGIN_ENABLED,
+        show_ldap_login=settings.S.LDAP_LOGIN_ENABLED,
     )
 
 
@@ -242,7 +242,7 @@ def logout(org_slug=None):
 
 
 def base_href():
-    if settings.MULTI_ORG:
+    if settings.S.MULTI_ORG:
         base_href = url_for("redash.index", _external=True, org_slug=current_org.slug)
     else:
         base_href = url_for("redash.index", _external=True)
@@ -252,9 +252,13 @@ def base_href():
 
 def date_time_format_config():
     date_format = current_org.get_setting("date_format")
-    date_format_list = set(["DD/MM/YY", "MM/DD/YY", "YYYY-MM-DD", settings.DATE_FORMAT])
+    date_format_list = set([
+        "DD/MM/YY", "MM/DD/YY", "YYYY-MM-DD", settings.S.FORMAT_DATE
+    ])
     time_format = current_org.get_setting("time_format")
-    time_format_list = set(["HH:mm", "HH:mm:ss", "HH:mm:ss.SSS", settings.TIME_FORMAT])
+    time_format_list = set([
+        "HH:mm", "HH:mm:ss", "HH:mm:ss.SSS", settings.S.FORMAT_TIME
+    ])
     return {
         "dateFormat": date_format,
         "dateFormatList": list(date_format_list),
@@ -285,8 +289,9 @@ def client_config():
     ):
         client_config["showBeaconConsentMessage"] = True
 
+    S = settings.S
     defaults = {
-        "allowScriptsInUserInput": settings.ALLOW_SCRIPTS_IN_USER_INPUT,
+        "allowScriptsInUserInput": S.ALLOW_SCRIPTS_IN_USER_INPUT,
         "showPermissionsControl": current_org.get_setting(
             "feature_show_permissions_control"
         ),
@@ -294,17 +299,17 @@ def client_config():
             "hide_plotly_mode_bar"
         ),
         "disablePublicUrls": current_org.get_setting("disable_public_urls"),
-        "allowCustomJSVisualizations": settings.FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS,
-        "autoPublishNamedQueries": settings.FEATURE_AUTO_PUBLISH_NAMED_QUERIES,
-        "extendedAlertOptions": settings.FEATURE_EXTENDED_ALERT_OPTIONS,
-        "mailSettingsMissing": not settings.email_server_is_configured(),
-        "dashboardRefreshIntervals": settings.DASHBOARD_REFRESH_INTERVALS,
-        "queryRefreshIntervals": settings.QUERY_REFRESH_INTERVALS,
-        "googleLoginEnabled": settings.GOOGLE_OAUTH_ENABLED,
-        "ldapLoginEnabled": settings.LDAP_LOGIN_ENABLED,
-        "pageSize": settings.PAGE_SIZE,
-        "pageSizeOptions": settings.PAGE_SIZE_OPTIONS,
-        "tableCellMaxJSONSize": settings.TABLE_CELL_MAX_JSON_SIZE,
+        "allowCustomJSVisualizations": S.FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS,
+        "autoPublishNamedQueries": S.FEATURE_AUTO_PUBLISH_NAMED_QUERIES,
+        "extendedAlertOptions": S.FEATURE_EXTENDED_ALERT_OPTIONS,
+        "mailSettingsMissing": not S.email_configured(),
+        "dashboardRefreshIntervals": S.DASHBOARD_REFRESH_INTERVALS,
+        "queryRefreshIntervals": S.QUERY_REFRESH_INTERVALS,
+        "googleLoginEnabled": S.GOOGLE_OAUTH_ENABLED,
+        "ldapLoginEnabled": S.LDAP_LOGIN_ENABLED,
+        "pageSize": S.PAGE_SIZE_DEFAULT,
+        "pageSizeOptions": S.PAGE_SIZE_OPTIONS,
+        "tableCellMaxJSONSize": S.TABLE_CELL_MAX_JSON_SIZE,
     }
 
     client_config.update(defaults)
@@ -320,9 +325,6 @@ def messages():
 
     if not current_user.is_email_verified:
         messages.append("email-not-verified")
-
-    if settings.ALLOW_PARAMETERS_IN_EMBEDS:
-        messages.append("using-deprecated-embed-feature")
 
     return messages
 

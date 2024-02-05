@@ -25,9 +25,9 @@ def get_engine_options() -> dict:
     """Get engine options for SQLAlchemy."""
     # TODO: Utilize the `SQLALCHEMY_ENGINE_OPTIONS` setting via `app.config`
     engine_options = {"json_serializer": json_dumps}
-    if settings.SQLALCHEMY_ENABLE_POOL_PRE_PING:
+    if settings.S.SQLALCHEMY_ENABLE_POOL_PRE_PING:
         engine_options.update(pool_pre_ping=True)
-    if settings.SQLALCHEMY_DISABLE_POOL:
+    if settings.S.SQLALCHEMY_DISABLE_POOL:
         engine_options.update(poolclass=NullPool)
         engine_options.pop("max_overflow", None)
     return engine_options
@@ -104,7 +104,7 @@ class GFKBase(object):
         self.object_id = value.id
 
 
-key_definitions = settings.dynamic_settings.database_key_definitions((db.Integer, {}))
+key_definitions = settings.D.database_key_definitions((db.Integer, {}))
 
 
 def key_type(name):

@@ -109,7 +109,7 @@ class DBPersistence(object):
 
 
 QueryResultPersistence = (
-    settings.dynamic_settings.QueryResultPersistence or DBPersistence
+    settings.D.QueryResultPersistence or DBPersistence
 )
 
 
@@ -1174,7 +1174,7 @@ class NotificationDestination(BelongsToOrgMixin, db.Model):
         "encrypted_options",
         ConfigurationContainer.as_mutable(
             EncryptedConfiguration(
-                db.Text, settings.DATASOURCE_SECRET_KEY, FernetEngine
+                db.Text, settings.S.DATASOURCE_SECRET_KEY, FernetEngine
             )
         ),
     )

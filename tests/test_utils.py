@@ -1,7 +1,7 @@
 from collections import namedtuple
 from unittest import TestCase
 
-from redash import create_app
+from redash.app import create_app
 from redash.utils import (
     build_url,
     collect_parameters_from_request,

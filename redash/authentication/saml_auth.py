@@ -31,12 +31,12 @@ def get_saml_client(org):
     metadata_url = org.get_setting("auth_saml_metadata_url")
     sp_settings = org.get_setting("auth_saml_sp_settings")
 
-    if settings.SAML_SCHEME_OVERRIDE:
+    if settings.S.SAML_SCHEME_OVERRIDE:
         acs_url = url_for(
             "saml_auth.idp_initiated",
             org_slug=org.slug,
             _external=True,
-            _scheme=settings.SAML_SCHEME_OVERRIDE,
+            _scheme=settings.S.SAML_SCHEME_OVERRIDE,
         )
     else:
         acs_url = url_for("saml_auth.idp_initiated", org_slug=org.slug, _external=True)
@@ -64,13 +64,13 @@ def get_saml_client(org):
         },
     }
 
-    if settings.SAML_ENCRYPTION_ENABLED:
+    if settings.S.SAML_ENCRYPTION_ENABLED:
         encryption_dict = {
             "xmlsec_binary": get_xmlsec_binary(),
             "encryption_keypairs": [
                 {
-                    "key_file": settings.SAML_ENCRYPTION_PEM_PATH,
-                    "cert_file": settings.SAML_ENCRYPTION_CERT_PATH,
+                    "key_file": settings.S.SAML_ENCRYPTION_PEM_PATH,
+                    "cert_file": settings.S.SAML_ENCRYPTION_CERT_PATH,
                 }
             ],
         }

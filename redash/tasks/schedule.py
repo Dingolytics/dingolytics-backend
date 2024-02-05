@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import logging
 import hashlib
 import json
@@ -7,7 +6,7 @@ from datetime import datetime, timedelta
 from rq.job import Job
 from rq_scheduler import Scheduler
 
-from redash import settings, rq_redis_connection, statsd_client
+from redash import settings, rq_redis_connection
 from redash.tasks import (
     sync_user_details,
     refresh_queries,
@@ -32,7 +31,9 @@ class StatsdRecordingScheduler(Scheduler):
 
 
 rq_scheduler = StatsdRecordingScheduler(
-    connection=rq_redis_connection, queue_name="periodic", interval=5
+    connection=rq_redis_connection,
+    queue_name="periodic",
+    interval=5
 )
 
 
@@ -77,7 +78,7 @@ def periodic_job_definitions():
         },
         {
             "func": refresh_schemas,
-            "interval": timedelta(minutes=settings.SCHEMAS_REFRESH_SCHEDULE),
+            "interval": timedelta(minutes=settings.S.SCHEMAS_REFRESH_SCHEDULE),
         },
         {
             "func": sync_user_details,
@@ -87,18 +88,24 @@ def periodic_job_definitions():
         },
         {
             "func": send_aggregated_errors,
-            "interval": timedelta(minutes=settings.SEND_FAILURE_EMAIL_INTERVAL),
+            "interval": timedelta(minutes=settings.S.SEND_FAILURE_EMAIL_INTERVAL),
         },
     ]
 
-    if settings.VERSION_CHECK:
-        jobs.append({"func": version_check, "interval": timedelta(days=1)})
+    if settings.S.FEATURE_VERSION_CHECK:
+        jobs.append({
+            "func": version_check,
+            "interval": timedelta(days=1)
+        })
 
-    if settings.QUERY_RESULTS_CLEANUP_ENABLED:
-        jobs.append({"func": cleanup_query_results, "interval": timedelta(minutes=5)})
+    if settings.S.QUERY_RESULTS_CLEANUP_ENABLED:
+        jobs.append({
+            "func": cleanup_query_results,
+            "interval": timedelta(minutes=5)
+        })
 
     # Add your own custom periodic jobs in your dynamic_settings module.
-    jobs.extend(settings.dynamic_settings.periodic_jobs() or [])
+    jobs.extend(settings.D.periodic_jobs() or [])
 
     return jobs
 

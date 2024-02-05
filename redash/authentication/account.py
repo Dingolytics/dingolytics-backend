@@ -9,7 +9,8 @@ from redash.utils import base_url
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 logger = logging.getLogger(__name__)
-serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
+
+serializer = URLSafeTimedSerializer(settings.S.SECRET_KEY)
 
 
 def invite_token(user):
@@ -38,7 +39,7 @@ def reset_link_for_user(user):
 
 
 def validate_token(token):
-    max_token_age = settings.INVITATION_TOKEN_MAX_AGE
+    max_token_age = settings.S.INVITATION_TOKEN_MAX_AGE
     return serializer.loads(token, max_age=max_token_age)
 
 

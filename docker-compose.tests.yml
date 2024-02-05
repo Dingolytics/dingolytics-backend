@@ -10,10 +10,11 @@ x-redash-service: &redash-service
     - .env
 
 x-redash-environment: &redash-environment
-  REDASH_LOG_LEVEL: "INFO"
-  REDASH_REDIS_URL: "redis://redis-tests:6379/0"
-  REDASH_DATABASE_URL: "postgresql://postgres@postgres-tests/tests"
+  LOG_LEVEL: "INFO"
   VECTOR_CONFIG_PATH: "/tmp/vector/vector.toml"
+  REDIS_URL: "redis://redis-tests:6379/0"
+  RQ_REDIS_URL: "redis://redis-tests:6379/0"
+  SQLALCHEMY_DATABASE_URI: "postgresql://postgres@postgres-tests/tests"
 
 services:
   server-tests:

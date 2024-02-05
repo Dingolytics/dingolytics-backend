@@ -2,7 +2,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy_utils.models import generic_repr
 from sqlalchemy.dialects import postgresql
 
-from redash.settings.organization import settings as org_settings
+from redash.settings import S
 from .base import db, Column, primary_key
 from .mixins import TimestampMixin
 from .types import MutableDict
@@ -62,9 +62,8 @@ class Organization(TimestampMixin, db.Model):
         self.settings["is_disabled"] = False
 
     def set_setting(self, key, value):
-        if key not in org_settings:
+        if key not in S.org_settings():
             raise KeyError(key)
-
         self.settings.setdefault("settings", {})
         self.settings["settings"][key] = value
         flag_modified(self, "settings")
@@ -72,13 +71,10 @@ class Organization(TimestampMixin, db.Model):
     def get_setting(self, key, raise_on_missing=True):
         if key in self.settings.get("settings", {}):
             return self.settings["settings"][key]
-
-        if key in org_settings:
-            return org_settings[key]
-
+        if key in S.org_settings():
+            return S.org_settings()[key]
         if raise_on_missing:
             raise KeyError(key)
-
         return None
 
     @property

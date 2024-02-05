@@ -1,9 +1,9 @@
 from flask import request
 
 from redash.models import db, Organization
-from redash.handlers.base import BaseResource, record_event
+from redash.handlers.base import BaseResource
 from redash.permissions import require_admin
-from redash.settings.organization import settings as org_settings
+from redash.settings import S
 
 
 def get_settings_with_defaults(defaults, org):
@@ -28,7 +28,7 @@ def get_settings_with_defaults(defaults, org):
 class OrganizationSettings(BaseResource):
     @require_admin
     def get(self):
-        settings = get_settings_with_defaults(org_settings, self.current_org)
+        settings = get_settings_with_defaults(S.org_settings(), self.current_org)
 
         return {"settings": settings}
 
@@ -63,6 +63,6 @@ class OrganizationSettings(BaseResource):
             }
         )
 
-        settings = get_settings_with_defaults(org_settings, self.current_org)
+        settings = get_settings_with_defaults(S.org_settings(), self.current_org)
 
         return {"settings": settings}

@@ -5,7 +5,6 @@ import time
 from flask import request
 from mock import patch
 from redash import models, settings
-from redash.settings import default
 from redash.authentication import (
     api_key_load_user_from_request,
     get_login_url,
@@ -13,7 +12,6 @@ from redash.authentication import (
     sign,
 )
 from redash.authentication.google_oauth import create_and_login_user, verify_profile
-from redash.utils import utcnow
 from sqlalchemy.orm.exc import NoResultFound
 from tests import BaseTestCase
 
@@ -310,7 +308,7 @@ class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
 
 
 class TestRemoteUserAuth(BaseTestCase):
-    DEFAULT_SETTING_OVERRIDES = {"REDASH_REMOTE_USER_LOGIN_ENABLED": "true"}
+    DEFAULT_SETTING_OVERRIDES = {"REMOTE_USER_LOGIN_ENABLED": "true"}
 
     def setUp(self):
         # Apply default setting overrides to every test
@@ -333,7 +331,6 @@ class TestRemoteUserAuth(BaseTestCase):
             when the settings are reloaded
         """
         def reload_settings():
-            importlib.reload(default)
             importlib.reload(settings)
 
         variables = self.DEFAULT_SETTING_OVERRIDES.copy()
@@ -374,7 +371,7 @@ class TestRemoteUserAuth(BaseTestCase):
         return models.User.get_by_email_and_org(email, org or self.factory.org)
 
     def test_remote_login_disabled(self):
-        self.override_settings({"REDASH_REMOTE_USER_LOGIN_ENABLED": "false"})
+        self.override_settings({"REMOTE_USER_LOGIN_ENABLED": "false"})
 
         self.get_request(
             "/remote_user/login",
@@ -395,7 +392,7 @@ class TestRemoteUserAuth(BaseTestCase):
         self.assert_correct_user_attributes(self.get_test_user())
 
     def test_remote_login_custom_header(self):
-        self.override_settings({"REDASH_REMOTE_USER_HEADER": "X-Custom-User"})
+        self.override_settings({"REMOTE_USER_HEADER": "X-Custom-User"})
 
         self.get_request(
             "/remote_user/login",

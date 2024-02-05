@@ -113,7 +113,7 @@ class TestLogin(BaseTestCase):
     def test_throttle_login(self):
         limiter.enabled = True
         # Extract the limit from settings (ex: '50/day')
-        limit = settings.THROTTLE_LOGIN_PATTERN.split("/")[0]
+        limit = settings.S.THROTTLE_LOGIN_PATTERN.split("/")[0]
         for _ in range(0, int(limit)):
             self.get_request("/login", org=self.factory.org)
 
@@ -123,7 +123,7 @@ class TestLogin(BaseTestCase):
     def test_throttle_password_reset(self):
         limiter.enabled = True
         # Extract the limit from settings (ex: '10/hour')
-        limit = settings.THROTTLE_PASS_RESET_PATTERN.split("/")[0]
+        limit = settings.S.THROTTLE_PASS_RESET_PATTERN.split("/")[0]
         for _ in range(0, int(limit)):
             self.get_request("/forgot", org=self.factory.org)
 

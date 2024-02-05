@@ -5,8 +5,7 @@ from redash import settings
 from redash.authentication.org_resolving import current_org
 from redash.handlers.base import routes
 from redash.models import Group, Organization, User, db
-from redash.tasks.general import subscribe
-from wtforms import BooleanField, Form, PasswordField, StringField, validators
+from wtforms import Form, PasswordField, StringField, validators
 from wtforms.fields import EmailField
 
 
@@ -15,8 +14,8 @@ class SetupForm(Form):
     email = EmailField("Email Address", validators=[validators.Email()])
     password = PasswordField("Password", validators=[validators.Length(6)])
     org_name = StringField("Organization Name", validators=[validators.InputRequired()])
-    security_notifications = BooleanField()
-    newsletter = BooleanField()
+    # security_notifications = BooleanField()
+    # newsletter = BooleanField()
 
 
 def create_org(org_name, user_name, email, password):
@@ -53,7 +52,7 @@ def create_org(org_name, user_name, email, password):
 
 @routes.route("/setup", methods=["GET", "POST"])
 def setup():
-    if current_org != None or settings.MULTI_ORG:
+    if current_org is not None or settings.S.MULTI_ORG:
         return redirect("/")
 
     form = SetupForm(request.form)
@@ -62,15 +61,18 @@ def setup():
 
     if request.method == "POST" and form.validate():
         default_org, user = create_org(
-            form.org_name.data, form.name.data, form.email.data, form.password.data
+            form.org_name.data,
+            form.name.data,
+            form.email.data,
+            form.password.data
         )
-
         g.org = default_org
+
         login_user(user)
 
-        # signup to newsletter if needed
-        if form.newsletter.data or form.security_notifications:
-            subscribe.delay(form.data)
+        # Signup to newsletter if needed
+        # if form.newsletter.data or form.security_notifications:
+        #     subscribe.delay(form.data)
 
         return redirect(url_for("redash.index", org_slug=None))
 

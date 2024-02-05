@@ -273,7 +273,7 @@ class BaseSQLQueryRunner(BaseQueryRunner):
     def get_schema(self, get_stats=False):
         schema_dict = {}
         self._get_tables(schema_dict)
-        if settings.SCHEMA_RUN_TABLE_SIZE_CALCULATIONS and get_stats:
+        if settings.S.SCHEMA_RUN_TABLE_SIZE_CALCULATIONS and get_stats:
             self._get_tables_stats(schema_dict)
         return list(schema_dict.values())
 
@@ -282,7 +282,7 @@ class BaseSQLQueryRunner(BaseQueryRunner):
 
     def _get_tables_stats(self, tables_dict):
         for t in tables_dict.keys():
-            if type(tables_dict[t]) == dict:
+            if isinstance(tables_dict[t], dict):
                 res = self._run_query_internal("select count(*) as cnt from %s" % t)
                 tables_dict[t]["size"] = res[0]["cnt"]
 
@@ -501,7 +501,7 @@ def with_ssh_tunnel(query_runner, details):
                 remote_address = (remote_host, remote_port)
                 auth = {
                     "ssh_username": details["ssh_username"],
-                    **settings.dynamic_settings.ssh_tunnel_auth(),
+                    **settings.D.ssh_tunnel_auth(),
                 }
                 server = stack.enter_context(
                     open_tunnel(
