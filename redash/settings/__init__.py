@@ -2,6 +2,7 @@ from functools import lru_cache
 from typing import Dict, List, Any
 from pydantic import BaseSettings, PyObject  #, ValidationError, validator
 
+from redash.defaults import DynamicSettings
 from ._helpers import (
     fix_assets_path,
     parse_boolean,
@@ -40,7 +41,7 @@ class Settings(BaseSettings):
     ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE: str = "({state}) {alert_name}"
     EVENT_REPORTING_WEBHOOKS: List[str] = []
     BLOCKED_DOMAINS: List[str] = ["qq.com"]
-    DYNAMIC_SETTINGS_MODULE: PyObject = "redash.overrides"
+    DYNAMIC_SETTINGS: PyObject = "redash.defaults.DynamicSettings"
 
     # Vector settings
     VECTOR_INGEST_URL: str = "http://localhost:8180"
@@ -396,4 +397,4 @@ def get_settings() -> "Settings":
 
 S = get_settings()
 
-D = S.DYNAMIC_SETTINGS_MODULE
+D = S.DYNAMIC_SETTINGS()  # type: DynamicSettings

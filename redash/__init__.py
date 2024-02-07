@@ -9,7 +9,7 @@ from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from statsd import StatsClient
 
-from . import overrides
+from . import defaults
 from . import settings
 from .query_runner import import_query_runners
 from .destinations import import_destinations
@@ -21,7 +21,7 @@ __all__ = [
     "migrate",
     "statsd_client",
     "limiter",
-    "overrides",
+    "defaults",
 ]
 
 __version__ = "11.0.1-dev"
