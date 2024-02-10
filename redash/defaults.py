@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Any, List, Tuple
 
 
 class DynamicSettings:
@@ -61,3 +62,44 @@ class DynamicSettings:
             }
         )
         return definitions
+
+    def setup_default_org(name: str) -> Tuple[Any, List[Any]]:
+        """
+        Setup the default organization and groups.
+
+        :param name: The name of the organization.
+
+        :return: A tuple containing the organization and a list of groups.
+        """
+        from redash.models import Group, Organization, db
+        default_org = Organization(name=name, slug="default", settings={})
+        admin_group = Group(
+            name="admin",
+            permissions=["admin", "super_admin"],
+            org=default_org,
+            type=Group.BUILTIN_GROUP,
+        )
+        default_group = Group(
+            name="default",
+            permissions=Group.DEFAULT_PERMISSIONS,
+            org=default_org,
+            type=Group.BUILTIN_GROUP,
+        )
+        db.session.add_all([default_org, admin_group, default_group])
+        db.session.commit()
+        return default_org, [admin_group, default_group]
+
+    def setup_default_user(
+        org: Any, group_ids: List[int], name: str, email: str, password: str,
+        **kwargs
+    ) -> Any:
+        """Setup the default user."""
+        from redash.models import User, db
+        user = User(org=org, group_ids=group_ids, name=name, email=email)
+        user.hash_password(password)
+        db.session.add(user)
+        db.session.commit()
+        # Signup to newsletter if needed
+        # if form.newsletter.data or form.security_notifications:
+        #     subscribe.delay(form.data)
+        return user

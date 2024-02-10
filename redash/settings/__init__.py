@@ -395,6 +395,6 @@ def get_settings() -> "Settings":
     return Settings()
 
 
-S = get_settings()
+S: Settings = get_settings()
 
-D = S.DYNAMIC_SETTINGS()  # type: DynamicSettings
+D: DynamicSettings = S.DYNAMIC_SETTINGS()

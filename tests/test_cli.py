@@ -1,10 +1,10 @@
-import mock
+from unittest import mock
 import textwrap
 from click.testing import CliRunner
 
 from tests import BaseTestCase
 from redash.utils.configuration import ConfigurationContainer
-from redash.query_runner import query_runners
+# from redash.query_runner import query_runners
 from redash.cli import manager
 from redash.models import DataSource, Group, Organization, User, db
 
