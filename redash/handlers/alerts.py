@@ -1,5 +1,4 @@
 from flask import request
-from flask_login import current_user
 from funcy import project
 
 from redash import models

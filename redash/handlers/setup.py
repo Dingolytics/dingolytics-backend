@@ -34,7 +34,7 @@ def setup():
     """
     Initial setup handler.
 
-    If no organization exists, this handler will create the default
+    If no organization exists, this handler will create a default
     organization and user based on the form data.
 
     If an organization exists, the user will be redirected

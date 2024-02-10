@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Dict, List, Any
-from pydantic import BaseSettings, PyObject  #, ValidationError, validator
+from pydantic import BaseSettings, PyObject, root_validator
+#, ValidationError, validator
 
 from redash.defaults import DynamicSettings
 from ._helpers import (
@@ -168,7 +169,7 @@ class Settings(BaseSettings):
 
     # Redis client settings
     REDIS_URL: str = "redis://localhost:6379/0"
-    RQ_REDIS_URL: str = REDIS_URL
+    RQ_REDIS_URL: str = ""
     RQ_WORKER_LOG_FORMAT: str = (
         "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] "
         "job.func_name=%(job_func_name)s "
@@ -336,6 +337,12 @@ class Settings(BaseSettings):
             return bool(self.SAML_SSO_URL and self.SAML_METADATA_URL)
         else:
             return bool(self.SAML_METADATA_URL)
+
+    @root_validator
+    def validate_RQ_REDIS_URL(cls, values) -> dict:
+        if not values.get("RQ_REDIS_URL"):
+            values["RQ_REDIS_URL"] = values["REDIS_URL"]
+        return values
 
     # @validator("SECRET_KEY")
     # def validate_secret_key(cls, v):
