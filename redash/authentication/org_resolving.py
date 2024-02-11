@@ -17,6 +17,7 @@ def _get_current_org():
 
     g.org = Organization.get_by_slug(slug)
     logging.debug("Current organization: %s (slug: %s)", g.org, slug)
+
     return g.org
 
 

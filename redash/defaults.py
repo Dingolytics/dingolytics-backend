@@ -90,7 +90,7 @@ class DynamicSettings:
         return default_org, [admin_group, default_group]
 
     def setup_default_user(
-        self, org: Any, group_ids: List[int], name: str, email: str,
+        self, *, org: Any, group_ids: List[int], name: str, email: str,
         password: str, **kwargs
     ) -> Any:
         """Setup the default user."""
