@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE: str = "({state}) {alert_name}"
     EVENT_REPORTING_WEBHOOKS: List[str] = []
     BLOCKED_DOMAINS: List[str] = ["qq.com"]
-    DYNAMIC_SETTINGS: PyObject = "redash.defaults.DynamicSettings"
+    DYNAMIC_SETTINGS: PyObject = "dingolytics.defaults.DynamicSettings"
 
     # Vector settings
     VECTOR_INGEST_URL: str = "http://localhost:8180"
@@ -338,7 +338,7 @@ class Settings(BaseSettings):
         else:
             return bool(self.SAML_METADATA_URL)
 
-    @root_validator
+    @root_validator(allow_reuse=True)
     def validate_RQ_REDIS_URL(cls, values) -> dict:
         if not values.get("RQ_REDIS_URL"):
             values["RQ_REDIS_URL"] = values["REDIS_URL"]

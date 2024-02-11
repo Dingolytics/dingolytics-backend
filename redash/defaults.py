@@ -63,7 +63,7 @@ class DynamicSettings:
         )
         return definitions
 
-    def setup_default_org(name: str) -> Tuple[Any, List[Any]]:
+    def setup_default_org(self, name: str) -> Tuple[Any, List[Any]]:
         """
         Setup the default organization and groups.
 
@@ -90,8 +90,8 @@ class DynamicSettings:
         return default_org, [admin_group, default_group]
 
     def setup_default_user(
-        org: Any, group_ids: List[int], name: str, email: str, password: str,
-        **kwargs
+        self, org: Any, group_ids: List[int], name: str, email: str,
+        password: str, **kwargs
     ) -> Any:
         """Setup the default user."""
         from redash.models import User, db
