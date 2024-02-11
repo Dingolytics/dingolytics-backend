@@ -7,9 +7,10 @@ from dingolytics.ingest import update_vector_config
 class TestIngestVectorConfig(BaseTestCase):
     @patch("dingolytics.triggers.streams.create_table_for_stream")
     def test_update_vector_config(self, enqueue_query):
-        # Before adding streams 1 default sink is created
         vector_config = update_vector_config([], clean=True)
-        self.assertEqual(len(vector_config.config["sources"]), 1)
+        # One HTTP source and one internal logs source:
+        self.assertEqual(len(vector_config.config["sources"]), 2)
+        # Before adding streams 1 default sink is present:
         self.assertEqual(len(vector_config.config["sinks"]), 1)
 
         # Creating test data source and 2 streams
