@@ -73,8 +73,12 @@ class StreamListResource(BaseResource):
         presets = default_presets()
         if db_type not in presets:
             abort(400, message=f"Unsupported data source type: {db_type}")
+        # TODO: More explicit internal streams handling, e.g. load
+        # internal stream presets with a special argument only.
+        if db_table_preset.startswith("_"):
+            abort(400, message=f"Internal stream preset: {db_table_preset}")
         if db_table_preset not in presets[db_type]:
-            abort(400, message=f"Unsupported table preset: {db_table_preset}")
+            abort(400, message=f"Unsupported stream preset: {db_table_preset}")
         db_table_query = presets[db_type][db_table_preset]
 
         try:
