@@ -104,7 +104,7 @@ def periodic_job_definitions():
             "interval": timedelta(minutes=5)
         })
 
-    # Add your own custom periodic jobs in your dynamic_settings module.
+    # Add your own custom periodic jobs in your dynamic settings.
     jobs.extend(settings.D.periodic_jobs() or [])
 
     return jobs

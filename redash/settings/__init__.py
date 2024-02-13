@@ -1,7 +1,9 @@
 from functools import lru_cache
 from typing import Dict, List, Any
-from pydantic import BaseSettings, PyObject  #, ValidationError, validator
+from pydantic import BaseSettings, PyObject, root_validator
+#, ValidationError, validator
 
+from redash.defaults import DynamicSettings
 from ._helpers import (
     fix_assets_path,
     parse_boolean,
@@ -40,7 +42,7 @@ class Settings(BaseSettings):
     ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE: str = "({state}) {alert_name}"
     EVENT_REPORTING_WEBHOOKS: List[str] = []
     BLOCKED_DOMAINS: List[str] = ["qq.com"]
-    DYNAMIC_SETTINGS_MODULE: PyObject = "redash.overrides"
+    DYNAMIC_SETTINGS: PyObject = "dingolytics.defaults.DynamicSettings"
 
     # Vector settings
     VECTOR_INGEST_URL: str = "http://localhost:8180"
@@ -167,7 +169,7 @@ class Settings(BaseSettings):
 
     # Redis client settings
     REDIS_URL: str = "redis://localhost:6379/0"
-    RQ_REDIS_URL: str = REDIS_URL
+    RQ_REDIS_URL: str = ""
     RQ_WORKER_LOG_FORMAT: str = (
         "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] "
         "job.func_name=%(job_func_name)s "
@@ -336,6 +338,12 @@ class Settings(BaseSettings):
         else:
             return bool(self.SAML_METADATA_URL)
 
+    @root_validator(allow_reuse=True)
+    def validate_RQ_REDIS_URL(cls, values) -> dict:
+        if not values.get("RQ_REDIS_URL"):
+            values["RQ_REDIS_URL"] = values["REDIS_URL"]
+        return values
+
     # @validator("SECRET_KEY")
     # def validate_secret_key(cls, v):
     #     if len(v) < 16:
@@ -394,6 +402,6 @@ def get_settings() -> "Settings":
     return Settings()
 
 
-S = get_settings()
+S: Settings = get_settings()
 
-D = S.DYNAMIC_SETTINGS_MODULE
+D: DynamicSettings = S.DYNAMIC_SETTINGS()

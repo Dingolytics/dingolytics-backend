@@ -1,6 +1,7 @@
 import os
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 from pydantic import BaseModel
 from toml.encoder import TomlEncoder
 import toml
@@ -15,6 +16,9 @@ enabled = true
 VECTOR_HTTP_INPUT = "http_server"
 VECTOR_HTTP_ROUTER = "http_router"
 VECTOR_HTTP_PATH_KEY = "_path_"
+VECTOR_SINK_PREFIX = "sink-"
+VECTOR_INTERNAL_INPUT = "vector_internal_logs"
+# VECTOR_INTERNAL_REMAP = "vector_internal_remap"
 
 
 @lru_cache
@@ -23,9 +27,12 @@ def get_vector_config() -> "VectorConfig":
     return VectorConfig(config_path)
 
 
+def is_internal_stream(stream: Any) -> bool:
+    return stream.db_table_preset.startswith("_")
+
+
 def update_vector_config(
-    streams: list, clean: bool = False, sink_prefix: str = "sink-",
-    path_key: str = VECTOR_HTTP_PATH_KEY, router_key: str = VECTOR_HTTP_ROUTER
+    streams: list, clean: bool = False, router_key: str = VECTOR_HTTP_ROUTER
 ) -> "VectorConfig":
     vector_config = get_vector_config()
     if clean:
@@ -34,20 +41,19 @@ def update_vector_config(
         vector_config.load()
     router = VectorRouteTransform(key=router_key)
     for stream in streams:
-        route_key = stream.db_table.replace("_", "-").replace(".", "-")
-        ingest_key = stream.ingest_key
-        sink_key = f"{sink_prefix}{route_key}"
-        router.add_route(route_key, f'.{path_key} == "/ingest/{ingest_key}"')
-        options = stream.data_source.options.to_dict()
-        sink = VectorClickHouseSink(
-            key=sink_key,
-            inputs=[f"{router_key}.{route_key}"],
-            table=stream.db_table,
-            auth=VectorClickHouseAuth(**options),
-            endpoint=options["url"],
-            database=options["dbname"],
-        )
-        vector_config.add_sink(sink)
+        # TODO: More flexible stream source configuration.
+        # Current implementation only supports ingest via HTTP
+        # and internal logs.
+        if is_internal_stream(stream):
+            sink = vector_config.get_sink_for_internal_logs(
+                stream=stream
+            )
+        else:
+            sink = vector_config.get_sink_for_stream_ingest(
+                stream=stream, router=router,
+            )
+        if sink:
+            vector_config.add_sink(sink)
         # print(sink)
         # print(stream)
         # print(stream.data_source)
@@ -59,6 +65,16 @@ def update_vector_config(
 
 class VectorSection(BaseModel):
     key: str
+
+
+class VectorInternalSource(VectorSection):
+    type: str = "internal_logs"
+
+
+# class VectorInternalTransform(VectorSection):
+#     type: str = "remap"
+#     inputs: list = [VECTOR_INTERNAL_INPUT]
+#     source: str = ".timestamp = to_unix_timestamp(to_timestamp!(.timestamp))"
 
 
 class VectorHTTPSource(VectorSection):
@@ -73,7 +89,7 @@ class VectorHTTPSource(VectorSection):
 
 class VectorConsoleSink(VectorSection):
     type: str = "console"
-    inputs: list = [VECTOR_HTTP_INPUT]
+    inputs: list = [VECTOR_HTTP_INPUT, VECTOR_INTERNAL_INPUT]
     encoding: dict = {"codec": "json"}
 
 
@@ -97,6 +113,7 @@ class VectorRouteTransform(VectorSection):
     type: str = "route"
     inputs: list = [VECTOR_HTTP_INPUT]
     route: dict = {}
+    _path_key: str = VECTOR_HTTP_PATH_KEY
 
     def add_route(self, key: str, condition: str) -> None:
         self.route[key] = condition
@@ -124,12 +141,19 @@ class VectorConfig:
 
     def add_defaults(self) -> None:
         self.config = toml.loads(VECTOR_CONFIG_TEMPLATE)
+        self.add_source(VectorInternalSource(key=VECTOR_INTERNAL_INPUT))
         self.add_source(VectorHTTPSource(key=VECTOR_HTTP_INPUT))
         self.add_sink(VectorConsoleSink(key="console"))
+        # self.add_transform(VectorInternalTransform(key=VECTOR_INTERNAL_REMAP))
 
     def add_section(self, item: VectorSection, group_key: str) -> None:
         group = self.config.setdefault(group_key, {})
-        parameters = item.dict()
+        # Attributes with leading underscore are for use in code only,
+        # so we exclude them from the configuration serialization.
+        parameters = {
+            k: v for k, v in item.dict().items()
+            if not k.startswith("_")
+        }
         key = parameters.pop("key")
         group[key] = parameters
 
@@ -141,3 +165,46 @@ class VectorConfig:
 
     def add_transform(self, transform: VectorSection) -> None:
         self.add_section(transform, "transforms")
+
+    def get_sink_for_stream_ingest(
+        self, stream: Any, router: VectorRouteTransform,
+        prefix: str = VECTOR_SINK_PREFIX,
+    ) -> VectorSection:
+        """
+        Create a sink configuration for a stream ingest.
+
+        The sink will be connected to the HTTP source and the ClickHouse
+        database, and the router will route the incoming data to the sink.
+        """
+        route_key = stream.db_table.replace("_", "-").replace(".", "-")
+        path_match = f'.{router._path_key} == "/ingest/{stream.ingest_key}"'
+        router.add_route(route_key, path_match)
+        options = stream.data_source.options.to_dict()
+        return VectorClickHouseSink(
+            key=f"{prefix}{route_key}",
+            inputs=[f"{router.key}.{route_key}"],
+            table=stream.db_table,
+            auth=VectorClickHouseAuth(**options),
+            endpoint=options["url"],
+            database=options["dbname"],
+        )
+
+    def get_sink_for_internal_logs(
+        self, stream: Any, prefix: str = VECTOR_SINK_PREFIX
+    ) -> VectorSection:
+        """
+        Create a sink configuration for internal logs.
+
+        The sink will be connected to the internal logs source and the
+        ClickHouse database for output.
+        """
+        route_key = stream.db_table.replace("_", "-").replace(".", "-")
+        options = stream.data_source.options.to_dict()
+        return VectorClickHouseSink(
+            key=f"{prefix}{route_key}",
+            inputs=[VECTOR_INTERNAL_INPUT],
+            table=stream.db_table,
+            auth=VectorClickHouseAuth(**options),
+            endpoint=options["url"],
+            database=options["dbname"],
+        )

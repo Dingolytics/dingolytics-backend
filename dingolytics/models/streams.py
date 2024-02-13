@@ -94,5 +94,32 @@ class Stream(TimestampMixin, db.Model):
         }
 
     @classmethod
+    def create(
+        cls, *, data_source: DataSource, db_table_preset: str, **kwargs
+    ) -> 'Stream':
+        """
+        Create a new stream with a specified preset.
+
+        Keyword arguments:
+
+            * data_source -- the data source to associate with the stream
+            * db_table_preset -- the name of the preset to use
+            * name -- the name of the stream
+            * description -- the description of the stream
+            * db_table -- the name of the table in the database
+        """
+        presets = default_presets()
+        db_type = data_source.type
+        db_table_query = presets[db_type][db_table_preset]
+        stream = cls(
+            data_source=data_source,
+            db_table_preset=db_table_preset,
+            db_table_query=db_table_query,
+            **kwargs
+        )
+        db.session.add(stream)
+        return stream
+
+    @classmethod
     def get_by_id(cls, _id):
         return cls.query.filter(cls.id == _id).one()
