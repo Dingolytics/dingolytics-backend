@@ -1,4 +1,5 @@
 from tests import BaseTestCase
+from unittest import skip
 from redash import models
 from redash.models import db
 
@@ -58,6 +59,7 @@ class TestQueryResourceGet(BaseTestCase):
         )
         self.assertEqual(rv.status_code, 200)
 
+    @skip("Search is disabled for now.")
     def test_query_search(self):
         names = ["Harder", "Better", "Faster", "Stronger"]
         for name in names:
@@ -265,6 +267,7 @@ class TestQueryListResourceGet(BaseTestCase):
         assert len(rv.json["results"]) == 1
         assert set([result["id"] for result in rv.json["results"]]) == set([q1.id])
 
+    @skip("Search is disabled for now.")
     def test_search_term(self):
         q1 = self.factory.create_query(name="Sales")
         q2 = self.factory.create_query(name="Q1 sales")
@@ -368,6 +371,7 @@ class TestQueryArchiveResourceGet(BaseTestCase):
             [q1.id, q2.id]
         )
 
+    @skip("Search is disabled for now.")
     def test_search_term(self):
         q1 = self.factory.create_query(name="Sales", is_archived=True)
         q2 = self.factory.create_query(name="Q1 sales", is_archived=True)

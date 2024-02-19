@@ -30,6 +30,7 @@ class QueryTest(BaseTestCase):
             [("tag1", 3), ("tag2", 2), ("tag3", 1)],
         )
 
+    @skip("Search is disabled for now.")
     def test_search_finds_in_name(self):
         q1 = self.factory.create_query(name="Testing seåřċħ")
         q2 = self.factory.create_query(name="Testing seåřċħing")
@@ -40,6 +41,7 @@ class QueryTest(BaseTestCase):
         self.assertIn(q2, queries)
         self.assertNotIn(q3, queries)
 
+    @skip("Search is disabled for now.")
     def test_search_finds_in_description(self):
         q1 = self.factory.create_query(description="Testing seåřċħ")
         q2 = self.factory.create_query(description="Testing seåřċħing")
@@ -64,6 +66,7 @@ class QueryTest(BaseTestCase):
         self.assertIn(q2, queries)
         self.assertNotIn(q3, queries)
 
+    @skip("Search is disabled for now.")
     def test_search_by_id_returns_query(self):
         q1 = self.factory.create_query(description="Testing search")
         q2 = self.factory.create_query(description="Testing searching")
@@ -75,6 +78,7 @@ class QueryTest(BaseTestCase):
         self.assertNotIn(q1, queries)
         self.assertNotIn(q2, queries)
 
+    @skip("Search is disabled for now.")
     def test_search_by_number(self):
         q = self.factory.create_query(description="Testing search 12345")
         db.session.flush()
@@ -82,6 +86,7 @@ class QueryTest(BaseTestCase):
 
         self.assertIn(q, queries)
 
+    @skip("Search is disabled for now.")
     def test_search_respects_groups(self):
         other_group = Group(org=self.factory.org, name="Other Group")
         db.session.add(other_group)
@@ -109,6 +114,7 @@ class QueryTest(BaseTestCase):
         self.assertNotIn(q2, queries)
         self.assertNotIn(q3, queries)
 
+    @skip("Search is disabled for now.")
     def test_returns_each_query_only_once(self):
         other_group = self.factory.create_group()
         second_group = self.factory.create_group()
@@ -135,11 +141,13 @@ class QueryTest(BaseTestCase):
         db.session.flush()
         self.assertNotEqual(q.updated_at, one_day_ago)
 
+    @skip("Search is disabled for now.")
     def test_search_is_case_insensitive(self):
         q = self.factory.create_query(name="Testing search")
 
         self.assertIn(q, Query.search("testing", [self.factory.default_group.id]))
 
+    @skip("Search is disabled for now.")
     def test_search_query_parser_or(self):
         q1 = self.factory.create_query(name="Testing")
         q2 = self.factory.create_query(name="search")
@@ -150,6 +158,7 @@ class QueryTest(BaseTestCase):
         self.assertIn(q1, queries)
         self.assertIn(q2, queries)
 
+    @skip("Search is disabled for now.")
     def test_search_query_parser_negation(self):
         q1 = self.factory.create_query(name="Testing")
         q2 = self.factory.create_query(name="search")
@@ -171,6 +180,7 @@ class QueryTest(BaseTestCase):
         self.assertIn(q2, queries)
         self.assertIn(q3, queries)
 
+    @skip("Search is disabled for now.")
     def test_search_query_parser_hyphen(self):
         q1 = self.factory.create_query(name="Testing search")
         q2 = self.factory.create_query(name="Testing-search")

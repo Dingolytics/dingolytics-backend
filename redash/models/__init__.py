@@ -502,7 +502,7 @@ class Query(TimestampMixin, BelongsToOrgMixin, db.Model):
         include_drafts=False,
         limit=None,
         include_archived=False,
-        multi_byte_search=False,
+        multi_byte_search=True,
     ):
         all_queries = cls.all_queries(
             group_ids,
@@ -522,8 +522,9 @@ class Query(TimestampMixin, BelongsToOrgMixin, db.Model):
                 .limit(limit)
             )
 
-        # sort the result using the weight as defined in the search vector column
-        return all_queries.search(term, sort=True).limit(limit)
+        # Sort the result using the weight as defined in the search vector column
+        return all_queries.limit(limit)
+        # return all_queries.search(term, sort=True).limit(limit)
 
     @classmethod
     def search_by_user(cls, term, user, limit=None):
