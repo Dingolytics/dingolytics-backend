@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy.query import Query as BaseQuery
 from sqlalchemy.orm import object_session
 from sqlalchemy.pool import NullPool
-from sqlalchemy_searchable import make_searchable, vectorizer, SearchQueryMixin
+# from sqlalchemy_searchable import make_searchable, vectorizer, SearchQueryMixin
 from sqlalchemy.dialects import postgresql
 
 from redash import settings
@@ -41,23 +41,23 @@ db = SQLAlchemy(
 
 # Listen to a few database events to set up functions, trigger updates
 # and indexes for the full text search
-make_searchable(db.metadata, options={"regconfig": "pg_catalog.simple"})
+# make_searchable(db.metadata, options={"regconfig": "pg_catalog.simple"})
 
 
-class SearchBaseQuery(BaseQuery, SearchQueryMixin):
-    """
-    The SQA query class to use when full text search is wanted.
-    """
+# class SearchBaseQuery(BaseQuery, SearchQueryMixin):
+#     """
+#     The SQA query class to use when full text search is wanted.
+#     """
 
 
-@vectorizer(db.Integer)
-def integer_vectorizer(column):
-    return db.func.cast(column, db.Text)
+# @vectorizer(db.Integer)
+# def integer_vectorizer(column):
+#     return db.func.cast(column, db.Text)
 
 
-@vectorizer(postgresql.UUID)
-def uuid_vectorizer(column):
-    return db.func.cast(column, db.Text)
+# @vectorizer(postgresql.UUID)
+# def uuid_vectorizer(column):
+#     return db.func.cast(column, db.Text)
 
 
 Column = functools.partial(db.Column, nullable=False)

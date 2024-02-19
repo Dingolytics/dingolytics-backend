@@ -52,6 +52,7 @@ def setup_logging():
             "requests.packages.urllib3",
             "snowflake.connector",
             "apiclient",
+            "rq.worker",
         ]:
             logging.getLogger(name).setLevel("ERROR")
 

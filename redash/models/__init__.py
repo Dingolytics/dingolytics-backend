@@ -41,7 +41,7 @@ from redash.utils import (
 from redash.utils.configuration import ConfigurationContainer
 from redash.models.parameterized_query import ParameterizedQuery
 
-from .base import db, gfk_type, Column, GFKBase, SearchBaseQuery, key_type, primary_key
+from .base import db, gfk_type, Column, GFKBase, key_type, primary_key
 from .datasources import DataSource, DataSourceGroup
 from .mixins import BelongsToOrgMixin, TimestampMixin
 from .organizations import Organization
@@ -308,7 +308,7 @@ class Query(TimestampMixin, BelongsToOrgMixin, db.Model):
         "tags", MutableList.as_mutable(postgresql.ARRAY(db.Unicode)), nullable=True
     )
 
-    query_class = SearchBaseQuery
+    # query_class = SearchBaseQuery
     __tablename__ = "queries"
     __mapper_args__ = {"version_id_col": version, "version_id_generator": False}
 
