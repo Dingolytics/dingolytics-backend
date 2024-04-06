@@ -360,7 +360,7 @@ class Settings(BaseSettings):
     #         )
     #     return v
 
-    class Meta:
+    class Config:
         env_file = ".env"
 
     def email_configured(self) -> bool:
