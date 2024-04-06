@@ -18,8 +18,8 @@ RUN apt update -y && \
 
 COPY requirements.txt .
 
-RUN pip install --upgrade pip~=23.0.1 --timeout 120 \
- && pip install --user -r requirements.txt --timeout 120
+RUN pip install --no-cache-dir --upgrade pip~=23.0.1 --timeout 300 \
+ && pip install --no-cache-dir --user -r requirements.txt --timeout 300
 
 # Stage 2: Create image with application code
 #--------------------------------------------
@@ -48,4 +48,11 @@ ENTRYPOINT ["./docker-entrypoint.sh"]
 
 FROM application AS tests
 
-RUN pip install --user -r ${USERHOME}/etc/requirements.tests.txt --timeout 120
+RUN pip install --no-cache-dir --user -r ${USERHOME}/etc/requirements.tests.txt --timeout 300
+
+# Stage 4: Create image for development
+#--------------------------------------
+
+FROM tests AS development
+
+RUN pip install --no-cache-dir --user watchdog --timeout 300

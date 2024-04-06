@@ -207,7 +207,7 @@ pytz==2023.3
     #   pysaml2
 pyyaml==5.1.2
     # via -r requirements.in
-redis==3.5.0
+redis==5.0.3
     # via
     #   -r requirements.in
     #   rq
