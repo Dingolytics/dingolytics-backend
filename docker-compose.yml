@@ -11,7 +11,7 @@ x-redash-service: &redash-service
     - .env
 
 x-redash-environment: &redash-environment
-  REDIS_URL: "redis://redis:6379/0"
+  REDIS_URL: "redis://keydb:6379/0"
   SQLALCHEMY_DATABASE_URI: "postgresql://postgres@postgres/postgres"
   RATELIMIT_ENABLED: "false"
   MAIL_DEFAULT_SENDER: "redash@example.com"
@@ -25,7 +25,7 @@ services:
     <<: *redash-service
     depends_on:
       - postgres
-      - redis
+      - keydb
     ports:
       - "127.0.0.1:5000:5000"
       - "127.0.0.1:5678:5678"
@@ -52,8 +52,8 @@ services:
       PYTHONUNBUFFERED: 0
     command: dev_worker
 
-  redis:
-    image: redis:6.2.11-alpine
+  keydb:
+    image: eqalpha/keydb:alpine_x86_64_v6.3.4
     restart: unless-stopped
 
   postgres:

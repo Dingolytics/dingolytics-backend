@@ -12,8 +12,8 @@ x-redash-service: &redash-service
 x-redash-environment: &redash-environment
   LOG_LEVEL: "INFO"
   VECTOR_CONFIG_PATH: "/tmp/vector/vector.toml"
-  REDIS_URL: "redis://redis-tests:6379/0"
-  RQ_REDIS_URL: "redis://redis-tests:6379/0"
+  REDIS_URL: "redis://keydb-tests:6379/0"
+  RQ_REDIS_URL: "redis://keydb-tests:6379/0"
   SQLALCHEMY_DATABASE_URI: "postgresql://postgres@postgres-tests/tests"
 
 services:
@@ -22,15 +22,15 @@ services:
     depends_on:
       - clickhouse-tests
       - postgres-tests
-      - redis-tests
+      - keydb-tests
     environment:
       <<: *redash-environment
       SQLALCHEMY_SILENCE_UBER_WARNING: 1
       PYTHONUNBUFFERED: 0
     command: tests -x
 
-  redis-tests:
-    image: redis:6.2.11-alpine
+  keydb-tests:
+    image: eqalpha/keydb:alpine_x86_64_v6.3.4
     restart: unless-stopped
 
   postgres-tests:
