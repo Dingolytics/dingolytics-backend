@@ -1,38 +1,16 @@
-from flask import current_app
 import datetime
-from redash.worker import job, get_job_logger
+import logging
+
+from flask import current_app
+
+from dingolytics.defaults import worker
 from redash import models, utils
 
-
-logger = get_job_logger(__name__)
-
-
-def notify_subscriptions(alert, new_state):
-    host = utils.base_url(alert.query_rel.org)
-    for subscription in alert.subscriptions:
-        try:
-            subscription.notify(
-                alert, alert.query_rel, subscription.user, new_state, current_app, host
-            )
-        except Exception as e:
-            logger.exception("Error with processing destination")
+logger = logging.getLogger(__name__)
 
 
-def should_notify(alert, new_state):
-    passed_rearm_threshold = False
-    if alert.rearm and alert.last_triggered_at:
-        passed_rearm_threshold = (
-            alert.last_triggered_at + datetime.timedelta(seconds=alert.rearm)
-            < utils.utcnow()
-        )
-
-    return new_state != alert.state or (
-        alert.state == models.Alert.TRIGGERED_STATE and passed_rearm_threshold
-    )
-
-
-@job("default", timeout=300)
-def check_alerts_for_query(query_id):
+@worker.task()
+def check_alerts_for_query_task(query_id: int):
     logger.debug("Checking query %d for alerts", query_id)
 
     query = models.Query.query.get(query_id)
@@ -63,3 +41,25 @@ def check_alerts_for_query(query_id):
                 continue
 
             notify_subscriptions(alert, new_state)
+
+
+def notify_subscriptions(alert, new_state):
+    host = utils.base_url(alert.query_rel.org)
+    for subscription in alert.subscriptions:
+        try:
+            subscription.notify(
+                alert, alert.query_rel, subscription.user, new_state, current_app, host
+            )
+        except Exception as exc:
+            logger.exception(exc)
+
+
+def should_notify(alert, new_state):
+    passed_rearm_threshold = False
+    if alert.rearm and alert.last_triggered_at:
+        passed_rearm_threshold = (
+            alert.last_triggered_at + datetime.timedelta(seconds=alert.rearm) < utils.utcnow()
+        )
+    return new_state != alert.state or (
+        alert.state == models.Alert.TRIGGERED_STATE and passed_rearm_threshold
+    )

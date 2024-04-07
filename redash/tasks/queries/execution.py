@@ -7,10 +7,11 @@ from rq.job import JobStatus
 from rq.timeouts import JobTimeoutException
 from rq.exceptions import NoSuchJobError
 
+from dingolytics.tasks.check_alerts_for_query import check_alerts_for_query_task
 from redash import models, redis_connection, settings
 from redash.query_runner import InterruptException
 from redash.tasks.worker import Queue, Job
-from redash.tasks.alerts import check_alerts_for_query
+# from redash.tasks.alerts import check_alerts_for_query
 from redash.tasks.failure_report import track_failure
 from redash.utils import gen_query_hash, utcnow
 from redash.worker import get_job_logger
@@ -236,7 +237,7 @@ class QueryExecutor(object):
             models.db.session.commit()  # make sure that alert sees the latest query result
             self._log_progress("checking_alerts")
             for query_id in updated_query_ids:
-                check_alerts_for_query.delay(query_id)
+                check_alerts_for_query_task(query_id)
             self._log_progress("finished")
 
             result = query_result.id

@@ -1,13 +1,13 @@
 ### Initialize fresh database
 
 ```bash
-docker-compose run --rm server create_tables
+docker-compose run --rm server manage database create-tables
 ```
 
 ### Run management shell in Docker container
 
 ```bash
-docker-compose run --rm server bash
+docker-compose run --rm server manage shell
 ```
 
 ### Managing migrations

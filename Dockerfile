@@ -30,29 +30,27 @@ ARG USERNAME=redash
 ARG USERHOME=/home/${USERNAME}
 
 RUN useradd --create-home ${USERNAME}
-USER ${USERNAME}
-ENV PATH=${USERHOME}/.local/bin:$PATH
 
+ENV PATH=${USERHOME}/.local/bin:$PATH
+USER ${USERNAME}
 WORKDIR ${USERHOME}/app/
 
 COPY --chown=${USERNAME} --from=dependencies /root/.local ${USERHOME}/.local
 COPY --chown=${USERNAME} etc ${USERHOME}/etc/
 COPY --chown=${USERNAME} . ./
 
-EXPOSE 5000
+ENTRYPOINT ["./entrypoint.sh"]
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
-
-# Stage 3: Create image for testing
+# Stage 3a: Create image for testing
 #----------------------------------
 
 FROM application AS tests
 
 RUN pip install --no-cache-dir --user -r ${USERHOME}/etc/requirements.tests.txt --timeout 300
 
-# Stage 4: Create image for development
+# Stage 3b: Create image for development
 #--------------------------------------
 
-FROM tests AS development
+FROM application AS development
 
 RUN pip install --no-cache-dir --user watchdog --timeout 300

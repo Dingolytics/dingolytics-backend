@@ -1,42 +1,35 @@
 from tests import BaseTestCase
-from mock import MagicMock, ANY
+from unittest.mock import MagicMock, ANY, patch
 
-import redash.tasks.alerts
-from redash.tasks.alerts import (
-    check_alerts_for_query,
-    notify_subscriptions,
-    should_notify,
-)
+from dingolytics.tasks.check_alerts_for_query import check_alerts_for_query_task
+from dingolytics.tasks.check_alerts_for_query import notify_subscriptions
 from redash.models import Alert
 
 
 class TestCheckAlertsForQuery(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        patch_1 = patch("dingolytics.tasks.check_alerts_for_query.notify_subscriptions")
+        self.notify_subscriptions_mock = patch_1.start()
+        self.addCleanup(patch_1.stop)
+
     def test_notifies_subscribers_when_should(self):
-        redash.tasks.alerts.notify_subscriptions = MagicMock()
         Alert.evaluate = MagicMock(return_value=Alert.TRIGGERED_STATE)
-
         alert = self.factory.create_alert()
-        check_alerts_for_query(alert.query_id)
-
-        self.assertTrue(redash.tasks.alerts.notify_subscriptions.called)
+        check_alerts_for_query_task(alert.query_id)()
+        self.assertTrue(self.notify_subscriptions_mock.called)
 
     def test_doesnt_notify_when_nothing_changed(self):
-        redash.tasks.alerts.notify_subscriptions = MagicMock()
         Alert.evaluate = MagicMock(return_value=Alert.OK_STATE)
-
         alert = self.factory.create_alert()
-        check_alerts_for_query(alert.query_id)
-
-        self.assertFalse(redash.tasks.alerts.notify_subscriptions.called)
+        check_alerts_for_query_task(alert.query_id)()
+        self.assertFalse(self.notify_subscriptions_mock.called)
 
     def test_doesnt_notify_when_muted(self):
-        redash.tasks.alerts.notify_subscriptions = MagicMock()
         Alert.evaluate = MagicMock(return_value=Alert.TRIGGERED_STATE)
-
         alert = self.factory.create_alert(options={"muted": True})
-        check_alerts_for_query(alert.query_id)
-
-        self.assertFalse(redash.tasks.alerts.notify_subscriptions.called)
+        check_alerts_for_query_task(alert.query_id)()
+        self.assertFalse(self.notify_subscriptions_mock.called)
 
 
 class TestNotifySubscriptions(BaseTestCase):
