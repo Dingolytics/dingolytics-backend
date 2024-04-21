@@ -3,10 +3,13 @@ from enum import IntEnum
 from typing import Any, List, Tuple
 
 from huey import Huey, PriorityRedisExpireHuey
+from huey.api import Result
 from pydantic import BaseSettings
 
 __all__ = [
     "DynamicSettings",
+    "TaskPriority",
+    "TaskResult",
     "workers",
 ]
 
@@ -187,6 +190,10 @@ class TaskPriority(IntEnum):
     normal = 25
     high = 50
     top = 100
+
+
+class TaskResult(Result):
+    pass
 
 
 class Workers:

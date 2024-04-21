@@ -24,6 +24,7 @@ __all__ = [
     "InterruptException",
     "JobTimeoutException",
     "BaseSQLQueryRunner",
+    "QueryExecutionError",
     "TYPE_DATETIME",
     "TYPE_BOOLEAN",
     "TYPE_INTEGER",
@@ -112,6 +113,10 @@ class InterruptException(Exception):
 
 
 class NotSupported(Exception):
+    pass
+
+
+class QueryExecutionError(Exception):
     pass
 
 

@@ -113,7 +113,6 @@ def refresh_queries():
         "query_ids": json_dumps([q.id for q in enqueued]),
     }
     redis_connection.hset("redash:status", '', '', mapping=status)
-    # redis_connection.hmset("redash:status", status)
     logger.info("Done refreshing queries: %s" % status)
 
 

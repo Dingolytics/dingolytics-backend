@@ -9,7 +9,7 @@ from rq.exceptions import NoSuchJobError
 
 from dingolytics.tasks.check_alerts_for_query import check_alerts_for_query_task
 from redash import models, redis_connection, settings
-from redash.query_runner import InterruptException
+from redash.query_runner import InterruptException, QueryExecutionError
 from redash.tasks.worker import Queue, Job
 # from redash.tasks.alerts import check_alerts_for_query
 from redash.tasks.failure_report import track_failure
@@ -128,10 +128,6 @@ def enqueue_query(
 
 def signal_handler(*args):
     raise InterruptException
-
-
-class QueryExecutionError(Exception):
-    pass
 
 
 def _resolve_user(user_id, is_api_key, query_id):

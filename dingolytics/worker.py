@@ -10,11 +10,16 @@ from redash.settings import get_settings
 from .tasks.check_alerts_for_query import check_alerts_for_query_task  # noqa: F401
 from .tasks.check_connection import check_connection_task  # noqa: F401
 from .tasks.get_schema import get_schema_task  # noqa: F401
+from .tasks.run_query import run_query_task  # noqa: F401
 
 __all__ = [
+    # Discovered tasks
     "check_alerts_for_query_task",
     "check_connection_task",
     "get_schema_task",
+    "run_query_task",
+
+    # Main entry point
     "main",
 ]
 

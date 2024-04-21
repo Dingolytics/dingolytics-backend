@@ -6,12 +6,9 @@ from rq.exceptions import NoSuchJobError
 from tests import BaseTestCase
 from redash import rq_redis_connection, models
 from redash.utils import json_dumps
+from redash.query_runner import QueryExecutionError
 from redash.query_runner.pg import PostgreSQL
-from redash.tasks.queries.execution import (
-    QueryExecutionError,
-    enqueue_query,
-    execute_query,
-)
+from redash.tasks.queries.execution import enqueue_query, execute_query
 from redash.tasks import Job
 
 
