@@ -370,9 +370,6 @@ class Settings(BaseSettings):
     # BigQuery client settings
     BIGQUERY_HTTP_TIMEOUT: int = 600
 
-    # DataBricks client settings
-    DATABRICKS_ROW_LIMIT: int = 20000
-
     @property
     def REDIS_FULL_URL(self) -> str:
         return add_decode_responses_to_redis_url(self.REDIS_URL)
