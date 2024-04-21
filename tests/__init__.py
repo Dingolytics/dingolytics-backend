@@ -10,7 +10,7 @@ os.environ["MULTI_ORG"] = "true"
 os.environ["RATELIMIT_ENABLED"] = "true"
 os.environ["CSRF_ENFORCED"] = "false"
 
-from dingolytics.defaults import worker
+from dingolytics.defaults import workers
 from redash import limiter, redis_connection
 from redash.app import create_app
 from redash.models import db
@@ -37,7 +37,7 @@ def authenticated_user(c, user=None):
 
 class BaseTestCase(TestCase):
     def setUp(self):
-        worker.immediate = True
+        workers.default.immediate = True
         limiter.enabled = False
         self.app = create_app()
         self.db = db
@@ -55,7 +55,7 @@ class BaseTestCase(TestCase):
         db.engine.dispose()
         self.app_ctx.pop()
         redis_connection.flushdb()
-        worker.immediate = False
+        workers.default.immediate = False
 
     def make_request(
         self,

@@ -1,12 +1,13 @@
 from collections import defaultdict
+from enum import IntEnum
 from typing import Any, List, Tuple
 
-from huey import PriorityRedisExpireHuey
+from huey import Huey, PriorityRedisExpireHuey
 from pydantic import BaseSettings
 
 __all__ = [
     "DynamicSettings",
-    "worker",
+    "workers",
 ]
 
 
@@ -175,12 +176,35 @@ class HueySettings(BaseSettings):
     class Config:
         env_file = ".env"
 
-    def get_worker_config(self) -> dict[str, Any]:
-        return {k.lower().removeprefix("huey_"): v for k, v in self.dict().items()}
+    def get_worker_config(self, **overrides) -> dict[str, Any]:
+        config = {k.lower().removeprefix("huey_"): v for k, v in self.dict().items()}
+        config.update(overrides)
+        return config
 
 
-worker = PriorityRedisExpireHuey(**HueySettings().get_worker_config())
+class TaskPriority(IntEnum):
+    low = 0
+    normal = 25
+    high = 50
+    top = 100
 
-@worker.task()
-def add_numbers(a, b):
-    return a + b
+
+class Workers:
+    def __init__(self, settings: HueySettings) -> None:
+        self._default = PriorityRedisExpireHuey(**settings.get_worker_config(name="default"))
+        # self._adhoc = PriorityRedisExpireHuey(**settings.get_worker_config(name="adhoc"))
+        self._periodic = PriorityRedisExpireHuey(**settings.get_worker_config(name="periodic"))
+
+    @property
+    def default(self) -> Huey:
+        return self._default
+
+    # @property
+    # def adhoc(self) -> Huey:
+    #     return self._adhoc
+
+    @property
+    def periodic(self) -> Huey:
+        return self._periodic
+
+workers = Workers(HueySettings())

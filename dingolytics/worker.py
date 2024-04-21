@@ -2,15 +2,19 @@ import logging
 import sys
 from typing import Any
 
-from dingolytics.defaults import worker
+from dingolytics.defaults import workers
 from redash.app import create_app
 from redash.settings import get_settings
 
 # Discover all tasks by importing them:
 from .tasks.check_alerts_for_query import check_alerts_for_query_task  # noqa: F401
+from .tasks.check_connection import check_connection_task  # noqa: F401
+from .tasks.get_schema import get_schema_task  # noqa: F401
 
 __all__ = [
     "check_alerts_for_query_task",
+    "check_connection_task",
+    "get_schema_task",
     "main",
 ]
 
@@ -20,18 +24,18 @@ app = None
 def main(**options) -> None:
     global app
     app = create_app()
-    consumer = worker.create_consumer(**options)
+    consumer = workers.default.create_consumer(**options)
     consumer.run()
 
 
-@worker.pre_execute()
+@workers.default.pre_execute()
 def pre_execute_hook(task):
     app_ctx = app.app_context()
     app_ctx.push()
     setattr(task, "_app_ctx", app_ctx)
 
 
-@worker.post_execute()
+@workers.default.post_execute()
 def post_execute_hook(task, task_value, exc):
     app_ctx = getattr(task, "_app_ctx", None)
     if app_ctx:

@@ -3,13 +3,13 @@ import logging
 
 from flask import current_app
 
-from dingolytics.defaults import worker
+from dingolytics.defaults import workers
 from redash import models, utils
 
 logger = logging.getLogger(__name__)
 
 
-@worker.task()
+@workers.default.task()
 def check_alerts_for_query_task(query_id: int):
     logger.debug("Checking query %d for alerts", query_id)
 
