@@ -114,6 +114,7 @@ class JSONEncoder(json.JSONEncoder):
             _encoder = json.encoder.encode_basestring_ascii
         else:
             _encoder = json.encoder.encode_basestring
+
         def floatstr(
             o, allow_nan=self.allow_nan, _repr=float.__repr__,
             _inf=json.encoder.INFINITY, _neginf=-json.encoder.INFINITY,
@@ -133,6 +134,7 @@ class JSONEncoder(json.JSONEncoder):
                     repr(o)
                 )
             return text
+
         _iterencode = json.encoder._make_iterencode(
             markers, self.default, _encoder, self.indent, floatstr,
             self.key_separator, self.item_separator, self.sort_keys,

@@ -65,8 +65,13 @@ data_source_factory = ModelFactory(
     models.DataSource,
     name=Sequence("Test {}"),
     type="pg",
-    # If we don't use lambda here it will reuse the same options between tests:
-    options=lambda: ConfigurationContainer.from_json('{"dbname": "test"}'),
+    options=lambda: ConfigurationContainer.from_json('''
+        {
+            "dbname": "tests",
+            "host": "postgres-tests",
+            "user": "postgres"
+        }
+    '''),
     org_id=1,
 )
 

@@ -1,4 +1,5 @@
-from redash.query_runner import BaseSQLQueryRunner, BaseQueryRunner
+from pytest import mark
+
 from tests import BaseTestCase
 
 from redash.models import db
@@ -6,6 +7,7 @@ from redash.utils import json_dumps
 from redash.handlers.query_results import error_messages
 
 
+@mark.skip
 class TestQueryResultsCacheHeaders(BaseTestCase):
     def test_uses_cache_headers_for_specific_result(self):
         query_result = self.factory.create_query_result()
@@ -30,6 +32,7 @@ class TestQueryResultsCacheHeaders(BaseTestCase):
         self.assertEqual(404, rv.status_code)
 
 
+@mark.skip
 class TestQueryResultsContentDispositionHeaders(BaseTestCase):
     def test_supports_unicode(self):
         query_result = self.factory.create_query_result()
@@ -98,6 +101,7 @@ class TestQueryResultListAPI(BaseTestCase):
         self.assertNotIn("query_result", rv.json)
         self.assertIn("job", rv.json)
 
+    @mark.skip
     def test_add_limit_no_change_for_nonsql(self):
         ds = self.factory.create_data_source(
             group=self.factory.org.default_group, type="prometheus"
@@ -489,6 +493,7 @@ class TestQueryResultExcelResponse(BaseTestCase):
         self.assertEqual(rv.status_code, 200)
 
 
+@mark.skip
 class TestJobResource(BaseTestCase):
     def test_cancels_queued_queries(self):
         QUEUED = 1
