@@ -6,7 +6,7 @@ from redash import models
 logger = logging.getLogger(__name__)
 
 
-@workers.default.task(expires=90)
+@workers.default.task(expires=30)
 def check_connection_task(data_source_id: int):
     logger.info("Check connection for data source - %s", data_source_id)
 

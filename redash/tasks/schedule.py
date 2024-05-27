@@ -73,14 +73,6 @@ def periodic_job_definitions():
             "result_ttl": 600,
         },
         {
-            "func": empty_schedules,
-            "interval": timedelta(minutes=60)
-        },
-        {
-            "func": refresh_schemas,
-            "interval": timedelta(minutes=settings.S.SCHEMAS_REFRESH_SCHEDULE),
-        },
-        {
             "func": sync_user_details,
             "timeout": 60,
             "interval": timedelta(minutes=1),

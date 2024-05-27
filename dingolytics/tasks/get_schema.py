@@ -3,7 +3,7 @@ from redash.query_runner import NotSupported
 from dingolytics.defaults import TaskPriority, workers
 
 
-@workers.default.task(expires=90, priority=TaskPriority.top)
+@workers.default.task(expires=30, priority=TaskPriority.top)
 def get_schema_task(data_source_id: int, refresh: bool) -> dict:
     try:
         data_source = models.DataSource.get_by_id(data_source_id)

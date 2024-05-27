@@ -65,9 +65,19 @@ run_worker_hy() {
   echo "Starting Huey worker (${ENVIRONMENT}) ..."
   if [ ${ENVIRONMENT} = "development" ]; then
     exec watchmedo auto-restart -d=./redash/ -d=./dingolytics/ -p=*.py -R -- \
-      python -m dingolytics.worker
+      python -m dingolytics.worker default
   else
-    exec python -m dingolytics.worker
+    exec python -m dingolytics.worker default
+  fi
+}
+
+run_periodic_hy() {
+  echo "Starting Huey periodic worker (${ENVIRONMENT}) ..."
+  if [ ${ENVIRONMENT} = "development" ]; then
+    exec watchmedo auto-restart -d=./redash/ -d=./dingolytics/ -p=*.py -R -- \
+      python -m dingolytics.worker periodic
+  else
+    exec python -m dingolytics.worker periodic
   fi
 }
 
@@ -125,6 +135,10 @@ case "$1" in
   run_worker_hy)
     shift
     run_worker_hy
+    ;;
+  run_periodic_hy)
+    shift
+    run_periodic_hy
     ;;
   shell)
     exec ./manage.py shell

@@ -44,6 +44,15 @@ services:
       LOG_LEVEL: "INFO"
     command: run_worker_hy
 
+  periodic_hy:
+    <<: *redash-service
+    depends_on:
+      - server
+    environment:
+      <<: *redash-environment
+      LOG_LEVEL: "INFO"
+    command: run_periodic_hy
+
   scheduler:
     <<: *redash-service
     depends_on:

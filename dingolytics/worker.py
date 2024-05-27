@@ -1,5 +1,6 @@
 import logging
 import sys
+from argparse import ArgumentParser
 from typing import Any
 
 from dingolytics.defaults import workers
@@ -11,6 +12,9 @@ from .tasks.check_alerts_for_query import check_alerts_for_query_task  # noqa: F
 from .tasks.check_connection import check_connection_task  # noqa: F401
 from .tasks.get_schema import get_schema_task  # noqa: F401
 from .tasks.run_query import run_query_task  # noqa: F401
+from .tasks.empty_schedules import empty_schedules_task  # noqa: F401
+from .tasks.refresh_schemas import refresh_all_schemas_task  # noqa: F401
+from .tasks.refresh_schemas import refresh_schema_task  # noqa: F401
 
 __all__ = [
     # Discovered tasks
@@ -26,10 +30,20 @@ __all__ = [
 app = None
 
 
-def main(**options) -> None:
+def main(_type: str) -> None:
     global app
+
+    known_workers = {
+        "default": workers.default,
+        "periodic": workers.periodic,
+    }
+    assert _type in known_workers, \
+        f"Error: invalid worker '{_type}', available: {list(workers.keys())}"
+
     app = create_app()
-    consumer = workers.default.create_consumer(**options)
+    worker = known_workers[_type]
+    options = get_worker_consumer_options()
+    consumer = worker.create_consumer(**options)
     consumer.run()
 
 
@@ -66,6 +80,10 @@ if __name__ == "__main__":
     logger = logging.getLogger("huey.consumer")
     logger.setLevel(settings.LOG_LEVEL)
 
+    parser = ArgumentParser()
+    parser.add_argument("type", nargs="?", default="default")
+    args = parser.parse_args()
+
     if sys.version_info >= (3, 8) and sys.platform == "darwin":
         import multiprocessing
 
@@ -74,5 +92,4 @@ if __name__ == "__main__":
         except RuntimeError:
             pass
 
-    options = get_worker_consumer_options()
-    main(**options)
+    main(args.type)

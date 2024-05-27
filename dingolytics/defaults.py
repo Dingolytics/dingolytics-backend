@@ -214,4 +214,5 @@ class Workers:
     def periodic(self) -> Huey:
         return self._periodic
 
+
 workers = Workers(HueySettings())
