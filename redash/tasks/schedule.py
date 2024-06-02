@@ -9,7 +9,6 @@ from rq_scheduler import Scheduler
 from redash import settings, rq_redis_connection
 from redash.tasks import (
     sync_user_details,
-    version_check,
     send_aggregated_errors,
     Queue,
 )
@@ -67,12 +66,6 @@ def periodic_job_definitions():
             "interval": timedelta(minutes=settings.S.SEND_FAILURE_EMAIL_INTERVAL),
         },
     ]
-
-    if settings.S.FEATURE_VERSION_CHECK:
-        jobs.append({
-            "func": version_check,
-            "interval": timedelta(days=1)
-        })
 
     # Add your own custom periodic jobs in your dynamic settings.
     jobs.extend(settings.D.periodic_jobs() or [])

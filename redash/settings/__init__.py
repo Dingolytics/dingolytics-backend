@@ -134,7 +134,6 @@ class Settings(BaseSettings):
     TABLE_CELL_MAX_JSON_SIZE: int = 50000
 
     # Features settings
-    FEATURE_VERSION_CHECK: bool = True
     FEATURE_DISABLE_REFRESH_QUERIES: bool = False
     FEATURE_SHOW_QUERY_RESULTS_COUNT: bool = True
     FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS: bool = False
