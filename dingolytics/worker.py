@@ -50,26 +50,40 @@ def main(_type: str) -> None:
 
     app = create_app()
     worker = known_workers[_type]
-    options = get_worker_consumer_options()
+    options = get_worker_consumer_options(_type)
     consumer = worker.create_consumer(**options)
     consumer.run()
 
 
 @workers.default.pre_execute()
-def pre_execute_hook(task):
+def default_pre_execute_hook(task):
     app_ctx = app.app_context()
     app_ctx.push()
     setattr(task, "_app_ctx", app_ctx)
 
 
 @workers.default.post_execute()
-def post_execute_hook(task, task_value, exc):
+def default_post_execute_hook(task, task_value, exc):
     app_ctx = getattr(task, "_app_ctx", None)
     if app_ctx:
         app_ctx.pop()
 
 
-def get_worker_consumer_options() -> dict[str, Any]:
+@workers.periodic.pre_execute()
+def periodic_pre_execute_hook(task):
+    app_ctx = app.app_context()
+    app_ctx.push()
+    setattr(task, "_app_ctx", app_ctx)
+
+
+@workers.periodic.post_execute()
+def periodic_post_execute_hook(task, task_value, exc):
+    app_ctx = getattr(task, "_app_ctx", None)
+    if app_ctx:
+        app_ctx.pop()
+
+
+def get_worker_consumer_options(_type: str) -> dict[str, Any]:
     """Get options for Huey tasks consumer."""
     # Refer to the `huey.consumer.Consumer` class
     # workers=1, periodic=True, initial_delay=0.1,

@@ -19,7 +19,7 @@ class RefreshQueriesError(Exception):
     pass
 
 
-@workers.periodic.task(crontab(minute='*/1'))
+@workers.periodic.periodic_task(crontab(minute='*/1'))
 def refresh_queries_task():
     if settings.S.FEATURE_DISABLE_REFRESH_QUERIES:
         logger.info("Disabled refresh queries.")

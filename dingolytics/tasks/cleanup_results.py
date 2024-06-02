@@ -7,7 +7,7 @@ from redash import models, settings
 logger = logging.getLogger(__name__)
 
 
-@workers.periodic.task(crontab(minute='*/60'))
+@workers.periodic.periodic_task(crontab(minute='*/60'))
 def cleanup_unused_results_task():
     """
     Job to cleanup unused query results -- such that no query links to them

@@ -7,7 +7,7 @@ from redash import models
 logger = logging.getLogger(__name__)
 
 
-@workers.periodic.task(crontab(minute='*/60'))
+@workers.periodic.periodic_task(crontab(minute='*/60'))
 def empty_schedules_task():
     logger.info("Deleting schedules of past scheduled queries...")
 

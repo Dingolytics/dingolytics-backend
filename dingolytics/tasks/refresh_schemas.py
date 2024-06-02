@@ -9,7 +9,7 @@ from redash import models, redis_connection
 logger = logging.getLogger(__name__)
 
 
-@workers.periodic.task(crontab(minute='*/15'))
+@workers.periodic.periodic_task(crontab(minute='*/15'))
 def refresh_all_schemas_task() -> None:
     """Refreshes the data sources schemas."""
     blacklist = [
