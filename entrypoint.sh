@@ -11,7 +11,7 @@ help() {
   echo "Usage:"
   echo ""
   echo "manage -- run CLI to management command"
-  echo "healthcheck -- run healthchecks for workers"
+  echo "healthcheck -- run health checks for workers"
   echo ""
   echo "run_scheduler -- start an rq-scheduler instance"
   echo "run_worker -- start a RQ workers with code reloading"

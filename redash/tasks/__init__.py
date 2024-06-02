@@ -7,11 +7,6 @@ from .general import (
 from .queries import (
     enqueue_query,
     execute_query,
-    refresh_queries,
-    refresh_schemas,
-    cleanup_query_results,
-    empty_schedules,
-    remove_ghost_locks,
 )
 from .failure_report import send_aggregated_errors
 from .worker import Worker, Queue, Job

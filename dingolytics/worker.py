@@ -10,17 +10,25 @@ from redash.settings import get_settings
 # Discover all tasks by importing them:
 from .tasks.check_alerts_for_query import check_alerts_for_query_task  # noqa: F401
 from .tasks.check_connection import check_connection_task  # noqa: F401
-from .tasks.get_schema import get_schema_task  # noqa: F401
-from .tasks.run_query import run_query_task  # noqa: F401
+from .tasks.cleanup_results import cleanup_unused_results_task  # noqa: F401
 from .tasks.empty_schedules import empty_schedules_task  # noqa: F401
-from .tasks.refresh_schemas import refresh_all_schemas_task  # noqa: F401
-from .tasks.refresh_schemas import refresh_schema_task  # noqa: F401
+from .tasks.get_schema import get_schema_task  # noqa: F401
+from .tasks.refresh_queries import refresh_queries_task  # noqa: F401
+from .tasks.refresh_schemas import (
+    refresh_all_schemas_task,  # noqa: F401
+    refresh_schema_task,  # noqa: F401
+)
+from .tasks.run_query import run_query_task  # noqa: F401
 
 __all__ = [
     # Discovered tasks
     "check_alerts_for_query_task",
     "check_connection_task",
+    "cleanup_unused_results_task",
     "get_schema_task",
+    "refresh_queries_task",
+    "refresh_all_schemas_task",
+    "refresh_schema_task",
     "run_query_task",
 
     # Main entry point

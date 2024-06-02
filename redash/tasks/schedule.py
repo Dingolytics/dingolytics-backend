@@ -9,11 +9,6 @@ from rq_scheduler import Scheduler
 from redash import settings, rq_redis_connection
 from redash.tasks import (
     sync_user_details,
-    refresh_queries,
-    remove_ghost_locks,
-    empty_schedules,
-    refresh_schemas,
-    cleanup_query_results,
     version_check,
     send_aggregated_errors,
     Queue,
@@ -62,17 +57,6 @@ def schedule(kwargs):
 def periodic_job_definitions():
     jobs = [
         {
-            "func": refresh_queries,
-            "timeout": 600,
-            "interval": 30,
-            "result_ttl": 600
-        },
-        {
-            "func": remove_ghost_locks,
-            "interval": timedelta(minutes=1),
-            "result_ttl": 600,
-        },
-        {
             "func": sync_user_details,
             "timeout": 60,
             "interval": timedelta(minutes=1),
@@ -88,12 +72,6 @@ def periodic_job_definitions():
         jobs.append({
             "func": version_check,
             "interval": timedelta(days=1)
-        })
-
-    if settings.S.QUERY_RESULTS_CLEANUP_ENABLED:
-        jobs.append({
-            "func": cleanup_query_results,
-            "interval": timedelta(minutes=5)
         })
 
     # Add your own custom periodic jobs in your dynamic settings.

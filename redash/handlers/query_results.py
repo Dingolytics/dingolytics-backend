@@ -20,7 +20,6 @@ from redash.permissions import (
     view_only,
 )
 from redash.tasks import Job
-# from redash.tasks.queries import enqueue_query
 from redash.utils import (
     collect_parameters_from_request,
     json_dumps,

@@ -1,12 +1,16 @@
 import logging
+
 from flask import render_template
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from redash import settings
 from redash.tasks import send_mail
 from redash.utils import base_url
 
-# noinspection PyUnresolvedReferences
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+__all__ = [
+    "BadSignature",
+    "SignatureExpired",
+]
 
 logger = logging.getLogger(__name__)
 
