@@ -7,10 +7,10 @@ from urllib.parse import urlsplit, urlunsplit
 
 from flask import jsonify, redirect, request, url_for, session
 from flask_login import LoginManager, login_user, logout_user, user_logged_in
+from dingolytics.tasks.auditlog_events import record_auditlog_event_task
 from redash import models, settings
 from redash.authentication import jwt_auth
 from redash.authentication.org_resolving import current_org
-from redash.tasks import record_event
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import Unauthorized
 
@@ -202,7 +202,7 @@ def jwt_token_load_user_from_request(request):
 
 
 def log_user_logged_in(app, user):
-    event = {
+    record_auditlog_event_task({
         "org_id": user.org_id,
         "user_id": user.id,
         "action": "login",
@@ -210,8 +210,7 @@ def log_user_logged_in(app, user):
         "timestamp": int(time.time()),
         "user_agent": request.user_agent.string,
         "ip": request.remote_addr,
-    }
-    record_event.delay(event)
+    })
 
 
 def is_ajax_request() -> bool:

@@ -1,5 +1,4 @@
 from .general import (
-    record_event,
     send_mail,
     sync_user_details,
 )

@@ -197,6 +197,11 @@ class TaskResult(Result):
 
 
 class Workers:
+    """
+    Huey workers manager.
+
+    Available workers: `default`, `periodic`.
+    """
     def __init__(self, settings: HueySettings) -> None:
         self._default = PriorityRedisExpireHuey(**settings.get_worker_config(name="default"))
         # self._adhoc = PriorityRedisExpireHuey(**settings.get_worker_config(name="adhoc"))

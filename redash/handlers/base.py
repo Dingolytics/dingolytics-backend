@@ -6,10 +6,10 @@ from flask import Blueprint, current_app, request
 from flask_login import current_user, login_required
 from flask_restful import Resource, abort
 from flask_sqlalchemy.query import Query
+from dingolytics.tasks.auditlog_events import record_auditlog_event_task
 from redash import settings
 from redash.authentication import current_org
 from redash.models import db
-from redash.tasks import record_event as record_event_task
 from redash.utils import json_dumps
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import cast
@@ -61,7 +61,7 @@ def record_event(org, user, options):
     if "timestamp" not in options:
         options["timestamp"] = int(time.time())
 
-    record_event_task.delay(options)
+    record_auditlog_event_task(options)
 
 
 def require_fields(req, fields):

@@ -8,6 +8,7 @@ from redash.app import create_app
 from redash.settings import get_settings
 
 # Discover all tasks by importing them:
+from .tasks.auditlog_events import record_auditlog_event_task  # noqa: F401
 from .tasks.check_alerts_for_query import check_alerts_for_query_task  # noqa: F401
 from .tasks.check_connection import check_connection_task  # noqa: F401
 from .tasks.cleanup_results import cleanup_unused_results_task  # noqa: F401
@@ -26,6 +27,7 @@ __all__ = [
     "check_connection_task",
     "cleanup_unused_results_task",
     "get_schema_task",
+    "record_auditlog_event_task",
     "refresh_queries_task",
     "refresh_all_schemas_task",
     "refresh_schema_task",
