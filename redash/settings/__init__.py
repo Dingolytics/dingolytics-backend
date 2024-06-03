@@ -72,7 +72,6 @@ class Settings(BaseSettings):
     ADHOC_QUERY_TIME_LIMIT: int = -1
     JOB_EXPIRY_TIME: int = 3600 * 12
     JOB_DEFAULT_FAILURE_TTL: int = 3600 * 24 * 7
-    SEND_FAILURE_EMAIL_INTERVAL: int = 60
     MAX_FAILURE_REPORTS_PER_QUERY: int = 100
     ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE: str = "({state}) {alert_name}"
     EVENT_REPORTING_WEBHOOKS: List[str] = []

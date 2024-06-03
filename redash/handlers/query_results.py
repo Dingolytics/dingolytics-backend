@@ -1,6 +1,3 @@
-import logging
-import time
-
 import unicodedata
 from flask import make_response, request
 from flask_login import current_user
@@ -19,7 +16,6 @@ from redash.permissions import (
     require_any_of_permission,
     view_only,
 )
-from redash.tasks import Job
 from redash.utils import (
     collect_parameters_from_request,
     json_dumps,
@@ -36,7 +32,6 @@ from redash.serializers import (
     serialize_query_result,
     serialize_query_result_to_dsv,
     serialize_query_result_to_xlsx,
-    serialize_job,
 )
 
 
@@ -137,7 +132,6 @@ def run_query(
             "result": None,
         }
     }
-    # return serialize_job(job)
 
 
 def get_download_filename(query_result, query, filetype):
@@ -497,12 +491,10 @@ class JobResource(BaseResource):
                     "query_result_id": result,
                 }
             }
-        job = Job.fetch(job_id)
-        return serialize_job(job)
+        raise NotImplementedError()
 
     def delete(self, job_id):
         """
         Cancel a query job in progress.
         """
-        job = Job.fetch(job_id)
-        job.cancel()
+        raise NotImplementedError()

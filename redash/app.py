@@ -27,7 +27,6 @@ def create_app():
         mail,
         migrate,
         security,
-        tasks,
     )
     from .metrics import request as request_metrics
     from .models import db, users
@@ -45,6 +44,5 @@ def create_app():
     limiter.init_app(app)
     handlers.init_app(app)
     users.init_app(app)
-    tasks.init_app(app)
 
     return app

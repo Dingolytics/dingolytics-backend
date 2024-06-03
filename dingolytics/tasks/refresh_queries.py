@@ -4,12 +4,12 @@ import time
 from huey import crontab
 from dingolytics.defaults import workers
 from dingolytics.tasks.run_query import enqueue_query_hy
+from dingolytics.queries.errors import track_query_error
 from redash import models, redis_connection, settings
 from redash.models.parameterized_query import (
     InvalidParameterError,
     QueryDetachedFromDataSourceError,
 )
-from redash.tasks.failure_report import track_failure
 from redash.utils import json_dumps, sentry
 
 logger = logging.getLogger(__name__)
@@ -64,10 +64,10 @@ def _apply_default_parameters(query):
         try:
             return query.parameterized.apply(parameters).query
         except InvalidParameterError as exc:
-            track_failure(query, f"Skipping refresh of {query.id}: {exc}")
+            track_query_error(query, f"Skipping refresh of {query.id}: {exc}")
             raise
         except QueryDetachedFromDataSourceError as exc:
-            track_failure(query, (
+            track_query_error(query, (
                 f"Skipping refresh of {query.id} because a related dropdown "
                 f"query ({exc.query_id}) is unattached to any datasource."
             ))

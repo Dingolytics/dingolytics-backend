@@ -7,7 +7,7 @@ from rq import Connection
 
 from redash import __version__, settings, rq_redis_connection
 from redash.main import initialize_app
-from redash.cli import data_sources, database, groups, organization, queries, users, rq
+from redash.cli import data_sources, database, groups, organization, queries, users
 from redash.monitor import get_status
 
 
@@ -33,7 +33,6 @@ manager.add_command(groups.manager, "groups")
 manager.add_command(data_sources.manager, "ds")
 manager.add_command(organization.manager, "org")
 manager.add_command(queries.manager, "queries")
-manager.add_command(rq.manager, "rq")
 manager.add_command(run_command, "runserver")
 
 

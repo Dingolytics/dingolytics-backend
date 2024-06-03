@@ -5,11 +5,11 @@ import time
 from huey.api import Task
 
 from dingolytics.defaults import workers, TaskPriority, TaskResult
+from dingolytics.queries.errors import track_query_error
 # from dingolytics.tasks.check_alerts_for_query import check_alerts_for_query_task
 from redash.models import ApiUser, DataSource, Query, QueryResult, User
 from redash.models.base import db
 from redash.query_runner import QueryExecutionError
-from redash.tasks.failure_report import track_failure
 from redash.utils import gen_query_hash, utcnow
 
 logger = logging.getLogger(__name__)
@@ -91,7 +91,7 @@ def run_query_task(
         result = QueryExecutionError(error)
         if scheduled_query:
             scheduled_query = db.session.merge(scheduled_query, load=False)
-            track_failure(scheduled_query, error)
+            track_query_error(scheduled_query, error)
         raise result
 
     query_result = QueryResult.store_result(

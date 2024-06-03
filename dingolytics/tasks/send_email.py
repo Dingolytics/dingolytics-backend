@@ -1,20 +1,18 @@
+import logging
+
 from flask_mail import Message
+
+from dingolytics.defaults import workers
 from redash import mail
-from redash.models import users
-from redash.worker import job, get_job_logger
 
-logger = get_job_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
-@job("emails")
-def send_mail(to, subject, html, text):
+# TODO: Use separate worker for notifications (emails and other channels).
+@workers.default.task()
+def send_mail_task(to: list, subject: str, html: str, text: str) -> None:
     try:
         message = Message(recipients=to, subject=subject, html=html, body=text)
-
         mail.send(message)
     except Exception:
         logger.exception("Failed sending message: %s", message.subject)
-
-
-def sync_user_details():
-    users.sync_last_active_at()

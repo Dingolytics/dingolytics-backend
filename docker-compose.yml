@@ -53,23 +53,6 @@ services:
       LOG_LEVEL: "INFO"
     command: run_periodic_hy
 
-  scheduler:
-    <<: *redash-service
-    depends_on:
-      - server
-    environment:
-      <<: *redash-environment
-    command: run_scheduler
-
-  worker:
-    <<: *redash-service
-    depends_on:
-      - server
-    environment:
-      <<: *redash-environment
-      LOG_LEVEL: "WARNING"
-    command: run_worker
-
   keydb:
     image: eqalpha/keydb:alpine_x86_64_v6.3.4
     restart: unless-stopped

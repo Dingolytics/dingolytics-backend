@@ -11,11 +11,9 @@ help() {
   echo "Usage:"
   echo ""
   echo "manage -- run CLI to management command"
-  echo "healthcheck -- run health checks for workers"
   echo ""
-  echo "run_scheduler -- start an rq-scheduler instance"
-  echo "run_worker -- start a RQ workers with code reloading"
-  echo "run_worker -- start a single RQ worker with code reloading"
+  echo "run_periodic_hy -- start Huey periodic jobs runner with code reloading"
+  echo "run_worker_hy -- start a Huey workers with code reloading"
   echo "run_server -- start Flask / gunicorn server"
   echo ""
   echo "For live code reloading set ENVIRONMENT=development"
@@ -24,41 +22,6 @@ help() {
   echo ""
   echo "docker <CONTAINER> exec manage database create-tables"
   echo ""
-}
-
-healthcheck() {
-  WORKERS_COUNT=${WORKERS_COUNT}
-  echo "Checking active workers count against $WORKERS_COUNT..."
-  ACTIVE_WORKERS_COUNT=`echo $(rq info --url $REDIS_URL -R | grep workers | grep -oP ^[0-9]+)`
-  if [ "$ACTIVE_WORKERS_COUNT" < "$WORKERS_COUNT"  ]; then
-    echo "$ACTIVE_WORKERS_COUNT workers are active, Exiting"
-    exit 1
-  else
-    echo "$ACTIVE_WORKERS_COUNT workers are active"
-    exit 0
-  fi
-}
-
-run_scheduler() {
-  echo "Starting RQ scheduler (${ENVIRONMENT}) ..."
-  if [ ${ENVIRONMENT} = "development" ]; then
-    exec watchmedo auto-restart -d=./redash/ -d=./dingolytics/ -p=*.py -R -- \
-      ./manage.py rq scheduler
-  else
-    exec ./manage.py rq scheduler
-  fi
-}
-
-run_worker() {
-  echo "Starting RQ worker (${ENVIRONMENT}) ..."
-  if [ ${ENVIRONMENT} = "development" ]; then
-    exec watchmedo auto-restart -d=./redash/ -d=./dingolytics/ -p=*.py -R -- \
-      ./manage.py rq worker $QUEUES
-  else
-    export WORKERS_COUNT=${WORKERS_COUNT:-2}
-    export QUEUES=${QUEUES:-}
-    exec supervisord -c ${HOME}/etc/supervisor/worker.conf
-  fi
 }
 
 run_worker_hy() {
@@ -108,10 +71,6 @@ case "$1" in
     shift
     create_tables
     ;;
-  healthcheck)
-    shift
-    healthcheck
-    ;;
   help)
     shift
     help
@@ -123,14 +82,6 @@ case "$1" in
   run_server)
     shift
     run_server
-    ;;
-  run_scheduler)
-    shift
-    run_scheduler
-    ;;
-  run_worker)
-    shift
-    run_worker
     ;;
   run_worker_hy)
     shift
