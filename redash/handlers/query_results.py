@@ -5,7 +5,7 @@ from flask_restful import abort
 from werkzeug.urls import url_quote
 
 from dingolytics.defaults import workers
-from dingolytics.tasks.run_query import enqueue_query_hy
+from dingolytics.tasks.run_query import enqueue_query
 from redash import models, settings
 from redash.handlers.base import BaseResource, get_object_or_404, record_event
 from redash.permissions import (
@@ -110,7 +110,7 @@ def run_query(
             )
         }
 
-    job = enqueue_query_hy(
+    job = enqueue_query(
         query=query_text,
         data_source=data_source,
         user_id=current_user.id,

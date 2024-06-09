@@ -11,9 +11,10 @@ help() {
   echo "Usage:"
   echo ""
   echo "manage -- run CLI to management command"
+  echo "shell -- run management shell"
   echo ""
-  echo "run_periodic_hy -- start Huey periodic jobs runner with code reloading"
-  echo "run_worker_hy -- start a Huey workers with code reloading"
+  echo "run_periodic -- start Huey periodic jobs runner with optional code reloading"
+  echo "run_worker -- start a Huey workers with optional code reloading"
   echo "run_server -- start Flask / gunicorn server"
   echo ""
   echo "For live code reloading set ENVIRONMENT=development"
@@ -21,10 +22,11 @@ help() {
   echo "Example:"
   echo ""
   echo "docker <CONTAINER> exec manage database create-tables"
+  echo "docker -it <CONTAINER> exec shell"
   echo ""
 }
 
-run_worker_hy() {
+run_worker() {
   echo "Starting Huey worker (${ENVIRONMENT}) ..."
   if [ ${ENVIRONMENT} = "development" ]; then
     exec watchmedo auto-restart -d=./redash/ -d=./dingolytics/ -p=*.py -R -- \
@@ -34,7 +36,7 @@ run_worker_hy() {
   fi
 }
 
-run_periodic_hy() {
+run_periodic() {
   echo "Starting Huey periodic worker (${ENVIRONMENT}) ..."
   if [ ${ENVIRONMENT} = "development" ]; then
     exec watchmedo auto-restart -d=./redash/ -d=./dingolytics/ -p=*.py -R -- \
@@ -63,14 +65,6 @@ run_server() {
 }
 
 case "$1" in
-  create_db)
-    shift
-    create_tables
-    ;;
-  create_tables)
-    shift
-    create_tables
-    ;;
   help)
     shift
     help
@@ -79,20 +73,20 @@ case "$1" in
     shift
     exec ./manage.py $*
     ;;
+  shell)
+    exec ./manage.py shell
+    ;;
   run_server)
     shift
     run_server
     ;;
-  run_worker_hy)
+  run_worker)
     shift
-    run_worker_hy
+    run_worker
     ;;
-  run_periodic_hy)
+  run_periodic)
     shift
-    run_periodic_hy
-    ;;
-  shell)
-    exec ./manage.py shell
+    run_periodic
     ;;
   *)
     exec "$@"

@@ -3,7 +3,7 @@ import time
 
 from huey import crontab
 from dingolytics.defaults import workers
-from dingolytics.tasks.run_query import enqueue_query_hy
+from dingolytics.tasks.run_query import enqueue_query
 from dingolytics.queries.errors import track_query_error
 from redash import models, redis_connection, settings
 from redash.models.parameterized_query import (
@@ -35,7 +35,7 @@ def refresh_queries_task():
         try:
             query_text = _apply_default_parameters(query)
             query_text = _apply_auto_limit(query_text, query)
-            enqueue_query_hy(
+            enqueue_query(
                 query_text,
                 query.data_source,
                 query.user_id,

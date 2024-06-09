@@ -35,23 +35,23 @@ services:
       <<: *redash-environment
     command: run_server
 
-  worker_hy:
+  worker:
     <<: *redash-service
     depends_on:
       - server
     environment:
       <<: *redash-environment
       LOG_LEVEL: "INFO"
-    command: run_worker_hy
+    command: run_worker
 
-  periodic_hy:
+  periodic:
     <<: *redash-service
     depends_on:
       - server
     environment:
       <<: *redash-environment
       LOG_LEVEL: "INFO"
-    command: run_periodic_hy
+    command: run_periodic
 
   keydb:
     image: eqalpha/keydb:alpine_x86_64_v6.3.4

@@ -15,7 +15,7 @@ from redash.utils import gen_query_hash, utcnow
 logger = logging.getLogger(__name__)
 
 
-def enqueue_query_hy(  # TODO: Replace older enqueue_query() with this, then rename.
+def enqueue_query(  # TODO: Replace older enqueue_query() with this, then rename.
     query: str,
     data_source: DataSource,
     user_id: int,
