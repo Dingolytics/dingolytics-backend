@@ -3,7 +3,7 @@ version: "3.9"
 x-redash-service: &redash-service
   build:
     context: .
-    target: application
+    target: development
   volumes:
     - .:/home/redash/app
     - vector-etc:/home/redash/etc/vector
@@ -11,6 +11,8 @@ x-redash-service: &redash-service
     - .env
 
 x-redash-environment: &redash-environment
+  ENVIRONMENT: development
+  PYTHONUNBUFFERED: 0
   REDIS_URL: "redis://keydb:6379/0"
   SQLALCHEMY_DATABASE_URI: "postgresql://postgres@postgres/postgres"
   RATELIMIT_ENABLED: "false"
@@ -31,16 +33,7 @@ services:
       - "127.0.0.1:5678:5678"
     environment:
       <<: *redash-environment
-      PYTHONUNBUFFERED: 0
-    command: dev_server
-
-  scheduler:
-    <<: *redash-service
-    depends_on:
-      - server
-    environment:
-      <<: *redash-environment
-    command: dev_scheduler
+    command: run_server
 
   worker:
     <<: *redash-service
@@ -48,9 +41,17 @@ services:
       - server
     environment:
       <<: *redash-environment
-      LOG_LEVEL: "WARNING"
-      PYTHONUNBUFFERED: 0
-    command: dev_worker
+      LOG_LEVEL: "INFO"
+    command: run_worker
+
+  periodic:
+    <<: *redash-service
+    depends_on:
+      - server
+    environment:
+      <<: *redash-environment
+      LOG_LEVEL: "INFO"
+    command: run_periodic
 
   keydb:
     image: eqalpha/keydb:alpine_x86_64_v6.3.4

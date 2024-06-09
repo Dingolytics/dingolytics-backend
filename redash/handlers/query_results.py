@@ -1,11 +1,11 @@
-import logging
-import time
-
 import unicodedata
 from flask import make_response, request
 from flask_login import current_user
 from flask_restful import abort
 from werkzeug.urls import url_quote
+
+from dingolytics.defaults import workers
+from dingolytics.tasks.run_query import enqueue_query
 from redash import models, settings
 from redash.handlers.base import BaseResource, get_object_or_404, record_event
 from redash.permissions import (
@@ -16,8 +16,6 @@ from redash.permissions import (
     require_any_of_permission,
     view_only,
 )
-from redash.tasks import Job
-from redash.tasks.queries import enqueue_query
 from redash.utils import (
     collect_parameters_from_request,
     json_dumps,
@@ -34,7 +32,6 @@ from redash.serializers import (
     serialize_query_result,
     serialize_query_result_to_dsv,
     serialize_query_result_to_xlsx,
-    serialize_job,
 )
 
 
@@ -112,20 +109,29 @@ def run_query(
                 query_result, current_user.is_api_user()
             )
         }
-    else:
-        job = enqueue_query(
-            query_text,
-            data_source,
-            current_user.id,
-            current_user.is_api_user(),
-            metadata={
-                "Username": repr(current_user)
-                if current_user.is_api_user()
-                else current_user.email,
-                "query_id": query_id,
-            },
-        )
-        return serialize_job(job)
+
+    job = enqueue_query(
+        query=query_text,
+        data_source=data_source,
+        user_id=current_user.id,
+        is_api_key=current_user.is_api_user(),
+        metadata={
+            "Username": repr(current_user)
+            if current_user.is_api_user()
+            else current_user.email,
+            "query_id": query_id,
+        },
+    )
+
+    return {
+        "job": {
+            "id": f"huey:{job.id}",  # TODO: Remove prefix after full migration to Huey
+            "updated_at": utcnow(),
+            "status": 2,  # STARTED
+            "error": None,
+            "result": None,
+        }
+    }
 
 
 def get_download_filename(query_result, query, filetype):
@@ -452,16 +458,43 @@ class QueryResultResource(BaseResource):
 
 
 class JobResource(BaseResource):
-    def get(self, job_id, query_id=None):
+    def get(self, job_id: str, query_id=None):
         """
         Retrieve info about a running query job.
         """
-        job = Job.fetch(job_id)
-        return serialize_job(job)
+        # TODO: Remove special prefix handling after full migration to Huey.
+        # TODO: Implement general wrapper for Huey task results.
+        if job_id.startswith("huey:"):
+            huey_job_id = job_id.split(":")[-1]
+            result = workers.default.result(
+                id=huey_job_id,
+                timeout=1.0,
+                preserve=True,
+            )
+            if result is None:
+                return {
+                    "job": {
+                        "id": job_id,
+                        "updated_at": utcnow(),
+                        "status": 2,  # STARTED
+                        "error": None,
+                        "result": None,
+                    }
+                }
+            return {
+                "job": {
+                    "id": job_id,
+                    "updated_at": utcnow(),
+                    "status": 3,  # FINISHED
+                    "error": None,
+                    "result": result,
+                    "query_result_id": result,
+                }
+            }
+        raise NotImplementedError()
 
     def delete(self, job_id):
         """
         Cancel a query job in progress.
         """
-        job = Job.fetch(job_id)
-        job.cancel()
+        raise NotImplementedError()

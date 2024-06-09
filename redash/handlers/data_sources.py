@@ -6,6 +6,8 @@ from flask_restful import abort
 from funcy import project
 from sqlalchemy.exc import IntegrityError
 
+from dingolytics.tasks.check_connection import check_connection_task
+from dingolytics.tasks.get_schema import get_schema_task
 from redash import models
 from redash.handlers.base import BaseResource, get_object_or_404, require_fields
 from redash.permissions import (
@@ -17,11 +19,9 @@ from redash.permissions import (
 from redash.query_runner import (
     get_configuration_schema_for_query_runner_type,
     query_runners,
-    NotSupported,
 )
 from redash.utils import filter_none
 from redash.utils.configuration import ConfigurationContainer, ValidationError
-from redash.tasks.general import test_connection, get_schema
 from redash.serializers import serialize_job
 
 
@@ -196,16 +196,29 @@ class DataSourceSchemaResource(BaseResource):
         )
         require_access(data_source, self.current_user, view_only)
         refresh = request.args.get("refresh") is not None
+        schema = {}
 
         if not refresh:
-            cached_schema = data_source.get_cached_schema()
+            schema = data_source.get_cached_schema()
 
-            if cached_schema is not None:
-                return {"schema": cached_schema}
+        if refresh or not schema:
+            # TODO: Add a general wrapper for task result output
+            task = get_schema_task(data_source.id, refresh)
+            result = task.get(blocking=True, timeout=30)
+            schema = result.get("schema")
+            error = result.get("error")
+            if error:
+                return {
+                    "job": {
+                        "id": str(task.id),
+                        "updated_at": 0,
+                        "status": 4,
+                        "error": error,
+                        "result": None,
+                    }
+                }
 
-        job = get_schema.delay(data_source.id, refresh)
-
-        return serialize_job(job)
+        return {"schema": schema}
 
 
 class DataSourcePauseResource(BaseResource):
@@ -255,15 +268,14 @@ class DataSourceTestResource(BaseResource):
             models.DataSource.get_by_id_and_org, data_source_id, self.current_org
         )
 
-        response = {}
+        task = check_connection_task(data_source.id)
+        try:
+            result = task.get(blocking=True, timeout=30)
+        except Exception as exc:
+            result = exc
 
-        job = test_connection.delay(data_source.id)
-        while not (job.is_finished or job.is_failed):
-            time.sleep(1)
-            job.refresh()
-
-        if isinstance(job.result, Exception):
-            response = {"message": str(job.result), "ok": False}
+        if isinstance(result, Exception):
+            response = {"message": str(result), "ok": False}
         else:
             response = {"message": "success", "ok": True}
 

@@ -5,6 +5,7 @@ from sqlalchemy_utils.models import generic_repr
 
 from redash import redis_connection, settings
 from redash.query_runner import (
+    BaseQueryRunner,
     get_configuration_schema_for_query_runner_type,
     get_query_runner,
     with_ssh_tunnel,
@@ -108,7 +109,7 @@ class DataSource(BelongsToOrgMixin, db.Model):
         return data_sources.distinct()
 
     @classmethod
-    def get_by_id(cls, _id):
+    def get_by_id(cls, _id) -> 'DataSource':
         return cls.query.filter(cls.id == _id).one()
 
     def delete(self):
@@ -214,7 +215,7 @@ class DataSource(BelongsToOrgMixin, db.Model):
         return "ssh_tunnel" in self.options
 
     @property
-    def query_runner(self):
+    def query_runner(self) -> BaseQueryRunner:
         query_runner = get_query_runner(self.type, self.options)
         if self.uses_ssh_tunnel:
             options = self.options.get("ssh_tunnel")

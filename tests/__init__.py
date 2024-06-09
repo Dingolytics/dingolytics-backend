@@ -1,27 +1,16 @@
-import os
 import datetime
 import logging
-from unittest import TestCase
 from contextlib import contextmanager
+from unittest import TestCase
 
-# Dummy values for oauth login
-os.environ["REDASH_GOOGLE_CLIENT_ID"] = "dummy"
-os.environ["REDASH_GOOGLE_CLIENT_SECRET"] = "dummy"
-os.environ["MULTI_ORG"] = "true"
-
-# Make sure rate limit is enabled
-os.environ["RATELIMIT_ENABLED"] = "true"
-
-os.environ["CSRF_ENFORCED"] = "false"
-
+from dingolytics.defaults import workers
 from redash import limiter, redis_connection
 from redash.app import create_app
 from redash.models import db
-from redash.utils import json_dumps, json_loads
+from redash.utils import json_dumps
 from tests.factories import Factory, user_factory
 
-
-logging.disable(logging.INFO)
+# logging.disable(logging.INFO)
 logging.getLogger("metrics").setLevel(logging.ERROR)
 
 
@@ -41,6 +30,7 @@ def authenticated_user(c, user=None):
 
 class BaseTestCase(TestCase):
     def setUp(self):
+        workers.default.immediate = True
         limiter.enabled = False
         self.app = create_app()
         self.db = db
@@ -58,6 +48,7 @@ class BaseTestCase(TestCase):
         db.engine.dispose()
         self.app_ctx.pop()
         redis_connection.flushdb()
+        workers.default.immediate = False
 
     def make_request(
         self,

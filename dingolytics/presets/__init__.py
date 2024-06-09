@@ -36,6 +36,7 @@ class PresetLoader:
         >>> presets.load_all()
         >>> presets["clickhouse"]["app_events"]
     """
+
     def __init__(self, base_path: str) -> None:
         self.base_path = Path(base_path)
         self._presets = {}
@@ -81,7 +82,7 @@ class PresetLoader:
         with open(path, "r") as fp:
             key = path.name.split(".")[0]
             examples[key] = json.load(fp)
-        
+
     def _load_sql(self, path: Path, presets: dict) -> None:
         assert path.is_file()
         text = ''

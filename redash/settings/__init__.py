@@ -1,25 +1,60 @@
 from functools import lru_cache
-from typing import Dict, List, Any
-from pydantic import BaseSettings, PyObject, root_validator
-#, ValidationError, validator
+from typing import Any, Dict, List, Protocol
 
-from redash.defaults import DynamicSettings
+from pydantic import BaseSettings, PyObject, root_validator
+
 from ._helpers import (
+    add_decode_responses_to_redis_url,
     fix_assets_path,
     parse_boolean,
-    add_decode_responses_to_redis_url,
 )
 
 __all__ = [
     "S",  # Default global settings
     "D",  # Dynamic settings module
     "get_settings",
-
     # Helpers
     "parse_boolean",
     "fix_assets_path",
     "add_decode_responses_to_redis_url",
 ]
+
+
+class DynamicSettingsProtocol(Protocol):
+    # PostgreSQL extensions to use for the main database
+    database_extensions: list[str]
+
+    # Reference implementation: redash.models.DBPersistence
+    QueryResultPersistence: Any = None
+
+    def query_time_limit(
+        self, is_scheduled: bool, user_id: int, org_id: int
+    ) -> int:
+        pass
+
+    def periodic_jobs(self) -> list[dict[str, Any]]:
+        pass
+
+    def ssh_tunnel_auth(self) -> dict:
+        pass
+
+    def database_key_definitions(self, default: dict) -> dict[str, Any]:
+        pass
+
+    def setup_default_org(self, name: str) -> tuple[Any, list[Any]]:
+        pass
+
+    def setup_default_user(
+        self,
+        *,
+        org: Any,
+        group_ids: List[int],
+        name: str,
+        email: str,
+        password: str,
+        **kwargs,
+    ) -> Any:
+        pass
 
 
 class Settings(BaseSettings):
@@ -37,7 +72,6 @@ class Settings(BaseSettings):
     ADHOC_QUERY_TIME_LIMIT: int = -1
     JOB_EXPIRY_TIME: int = 3600 * 12
     JOB_DEFAULT_FAILURE_TTL: int = 3600 * 24 * 7
-    SEND_FAILURE_EMAIL_INTERVAL: int = 60
     MAX_FAILURE_REPORTS_PER_QUERY: int = 100
     ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE: str = "({state}) {alert_name}"
     EVENT_REPORTING_WEBHOOKS: List[str] = []
@@ -62,21 +96,43 @@ class Settings(BaseSettings):
     # Client side options
     ALLOW_SCRIPTS_IN_USER_INPUT: bool = False
     DASHBOARD_REFRESH_INTERVALS: List[int] = [
-        30, 60, 300, 600, 1800, 3600, 43200, 86400
+        30,
+        60,
+        300,
+        600,
+        1800,
+        3600,
+        43200,
+        86400,
     ]
     QUERY_REFRESH_INTERVALS: List[int] = [
-        60, 300, 600, 900, 1800, 3600, 7200, 10800,
-        14400, 18000, 21600, 25200, 28800, 32400, 36000,
-        39600, 43200, 86400, 604800, 1209600, 2592000
+        60,
+        300,
+        600,
+        900,
+        1800,
+        3600,
+        7200,
+        10800,
+        14400,
+        18000,
+        21600,
+        25200,
+        28800,
+        32400,
+        36000,
+        39600,
+        43200,
+        86400,
+        604800,
+        1209600,
+        2592000,
     ]
     PAGE_SIZE_DEFAULT: int = 20
-    PAGE_SIZE_OPTIONS: List[int] = [
-        5, 10, 20, 50, 100
-    ]
+    PAGE_SIZE_OPTIONS: List[int] = [5, 10, 20, 50, 100]
     TABLE_CELL_MAX_JSON_SIZE: int = 50000
 
     # Features settings
-    FEATURE_VERSION_CHECK: bool = True
     FEATURE_DISABLE_REFRESH_QUERIES: bool = False
     FEATURE_SHOW_QUERY_RESULTS_COUNT: bool = True
     FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS: bool = False
@@ -181,8 +237,8 @@ class Settings(BaseSettings):
     LOG_STDOUT: bool = False
     LOG_PREFIX: str = ""
     LOG_FORMAT: str = (
-        LOG_PREFIX +
-        "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s"
+        LOG_PREFIX
+        + "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s"
     )
 
     # Statsd client settings
@@ -312,9 +368,6 @@ class Settings(BaseSettings):
     # BigQuery client settings
     BIGQUERY_HTTP_TIMEOUT: int = 600
 
-    # DataBricks client settings
-    DATABRICKS_ROW_LIMIT: int = 20000
-
     @property
     def REDIS_FULL_URL(self) -> str:
         return add_decode_responses_to_redis_url(self.REDIS_URL)
@@ -360,7 +413,7 @@ class Settings(BaseSettings):
     #         )
     #     return v
 
-    class Meta:
+    class Config:
         env_file = ".env"
 
     def email_configured(self) -> bool:
@@ -404,4 +457,4 @@ def get_settings() -> "Settings":
 
 S: Settings = get_settings()
 
-D: DynamicSettings = S.DYNAMIC_SETTINGS()
+D: DynamicSettingsProtocol = S.DYNAMIC_SETTINGS()

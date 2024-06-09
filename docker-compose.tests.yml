@@ -5,16 +5,21 @@ x-redash-service: &redash-service
     context: .
     target: tests
   volumes:
-    - .:/home/redash/app
+    - .:/home/tests/app
   env_file:
     - .env
 
-x-redash-environment: &redash-environment
+x-tests-environment: &tests-environment
   LOG_LEVEL: "INFO"
   VECTOR_CONFIG_PATH: "/tmp/vector/vector.toml"
   REDIS_URL: "redis://keydb-tests:6379/0"
   RQ_REDIS_URL: "redis://keydb-tests:6379/0"
   SQLALCHEMY_DATABASE_URI: "postgresql://postgres@postgres-tests/tests"
+  CSRF_ENFORCED: "false"
+  RATELIMIT_ENABLED: "true"
+  REDASH_GOOGLE_CLIENT_ID: "dummy"
+  REDASH_GOOGLE_CLIENT_SECRET: "dummy"
+  MULTI_ORG: "true"
 
 services:
   server-tests:
@@ -24,7 +29,7 @@ services:
       - postgres-tests
       - keydb-tests
     environment:
-      <<: *redash-environment
+      <<: *tests-environment
       SQLALCHEMY_SILENCE_UBER_WARNING: 1
       PYTHONUNBUFFERED: 0
     command: tests -x

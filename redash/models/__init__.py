@@ -560,7 +560,7 @@ class Query(TimestampMixin, BelongsToOrgMixin, db.Model):
         return query
 
     @classmethod
-    def get_by_id(cls, _id):
+    def get_by_id(cls, _id) -> 'Query':
         return cls.query.filter(cls.id == _id).one()
 
     @classmethod
