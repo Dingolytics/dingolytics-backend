@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-redash-service: &redash-service
   build:
     context: .
