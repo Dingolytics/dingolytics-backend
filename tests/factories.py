@@ -180,13 +180,6 @@ alert_subscription_factory = ModelFactory(
     alert=alert_factory.create,
 )
 
-query_snippet_factory = ModelFactory(
-    models.QuerySnippet,
-    trigger=Sequence("trigger {}"),
-    description="description",
-    snippet="snippet",
-)
-
 
 class Factory(object):
     def __init__(self):
@@ -356,8 +349,3 @@ class Factory(object):
         args = {"org": self.org}
         args.update(kwargs)
         return destination_factory.create(**args)
-
-    def create_query_snippet(self, **kwargs):
-        args = {"user": self.user, "org": self.org}
-        args.update(kwargs)
-        return query_snippet_factory.create(**args)

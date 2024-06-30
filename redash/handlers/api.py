@@ -75,10 +75,6 @@ from redash.handlers.query_results import (
     QueryResultListResource,
     QueryResultResource,
 )
-from redash.handlers.query_snippets import (
-    QuerySnippetListResource,
-    QuerySnippetResource,
-)
 from redash.handlers.settings import (
     OrganizationSettings,
 )
@@ -394,13 +390,6 @@ api.add_org_resource(
 )
 api.add_org_resource(
     DestinationListResource, "/api/destinations", endpoint="destinations"
-)
-
-api.add_org_resource(
-    QuerySnippetResource, "/api/query_snippets/<snippet_id>", endpoint="query_snippet"
-)
-api.add_org_resource(
-    QuerySnippetListResource, "/api/query_snippets", endpoint="query_snippets"
 )
 
 api.add_org_resource(
