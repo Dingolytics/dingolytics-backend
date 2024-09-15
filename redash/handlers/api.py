@@ -2,6 +2,10 @@ from flask import make_response
 from flask_restful import Api
 from werkzeug.wrappers import Response
 
+from dingolytics.api import (
+    StreamResource,
+    StreamListResource,
+)
 from redash.handlers.alerts import (
     AlertListResource,
     AlertResource,
@@ -77,10 +81,6 @@ from redash.handlers.query_results import (
 )
 from redash.handlers.settings import (
     OrganizationSettings,
-)
-from redash.handlers.streams import (
-    StreamResource,
-    StreamListResource,
 )
 from redash.handlers.users import (
     UserDisableResource,
