@@ -3,6 +3,8 @@ from flask_restful import Api
 from werkzeug.wrappers import Response
 
 from dingolytics.api import (
+    EndpointDetailsResource,
+    EndpointListResource,
     StreamResource,
     StreamListResource,
 )
@@ -189,6 +191,15 @@ api.add_org_resource(
     DataSourceResource,
     "/api/data_sources/<data_source_id>",
     endpoint="data_source"
+)
+
+api.add_org_resource(
+    EndpointListResource,
+    "/api/endpoints",
+)
+api.add_org_resource(
+    EndpointDetailsResource,
+    "/api/endpoints/<endpoint_id>",
 )
 
 api.add_org_resource(
