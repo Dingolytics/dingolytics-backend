@@ -5,6 +5,7 @@ from werkzeug.wrappers import Response
 from dingolytics.api import (
     EndpointDetailsResource,
     EndpointListResource,
+    EndpointPublicResultsResource,
     StreamResource,
     StreamListResource,
 )
@@ -199,7 +200,11 @@ api.add_org_resource(
 )
 api.add_org_resource(
     EndpointDetailsResource,
-    "/api/endpoints/<endpoint_id>",
+    "/api/endpoints/<int:endpoint_id>",
+)
+api.add_org_resource(
+    EndpointPublicResultsResource,
+    "/api/endpoints/public/<int:endpoint_id>/<string:token>",
 )
 
 api.add_org_resource(

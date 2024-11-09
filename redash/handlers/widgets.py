@@ -9,18 +9,17 @@ from redash.utils import collect_parameters_from_request
 
 DEFAULT_TEMPLATES = {
     "plain.svg": Template(
-        '<svg xmlns="http://www.w3.org/2000/svg" '
-            'width="{{ width }}" height="{{ height }}" '
-            'viewBox="0 0 {{ width }} {{ height }}">'
-        '<text x="{{ x }}" y="{{ y }}" fill="{{ color }}" '
-            'text-anchor="{{ anchor }}" dominant-baseline="auto" '
-            'font-size="{{ size }}" font-family="{{ font }}">'
+        '<svg xmlns="http://www.w3.org/2000/svg"'
+        ' width="{{ width }}" height="{{ height }}"'
+        ' viewBox="0 0 {{ width }} {{ height }}">'
+        '<text x="{{ x }}" y="{{ y }}" fill="{{ color }}"'
+        ' text-anchor="{{ anchor }}" dominant-baseline="auto"'
+        ' font-size="{{ size }}" font-family="{{ font }}">'
         '{{ value }}'
         '</text>'
         '</svg>'
     )
 }
-
 
 
 def template_response(
