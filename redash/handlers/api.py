@@ -205,6 +205,7 @@ api.add_org_resource(
 api.add_org_resource(
     EndpointPublicResultsResource,
     "/api/endpoints/public/<int:endpoint_id>/<string:token>",
+    endpoint="endpoint_public_results",
 )
 
 api.add_org_resource(

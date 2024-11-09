@@ -1,7 +1,7 @@
 import json
 import logging
 
-from flask import request
+from flask import request, url_for
 from flask_restful import abort
 
 from redash import models
@@ -17,10 +17,13 @@ logger = logging.getLogger(__name__)
 
 def _serialize(o: models.Query) -> dict[str, object]:
     host = get_settings().HOST
+    url = url_for(
+        "endpoint_public_results", endpoint_id=o.id, token=o.api_key
+    )
     return {
         "id": o.id,
         "name": o.name,
-        "url": f"{host}/.../",
+        "url": f"{host}{url}",
         "description": o.description,
         "query_text": o.query_text,
         "tags": o.tags,
@@ -32,6 +35,8 @@ class EndpointDetailsResource(BaseResource):
     @require_permission("list_data_sources")
     def get(self, endpoint_id):
         endpoint = get_object_or_404(models.Query.get_by_id, endpoint_id)
+        if endpoint.is_draft:
+            abort(404)
         require_access(endpoint, self.current_user, view_only)
         self.record_event({
             "action": "view",
@@ -47,8 +52,7 @@ class EndpointListResource(BaseResource):
         endpoints = models.Query.all_queries(
             self.current_user.group_ids,
             self.current_user.id,
-            include_drafts=False,
-        )
+        ).filter(models.Query.is_draft.is_(False))
         self.record_event({
             "action": "list",
             "object_type": "endpoint",
@@ -60,7 +64,10 @@ class EndpointPublicResultsResource(BaseResource):
     decorators = BaseResource.decorators + [csp_allows_embeding]
 
     def get(self, endpoint_id: int, token: str) -> dict[str, object]:
-        endpoint = get_object_or_404(models.Query.by_api_key, token)
+        endpoint: models.Query = get_object_or_404(models.Query.by_api_key, token)
+        if endpoint.is_draft:
+            abort(404)
+
         parameterized = endpoint.parameterized
         parameterized.apply(collect_parameters_from_request(request.args))
 
