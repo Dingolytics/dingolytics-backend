@@ -6,7 +6,7 @@ from mock import patch
 
 from redash import models
 from redash.models import DBPersistence
-from redash.utils import utcnow, json_dumps
+from redash.utils import utcnow
 
 
 class QueryResultTest(BaseTestCase):
@@ -101,7 +101,7 @@ class TestDBPersistence(TestCase):
         p.data = '{"test": 2}'
         self.assertDictEqual(p.data, {"test": 2})
 
-    @patch("redash.models.json_loads")
+    @patch("json.loads")
     def test_calls_json_loads_only_once(self, json_loads_patch):
         json_loads_patch.return_value = "1"
         p = DBPersistence()

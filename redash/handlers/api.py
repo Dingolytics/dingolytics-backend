@@ -2,6 +2,13 @@ from flask import make_response
 from flask_restful import Api
 from werkzeug.wrappers import Response
 
+from dingolytics.api import (
+    EndpointDetailsResource,
+    EndpointListResource,
+    EndpointPublicResultsResource,
+    StreamResource,
+    StreamListResource,
+)
 from redash.handlers.alerts import (
     AlertListResource,
     AlertResource,
@@ -77,10 +84,6 @@ from redash.handlers.query_results import (
 )
 from redash.handlers.settings import (
     OrganizationSettings,
-)
-from redash.handlers.streams import (
-    StreamResource,
-    StreamListResource,
 )
 from redash.handlers.users import (
     UserDisableResource,
@@ -189,6 +192,20 @@ api.add_org_resource(
     DataSourceResource,
     "/api/data_sources/<data_source_id>",
     endpoint="data_source"
+)
+
+api.add_org_resource(
+    EndpointListResource,
+    "/api/endpoints",
+)
+api.add_org_resource(
+    EndpointDetailsResource,
+    "/api/endpoints/<int:endpoint_id>",
+)
+api.add_org_resource(
+    EndpointPublicResultsResource,
+    "/api/endpoints/public/<int:endpoint_id>/<string:token>",
+    endpoint="endpoint_public_results",
 )
 
 api.add_org_resource(

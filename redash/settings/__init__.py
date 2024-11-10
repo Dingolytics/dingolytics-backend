@@ -271,6 +271,7 @@ class Settings(BaseSettings):
     QUERY_RUNNERS_DEFAULT: List[str] = [
         "redash.query_runner.clickhouse",
         "redash.query_runner.pg",
+        "redash.query_runner.sqlite",
     ]
     QUERY_RUNNERS_DISABLED: List[str] = []
     QUERY_RESULTS_CLEANUP_ENABLED: bool = True

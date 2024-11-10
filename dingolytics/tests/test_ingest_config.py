@@ -6,7 +6,7 @@ from dingolytics.ingest import update_vector_config
 
 class TestIngestVectorConfig(BaseTestCase):
     @patch("dingolytics.triggers.streams.create_table_for_stream")
-    def test_update_vector_config(self):
+    def test_update_vector_config(self, _):
         vector_config = update_vector_config([], clean=True)
         # One HTTP source and one internal logs source:
         self.assertEqual(len(vector_config.config["sources"]), 2)
