@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 DESERIALIZED_DATA_ATTR = "_deserialized_data"
 
 
-class DBPersistence(object):
+class DBPersistence:
     @property
     def data(self):
         if self._data is None:
