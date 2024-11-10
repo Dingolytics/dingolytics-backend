@@ -1,3 +1,4 @@
+import hmac
 import json
 import logging
 
@@ -64,9 +65,15 @@ class EndpointPublicResultsResource(BaseResource):
     decorators = BaseResource.decorators + [csp_allows_embeding]
 
     def get(self, endpoint_id: int, token: str) -> dict[str, object]:
-        endpoint: models.Query = get_object_or_404(models.Query.by_api_key, token)
-        if endpoint.is_draft:
-            abort(404)
+        endpoint: models.Query = get_object_or_404(
+            models.Query.get_by_id, endpoint_id
+        )
+
+        if endpoint.is_draft or endpoint.is_archived:
+            abort(403)
+
+        if not hmac.compare_digest(token, endpoint.api_key):
+            abort(403)
 
         parameterized = endpoint.parameterized
         parameterized.apply(collect_parameters_from_request(request.args))
