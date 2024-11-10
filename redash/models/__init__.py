@@ -14,7 +14,7 @@ from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
 # Activate triggers for the models
 from dingolytics import triggers  # noqa
 from dingolytics.models.queries import Query
-from dingolytics.models.results import QueryResult  # noqa
+from dingolytics.models.results import DBPersistence, QueryResult  # noqa
 from dingolytics.models.streams import Stream  # noqa
 from redash import settings, utils
 from redash.destinations import (
