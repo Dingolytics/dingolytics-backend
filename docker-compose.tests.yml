@@ -9,7 +9,7 @@ x-redash-service: &redash-service
 
 x-tests-environment: &tests-environment
   LOG_LEVEL: "INFO"
-  VECTOR_CONFIG_PATH: "/tmp/vector/vector.toml"
+  VECTOR_CONFIG_PATH: "/tmp/vector/vector.yaml"
   REDIS_URL: "redis://keydb-tests:6379/0"
   RQ_REDIS_URL: "redis://keydb-tests:6379/0"
   SQLALCHEMY_DATABASE_URI: "postgresql://postgres@postgres-tests/tests"

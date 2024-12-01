@@ -3,15 +3,15 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from pydantic import BaseModel
-from toml.encoder import TomlEncoder
-import toml
+from yaml import safe_load as load_yaml
+from yaml import dump as dump_yaml
 
-VECTOR_CONFIG_TEMPLATE = '''
-data_dir = "/var/lib/vector"
+VECTOR_CONFIG_TEMPLATE = """
+data_dir: /var/lib/vector
 
-[api]
-enabled = true
-'''
+api:
+    enabled: true
+"""
 
 VECTOR_HTTP_INPUT = "http_server"
 VECTOR_HTTP_ROUTER = "http_router"
@@ -23,7 +23,7 @@ VECTOR_INTERNAL_INPUT = "vector_internal_logs"
 
 @lru_cache
 def get_vector_config() -> "VectorConfig":
-    config_path = os.environ.get("VECTOR_CONFIG_PATH") or "vector.toml"
+    config_path = os.environ.get("VECTOR_CONFIG_PATH") or "vector.yaml"
     return VectorConfig(config_path)
 
 
@@ -132,15 +132,15 @@ class VectorConfig:
     def load(self) -> None:
         if self.config_path.exists():
             with open(self.config_path) as f:
-                self.config = toml.load(f)
+                self.config = load_yaml(f)
 
     def save(self) -> None:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.config_path, "w") as f:
-            toml.dump(self.config, f, encoder=TomlEncoder(preserve=True))
+            dump_yaml(self.config, f)
 
     def add_defaults(self) -> None:
-        self.config = toml.loads(VECTOR_CONFIG_TEMPLATE)
+        self.config = load_yaml(VECTOR_CONFIG_TEMPLATE)
         self.add_source(VectorInternalSource(key=VECTOR_INTERNAL_INPUT))
         self.add_source(VectorHTTPSource(key=VECTOR_HTTP_INPUT))
         self.add_sink(VectorConsoleSink(key="console"))

@@ -18,7 +18,7 @@ x-redash-environment: &redash-environment
   MAIL_SERVER: "email"
   CSRF_ENFORCED: "true"
   GUNICORN_TIMEOUT: 60
-  VECTOR_CONFIG_PATH: "/home/redash/etc/vector/vector.toml"
+  VECTOR_CONFIG_PATH: "/home/redash/etc/vector/vector.yaml"
 
 services:
   server:
@@ -74,10 +74,10 @@ services:
     restart: unless-stopped
 
   vector:
-    image: timberio/vector:0.30.X-alpine
+    image: timberio/vector:0.42.X-alpine
     # restart: unless-stopped
     environment:
-      VECTOR_WATCH_CONFIG: /etc/vector/vector.toml
+      VECTOR_WATCH_CONFIG: /etc/vector/vector.yaml
       # VECTOR_LOG: debug
     volumes:
       - vector-data:/var/lib/vector
