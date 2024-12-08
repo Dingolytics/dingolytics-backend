@@ -144,9 +144,11 @@ class ClickHouse(BaseSQLQueryRunner):
         self, data, session_id=None, session_check=None
     ) -> QueryResult:
         client = clickhouse_client(
-            dsn=self.configuration.get("url", "http://127.0.0.1:8123"),
+            database=self.configuration.get("dbname"),
+            dsn=self.configuration.get("url", "http://localhost:8123"),
             username=self.configuration.get("user", "default"),
             password=self.configuration.get("password", ""),
+            verify=bool(self.configuration.get("verify")),
         )
         settings = {
             "session_timeout": self.configuration.get("timeout", 30),
