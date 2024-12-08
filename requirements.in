@@ -14,7 +14,7 @@ markupsafe~=2.1.2
 #
 pydantic~=1.10.8
 #
-clickhouse-connect~=0.6.23
+clickhouse-connect~=0.8.9
 #
 itsdangerous~=2.1.2
 #
