@@ -238,7 +238,7 @@ class UnicodeWriter:
             self.writerow(row)
 
 
-def collect_parameters_from_request(args):
+def collect_parameters_from_request(args: dict[str, str]) -> dict[str, str]:
     parameters = {}
     for k, v in args.items():
         if k.startswith("p_"):
