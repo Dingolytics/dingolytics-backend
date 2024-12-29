@@ -181,9 +181,32 @@ alert_subscription_factory = ModelFactory(
 )
 
 
+def init_database():
+    default_org = models.Organization(
+        name="Default",
+        slug="default",
+        settings={}
+    )
+    admin_group = models.Group(
+        name="admin",
+        permissions=["admin", "super_admin"],
+        org=default_org,
+        type=models.Group.BUILTIN_GROUP,
+    )
+    default_group = models.Group(
+        name="default",
+        permissions=models.Group.DEFAULT_PERMISSIONS,
+        org=default_org,
+        type=models.Group.BUILTIN_GROUP,
+    )
+    db.session.add_all([default_org, admin_group, default_group])
+    db.session.commit()
+    return default_org, admin_group, default_group
+
+
 class Factory(object):
     def __init__(self):
-        self.org, self.admin_group, self.default_group = models.init_db()
+        self.org, self.admin_group, self.default_group = init_database()
         self._data_source = None
         self._user = None
 
