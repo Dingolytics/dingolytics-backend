@@ -24,9 +24,6 @@ def enqueue_query(  # TODO: Replace older enqueue_query() with this, then rename
     metadata: dict | None = None,
 ) -> TaskResult:
     scheduled_query_id = scheduled_query.id if scheduled_query else None
-    # query_hash = gen_query_hash(query)
-    # query_lock = f"query:{data_source.id}:{query_hash}"
-    # with workers.default.lock_task(query_lock):
     task = run_query_task(
         query=query,
         data_source_id=data_source.id,
@@ -35,7 +32,6 @@ def enqueue_query(  # TODO: Replace older enqueue_query() with this, then rename
         scheduled_query_id=scheduled_query_id,
         metadata=metadata,
     )
-    # TODO: Return existing task result if locked.
     return task
 
 
@@ -56,6 +52,7 @@ def run_query_task(
     user = _resolve_user(user_id, is_api_key, metadata.get("query_id", 0))
     data_source = DataSource.get_by_id(data_source_id)
     query_runner = data_source.query_runner
+
     # TODO: Handle 'adhoc' explicitly instead of using `scheduled_query_id`
     scheduled_query = (
         Query.get_by_id(scheduled_query_id)
@@ -104,8 +101,9 @@ def run_query_task(
         retrieved_at=utcnow(),
     )
 
-    # updated_query_ids = Query.update_latest_result(query_result)
-    db.session.commit()  # make sure that alert sees the latest query result
+    Query.update_latest_result(query_result)
+    db.session.commit()
+
     # for query_id in updated_query_ids:
     #     check_alerts_for_query_task(query_id)
 
