@@ -67,6 +67,7 @@ class Query(TimestampMixin, BelongsToOrgMixin, db.Model):
     )
     is_archived = Column(db.Boolean, default=False, index=True)
     is_draft = Column(db.Boolean, default=True, index=True)
+    is_published = Column(db.Boolean, default=False, index=True, nullable=True)
     schedule = Column(
         MutableDict.as_mutable(postgresql.JSONB),
         server_default="{}", default={}
