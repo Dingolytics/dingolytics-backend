@@ -119,6 +119,7 @@ def serialize_query(
         "api_key": query.api_key,
         "is_archived": query.is_archived,
         "is_draft": query.is_draft,
+        "is_published": query.is_published,
         "updated_at": query.updated_at,
         "created_at": query.created_at,
         "data_source_id": query.data_source_id,

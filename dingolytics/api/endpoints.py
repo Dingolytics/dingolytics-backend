@@ -92,7 +92,7 @@ class EndpointDetailsResource(BaseResource):
     @require_permission("list_data_sources")
     def get(self, endpoint_id):
         endpoint = get_object_or_404(models.Query.get_by_id, endpoint_id)
-        if endpoint.is_draft:
+        if endpoint.is_draft or not endpoint.is_published:
             abort(404)
         require_access(endpoint, self.current_user, view_only)
         self.record_event({
@@ -109,7 +109,10 @@ class EndpointListResource(BaseResource):
         endpoints = models.Query.all_queries(
             self.current_user.group_ids,
             self.current_user.id,
-        ).filter(models.Query.is_draft.is_(False))
+        ).filter(
+            models.Query.is_draft.is_(False),
+            models.Query.is_published.is_(True),
+        )
         self.record_event({
             "action": "list",
             "object_type": "endpoint",
@@ -125,7 +128,7 @@ class EndpointPublicResultsResource(BaseResource):
             models.Query.get_by_id, endpoint_id
         )
 
-        if endpoint.is_draft or endpoint.is_archived:
+        if endpoint.is_draft or endpoint.is_archived or not endpoint.is_published:
             abort(403)
 
         if not hmac.compare_digest(token, endpoint.api_key):

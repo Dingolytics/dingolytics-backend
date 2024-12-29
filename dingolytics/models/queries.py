@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
     "last_modified_by_id",
     "is_archived",
     "is_draft",
+    "is_published",
     "schedule",
     "schedule_failures",
 )
