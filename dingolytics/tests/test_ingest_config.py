@@ -32,5 +32,5 @@ class TestIngestVectorConfig(BaseTestCase):
         # After adding streams 3 sinks are created
         vector_config = update_vector_config(streams, clean=False)
         self.assertEqual(len(vector_config.config["sources"]), 2)
-        self.assertEqual(len(vector_config.config["transforms"]), 1)
+        self.assertEqual(len(vector_config.config["transforms"]), 2)
         self.assertEqual(len(vector_config.config["sinks"]), 3)

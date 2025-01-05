@@ -13,11 +13,14 @@ api:
     enabled: true
 """
 
-VECTOR_HTTP_INPUT = "http_server"
+VECTOR_HTTP_INPUT = "http_input"
 VECTOR_HTTP_ROUTER = "http_router"
 VECTOR_HTTP_PATH_KEY = "_path_"
 VECTOR_SINK_PREFIX = "sink-"
 VECTOR_INTERNAL_INPUT = "vector_internal_logs"
+VECTOR_IP_ADDR_FIELD = "ip_addr_v4"
+VECTOR_IP_ADDR_HEADER = "x-real-ip"
+VECTOR_IP_ADDR_REMAP = "ip_addr_remap"
 # VECTOR_INTERNAL_REMAP = "vector_internal_remap"
 
 
@@ -78,13 +81,14 @@ class VectorInternalSource(VectorSection):
 
 
 class VectorHTTPSource(VectorSection):
-    type: str = VECTOR_HTTP_INPUT
+    type: str = "http_server"
     address: str = "0.0.0.0:8180"
     method = "POST"
     path = "/ingest"
     path_key: str = VECTOR_HTTP_PATH_KEY
     strict_path: bool = False
     decoding: dict = {"codec": "json"}
+    headers: list = ["x-real-ip"]
 
 
 class VectorConsoleSink(VectorSection):
@@ -109,9 +113,16 @@ class VectorClickHouseSink(VectorSection):
     endpoint: str = "http://clickhouse:8123"
 
 
+class VectorIPAddressTransform(VectorSection):
+    type: str = "remap"
+    inputs: list = [VECTOR_HTTP_INPUT]
+    source: str = f'.{VECTOR_IP_ADDR_FIELD} = del(."{VECTOR_IP_ADDR_HEADER}")'
+
+
 class VectorRouteTransform(VectorSection):
     type: str = "route"
-    inputs: list = [VECTOR_HTTP_INPUT]
+    # inputs: list = [VECTOR_HTTP_INPUT]  # use original input
+    inputs: list = [VECTOR_IP_ADDR_REMAP]  # use remapped input
     route: dict = {}
     _path_key: str = VECTOR_HTTP_PATH_KEY
 
@@ -144,6 +155,7 @@ class VectorConfig:
         self.add_source(VectorInternalSource(key=VECTOR_INTERNAL_INPUT))
         self.add_source(VectorHTTPSource(key=VECTOR_HTTP_INPUT))
         self.add_sink(VectorConsoleSink(key="console"))
+        self.add_transform(VectorIPAddressTransform(key=VECTOR_IP_ADDR_REMAP))
         # self.add_transform(VectorInternalTransform(key=VECTOR_INTERNAL_REMAP))
 
     def add_section(self, item: VectorSection, group_key: str) -> None:

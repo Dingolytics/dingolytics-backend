@@ -110,7 +110,7 @@ class ClickHouse(BaseSQLQueryRunner):
                     results = self._clickhouse_query(
                         query, session_id, session_check=True
                     )
-            data = json_dumps(results)
+            data = json_dumps(results, default=str)
             error = None
         except Exception as exc:
             data = None
